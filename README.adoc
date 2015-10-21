@@ -1,0 +1,3 @@
+= ledgerplot
+
+C application that calls ledgerplot, prepares data and plots the results using gnuplot.
