@@ -13,7 +13,9 @@ int main(int argc, char *argv[])
     double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
     double l_yvals[NUM_POINTS] = {5.0 ,3.0, 1.0, 3.0, 5.0};
     FILE *l_temp = fopen("data.temp", "w");
-    
+   
+    if ((argc > 0) || (argv != NULL))
+        exit(-1);
     // TODO: l_gcommands and the points, should be dynamic.
     // Prepare the data, by executing  ledgerplot with the proper
     // parameters in batch.
