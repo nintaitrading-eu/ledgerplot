@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
        fprintf(l_gp, "%s \n", l_gcommands[i]); //Send commands to gnuplot one by one.
     }
     
-    /*fprintf(gp, "set samples 2000\n");
-    fprintf(gp, "plot abs(sin(x))\n");
-    fprintf(gp, "rep abs(cos(x))\n");*/
-    fclose(gp);
+    /*fprintf(l_gp, "set samples 2000\n");
+    fprintf(l_gp, "plot abs(sin(x))\n");
+    fprintf(l_gp, "rep abs(cos(x))\n");*/
+    fclose(l_gp);
     return 0;
 }
