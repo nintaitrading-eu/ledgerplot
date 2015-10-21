@@ -1,3 +1,5 @@
+/* See LICENSE.txt for license and copyright information. */
+
 #include <stdlib.h>
 #include <stdio.h>
 #define GNUPLOT "gnuplot -persist"
