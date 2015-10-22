@@ -10,11 +10,12 @@ set output 'test.png'
 COLORS = "red green gray"
 STARTCOL = 2
 ENDCOL = 4
+set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
 
 ### titles and labels
-set title "income\_vs\_expenses\n(Extra info here?)" 
+set title "income\_vs\_expenses\n(Extra info here?)" textcolor rgb "gold"
 set xlabel "Year" 
-set xlabel  offset character 0, -2, 0 font "" textcolor lt -1 norotate
+set xlabel  offset character 0, -2, 0 font "" textcolor rgb "gold" lt -1 norotate
 set ylabel "Value (EUR)" 
 
 ####################################################################################
@@ -31,7 +32,6 @@ NCOL = ENDCOL-STARTCOL+1
 BOXWIDTH = 1./(GAPSIZE+NCOL)
 
 ### barchart layout - axis + grid
-#set border 3 front linetype -1 linewidth 1.000
 set style fill solid 1.00 border lt -1
 set boxwidth BOXWIDTH absolute
 set grid nopolar
