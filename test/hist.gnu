@@ -7,7 +7,7 @@
 #set terminal pngcairo transparent enhanced font "inconsolata,10" fontscale 1.0 size 500, 350 
 set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
 set output 'test.png'
-COLORS = "red green gray"
+COLORS = "red green blue"
 STARTCOL = 2
 ENDCOL = 4
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
@@ -15,8 +15,9 @@ set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
 ### titles and labels
 set title "income\_vs\_expenses\n(Extra info here?)" textcolor rgb "gold"
 set xlabel "Year" 
-set xlabel  offset character 0, -2, 0 font "" textcolor rgb "gold" lt -1 norotate
+set xlabel  offset character 0, -2, 0 font "" textcolor rgb "gold"  norotate
 set ylabel "Value (EUR)" 
+set ylabel textcolor rgb "gold"
 
 ####################################################################################
 # Gnuplot 4.6 script for plotting multiple groups of 3 bars in a barchart.
@@ -24,15 +25,15 @@ set ylabel "Value (EUR)"
 ####################################################################################
 
 ### legend
-set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox
+set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"
 
 ### main code
 GAPSIZE = 5
 NCOL = ENDCOL-STARTCOL+1
-BOXWIDTH = 1./(GAPSIZE+NCOL)
+BOXWIDTH = 2./(GAPSIZE+NCOL)
 
 ### barchart layout - axis + grid
-set style fill solid 1.00 border lt -1
+set style fill solid 0.75 border lt -1
 set boxwidth BOXWIDTH absolute
 set grid nopolar
 set grid noxtics nomxtics ytics nomytics noztics nomztics \
@@ -58,5 +59,5 @@ set rtics axis in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojust
 #x = 0.0
 #i = 23
 ### plotting
-plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL), \
-    for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels
+plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), \
+    for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb "gold"
