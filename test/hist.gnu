@@ -13,7 +13,7 @@ ENDCOL = 4
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
 
 ### titles and labels
-set title "income\_vs\_expenses\n(Extra info here?)" textcolor rgb "gold"
+set title "Income vs expenses" textcolor rgb "gold"
 set xlabel "Year" 
 set xlabel  offset character 0, -2, 0 font "" textcolor rgb "gold"  norotate
 set ylabel "Value (EUR)" 

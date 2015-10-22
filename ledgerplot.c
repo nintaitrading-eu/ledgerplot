@@ -8,8 +8,12 @@
 #define NUM_POINTS 5
 #define NUM_COMMANDS 2
 
-char *f_plotcmd = "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
+char *f_cmd_gnuplot =
+    "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
         "for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
+char *f_l_income_vs_expenses =
+    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income";
+// TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
  
 int main(int argc, char *argv[])
 {
