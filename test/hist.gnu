@@ -10,6 +10,7 @@ ENDCOL=4
 GAPSIZE=5
 NCOL=ENDCOL-STARTCOL+1
 BOXWIDTH=1./(GAPSIZE+NCOL)
+COLORS = "red green gray"
 
 #set border 3 front linetype -1 linewidth 1.000
 set boxwidth BOXWIDTH absolute
@@ -53,5 +54,5 @@ i = 23
 #plot 'test.dat' using "income":xtic(1) t col lc "#586e75", '' u "expenses" t col lc "#cb4b16", '' u "difference" t col lc "#93a1a1"
 #plot 'test.dat' using "income":xtic(1) t col lc "green", '' u "expenses" t col lc "red", '' u "difference" t col lc "gray"
 #plot for [COL=STARTCOL:ENDCOL] 'test.dat' using COL:xtic(1) t col lc "green", '' u  t col lc "red", '' u "difference" t col lc "gray"
-plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL), \
+plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \
     for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels
