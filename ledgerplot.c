@@ -2,12 +2,21 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "ledgerplot.h"
+
 #define GNUPLOT "gnuplot -persist"
 #define NUM_POINTS 5
 #define NUM_COMMANDS 2
+
+char *f_plotcmd[4000] = "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
+        "for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
  
 int main(int argc, char *argv[])
 {
+    // TODO: write function that loads info from barchart.gnu and combines it with
+    // info from income_vs_expenses.gnu => user settings for a specific graph
+    // barchart.gnu => barchart code
+    // add the plotting code at the end, through a define.
     char *l_gcommands[] = {"set title \"TITLEEEEE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
     double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
