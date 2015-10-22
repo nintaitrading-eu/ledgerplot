@@ -1,5 +1,6 @@
 ####################################################################################
 # Gnuplot 4.6 script for plotting multiple groups of 3 bars in a barchart.
+# This part is dynamic and can be altered to influence the look of the graph.
 ####################################################################################
 
 ### plot setup
@@ -7,20 +8,32 @@
 set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
 set output 'test.png'
 COLORS = "red green gray"
-STARTCOL=2
-ENDCOL=4
-GAPSIZE=5
+STARTCOL = 2
+ENDCOL = 4
 
-NCOL=ENDCOL-STARTCOL+1
-BOXWIDTH=1./(GAPSIZE+NCOL)
+### titles and labels
+set title "income\_vs\_expenses\n(Extra info here?)" 
+set xlabel "Year" 
+set xlabel  offset character 0, -2, 0 font "" textcolor lt -1 norotate
+set ylabel "Value (EUR)" 
+
+####################################################################################
+# Gnuplot 4.6 script for plotting multiple groups of 3 bars in a barchart.
+# This part is static and can not be altered.
+####################################################################################
 
 ### legend
 set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox
 
+### main code
+GAPSIZE = 5
+NCOL = ENDCOL-STARTCOL+1
+BOXWIDTH = 1./(GAPSIZE+NCOL)
+
 ### barchart layout - axis + grid
 #set border 3 front linetype -1 linewidth 1.000
-set boxwidth BOXWIDTH absolute
 set style fill solid 1.00 border lt -1
+set boxwidth BOXWIDTH absolute
 set grid nopolar
 set grid noxtics nomxtics ytics nomytics noztics nomztics \
  nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
@@ -30,7 +43,8 @@ set yzeroaxis linetype 0 linewidth 1.000
 set zzeroaxis linetype 0 linewidth 1.000
 
 ### Set tics and histograms
-set style histogram clustered gap 4 title  offset character 2, 0.25, 0
+# Note: I can not use GAPSIZE below, for some reason... hardcoded 4 is used instead
+set style histogram clustered gap 5 title offset character 2, 0.25, 0
 set datafile missing '-'
 set style data histograms
 set xtics border in scale 0,0 nomirror rotate by -45  offset character 0, 0, 0 autojustify
@@ -40,12 +54,6 @@ set ytics border in scale 0,0 mirror norotate  offset character 0, 0, 0 autojust
 set ztics border in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojustify
 set cbtics border in scale 0,0 mirror norotate  offset character 0, 0, 0 autojustify
 set rtics axis in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojustify
-
-### titles and labels
-set title "income\_vs\_expenses\n(Extra info here?)" 
-#set xlabel "(Note: )" 
-set xlabel  offset character 0, -2, 0 font "" textcolor lt -1 norotate
-set ylabel "Value (EUR)" 
 
 #x = 0.0
 #i = 23
