@@ -7,6 +7,7 @@
 #define GNUPLOT "gnuplot -persist"
 #define NUM_POINTS 5
 #define NUM_COMMANDS 2
+#define TEMP_FILE "data.temp"
 
 char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
@@ -14,7 +15,9 @@ char *f_cmd_gnuplot =
 char *f_l_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income";
 // TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
- 
+
+int prepare_temp_file(FILE *a_file);
+
 int main(int argc, char *argv[])
 {
     // TODO: write function that loads info from barchart.gnu and combines it with
@@ -23,17 +26,16 @@ int main(int argc, char *argv[])
     // add the plotting code at the end, through a define.
     char *l_gcommands[] = {"set title \"TITLEEEEE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
-    double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
-    double l_yvals[NUM_POINTS] = {5.0 ,3.0, 1.0, 3.0, 5.0};
-    FILE *l_temp = fopen("data.temp", "w");
+    FILE *l_temp = fopen(TEMP_FILE, "w");
    
-    (void) argc; // Note: unused, eliminates compiler warnings.
-    (void) *argv; // Note: unused, eliminates compiler warnings.
+    (void) argc; /* Note: unused, eliminates compiler warnings. */
+    (void) *argv; /* Note: unused, eliminates compiler warnings. */
     // TODO: l_gcommands and the points, should be dynamic.
     // Prepare the data, by executing  ledgerplot with the proper
     // parameters in batch.
     // Load all files 1 by 1 (from the ledger output folder) and generate the plots.
-    /* Opens an interface that one can use to send commands as if they were typing into the
+    /* 
+     * Opens an interface that one can use to send commands as if they were typing into the
      * gnuplot command line. "The -persistent" keeps the plot open even after your
      * C program terminates.
      */
@@ -52,9 +54,10 @@ int main(int argc, char *argv[])
     // and then do a simple
     // echo "plot sin(x)" > /tmp/gnuplot
     int i;
-    for (i = 0; i < NUM_POINTS; i++)
+    if prepare_temp_file(&l_temp)
     {
-        fprintf(l_temp, "%lf %lf \n", l_xvals[i], l_yvals[i]); //Write the data to a temporary file
+        fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE)
+        exit(-1);
     }
     
     for (i = 0; i < NUM_COMMANDS; i++)
@@ -66,5 +69,20 @@ int main(int argc, char *argv[])
     fprintf(l_gp, "plot abs(sin(x))\n");
     fprintf(l_gp, "rep abs(cos(x))\n");*/
     fclose(l_gp);
+    return 0;
+}
+
+/*
+ * prepare_temp_file:
+ * This function prepares the data to be plotted,
+ * in a temporary file that can be read by gnuplot.
+ */
+int prepare_temp_file(FILE *a_file)
+{
+    int i;
+    for (i = 0; i < NUM_POINTS; i++)
+    {
+        fprintf(l_temp, "%lf %lf \n", l_xvals[i], l_yvals[i]); //Write the data to a temporary file
+    }
     return 0;
 }
