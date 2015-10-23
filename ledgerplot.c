@@ -54,9 +54,9 @@ int main(int argc, char *argv[])
     // and then do a simple
     // echo "plot sin(x)" > /tmp/gnuplot
     int i;
-    if prepare_temp_file(&l_temp)
+    if(prepare_temp_file(l_temp) != 0)
     {
-        fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE)
+        fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE);
         exit(-1);
     }
     
@@ -80,9 +80,11 @@ int main(int argc, char *argv[])
 static int prepare_temp_file(FILE *a_file)
 {
     int i;
+    double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double l_yvals[NUM_POINTS] = {5.0 ,3.0, 1.0, 3.0, 5.0};
     for (i = 0; i < NUM_POINTS; i++)
     {
-        fprintf(l_temp, "%lf %lf \n", l_xvals[i], l_yvals[i]); //Write the data to a temporary file
+        fprintf(a_file, "%lf %lf \n", l_xvals[i], l_yvals[i]); //Write the data to a temporary file
     }
     return 0;
 }
