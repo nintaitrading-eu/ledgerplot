@@ -16,7 +16,7 @@ char *f_l_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income";
 // TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
 
-int prepare_temp_file(FILE *a_file);
+static int prepare_temp_file(FILE *a_file);
 
 int main(int argc, char *argv[])
 {
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
  * This function prepares the data to be plotted,
  * in a temporary file that can be read by gnuplot.
  */
-int prepare_temp_file(FILE *a_file)
+static int prepare_temp_file(FILE *a_file)
 {
     int i;
     for (i = 0; i < NUM_POINTS; i++)
