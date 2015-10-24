@@ -5,7 +5,6 @@
 #include "ledgerplot.h"
 
 #define GNUPLOT "gnuplot -persist"
-#define NUM_POINTS 5
 #define NUM_COMMANDS 2
 #define TEMP_FILE "data.temp"
 
@@ -16,7 +15,11 @@ char *f_l_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income";
 // TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
 
-static int prepare_temp_file(FILE *a_file);
+static int prepare_temp_file(
+    FILE *a_file,
+    int a_start_year,
+    int a_end_year
+);
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +30,12 @@ int main(int argc, char *argv[])
     char *l_gcommands[] = {"set title \"TITLEEEEE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
     FILE *l_temp = fopen(TEMP_FILE, "w");
-   
+    int l_start_year;
+    int l_end_year;
+ 
+    // TODO: use docopt 
+    l_start_year = atoi("2014"); // TODO: use argv[1]
+    l_end_year = atoi("2015"); // TODO: use argv[2]
     (void) argc; /* Note: unused, eliminates compiler warnings. */
     (void) *argv; /* Note: unused, eliminates compiler warnings. */
     // TODO: l_gcommands and the points, should be dynamic.
@@ -54,12 +62,12 @@ int main(int argc, char *argv[])
     // and then do a simple
     // echo "plot sin(x)" > /tmp/gnuplot
     int i;
-    if(prepare_temp_file(l_temp) != 0)
+    if(prepare_temp_file(l_temp, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE);
         exit(-1);
     }
-    
+   
     for (i = 0; i < NUM_COMMANDS; i++)
     {
        fprintf(l_gp, "%s \n", l_gcommands[i]); //Send commands to gnuplot one by one.
@@ -77,14 +85,22 @@ int main(int argc, char *argv[])
  * This function prepares the data to be plotted,
  * in a temporary file that can be read by gnuplot.
  */
-static int prepare_temp_file(FILE *a_file)
+static int prepare_temp_file(
+    FILE *a_file,
+    int a_start_year,
+    int a_end_year
+)
 {
+    int l_records;
     int i;
+    /*int i;
     double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
     double l_yvals[NUM_POINTS] = {5.0 ,3.0, 1.0, 3.0, 5.0};
-    for (i = 0; i < NUM_POINTS; i++)
+    */
+    l_records = (a_end_year - a_start_year);    
+    for (i = 0; i < l_records*100; i++)
     {
-        fprintf(a_file, "%lf %lf \n", l_xvals[i], l_yvals[i]); //Write the data to a temporary file
+        fprintf(a_file, "%lf %lf\n", 2.0*i, 3.0*i); //Write the data to a temporary file
     }
     return 0;
 }
