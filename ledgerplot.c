@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ledgerplot.h"
+#include "docopt.c"
 
 #define GNUPLOT "gnuplot -persist"
 #define NUM_COMMANDS 2
@@ -32,12 +33,28 @@ int main(int argc, char *argv[])
     FILE *l_temp = fopen(TEMP_FILE, "w");
     int l_start_year;
     int l_end_year;
+
+    DocoptArgs args = docopt(
+        argc,
+        argv,
+        1, /* help */
+        "ledgerplot version 0.1" /* version */
+    );
+
+    if(argc == 1)
+    {
+        printf("%s", args.help_message);
+        return 1;
+    }
+
+    printf("docopt testing:\n");
+    printf("file given? %s\n", args.file ? "file given" : "file not given");
+    printf("file=%s\n", args.file);
+    printf("startyear=%s\n", args.startyear);
+    printf("endyear=%s\n", args.endyear);
  
-    // TODO: use docopt 
-    l_start_year = atoi("2014"); // TODO: use argv[1]
-    l_end_year = atoi("2015"); // TODO: use argv[2]
-    (void) argc; /* Note: unused, eliminates compiler warnings. */
-    (void) *argv; /* Note: unused, eliminates compiler warnings. */
+    l_start_year = atoi(args.startyear);
+    l_end_year = atoi(args.endyear);
     // TODO: l_gcommands and the points, should be dynamic.
     // Prepare the data, by executing  ledgerplot with the proper
     // parameters in batch.
@@ -68,10 +85,13 @@ int main(int argc, char *argv[])
         exit(-1);
     }
    
+    // TODO: for line in first gnu-script
     for (i = 0; i < NUM_COMMANDS; i++)
     {
        fprintf(l_gp, "%s \n", l_gcommands[i]); //Send commands to gnuplot one by one.
     }
+    // TODO: for line in 2nd gnu-script
+    // TODO: add final plot command
     
     /*fprintf(l_gp, "set samples 2000\n");
     fprintf(l_gp, "plot abs(sin(x))\n");
