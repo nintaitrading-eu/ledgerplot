@@ -73,12 +73,7 @@ int main(int argc, char *argv[])
     
     // Note: To update in realtime: use fflush(gp)
     // Otherwise, the application will wait until the processing is finished.
-    // Other note: you could also make an actual pipe:
-    // mkfifo /tmp/gnuplot
-    // while :; do (gnuplot -persist) < /tmp/gnuplot; done
-    // and then do a simple
-    // echo "plot sin(x)" > /tmp/gnuplot
-    int i;
+        int i;
     if(prepare_temp_file(l_temp, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE);
@@ -88,11 +83,20 @@ int main(int argc, char *argv[])
     // TODO: for line in first gnu-script
     for (i = 0; i < NUM_COMMANDS; i++)
     {
-       fprintf(l_gp, "%s \n", l_gcommands[i]); //Send commands to gnuplot one by one.
+       fprintf(l_gp, "%s \n", l_gcommands[i]); /* Send commands to gnuplot one by one. */
+       fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
     }
     // TODO: for line in 2nd gnu-script
     // TODO: add final plot command
     
+    /* 
+     * Other note: you could also make an actual pipe:
+     * mkfifo /tmp/gnuplot
+     * while :; do (gnuplot -persist) < /tmp/gnuplot; done
+     * and then do a simple
+     * echo "plot sin(x)" > /tmp/gnuplot
+     */
+
     /*fprintf(l_gp, "set samples 2000\n");
     fprintf(l_gp, "plot abs(sin(x))\n");
     fprintf(l_gp, "rep abs(cos(x))\n");*/
@@ -117,6 +121,13 @@ static int prepare_temp_file(
     double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
     double l_yvals[NUM_POINTS] = {5.0 ,3.0, 1.0, 3.0, 5.0};
     */
+    // TODO: exec ledgerplot command for startyear
+    // exec ledgerplot command for all other years until endyear
+    // For each: parse output (scheme app?)
+    // write to temp-file.
+    // Remove (( and change <space>) to a newline
+    // That gives the line to be added to data.temp
+    // for a specific year.
     l_records = (a_end_year - a_start_year);    
     for (i = 0; i < l_records*100; i++)
     {
