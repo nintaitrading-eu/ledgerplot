@@ -2,13 +2,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "ledgerplot.h"
 #include "docopt.c"
 
 #define GNUPLOT "gnuplot -persist"
 #define NUM_COMMANDS 2
 #define TEMP_FILE "data.temp"
-#define INPUT_MAX 4000
+#define INPUT_MAX 1024 // MAX line length to copy
+#define DAT_MAX 8000 // MAX command length for the dat info
 
 char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
@@ -22,6 +24,8 @@ static int prepare_temp_file(
     int a_start_year,
     int a_end_year
 );
+
+char *trim_whitespace(char *str);
 
 int main(int argc, char *argv[])
 {
@@ -113,6 +117,7 @@ static int prepare_temp_file(
     FILE *l_fp;
     char l_cmd[INPUT_MAX];
     char l_input[INPUT_MAX];
+    char l_dat_info[DAT_MAX];
     // TODO: exec ledgerplot command for startyear
     // exec ledgerplot command for all other years until endyear
     // For each: parse output (scheme app?)
@@ -133,12 +138,52 @@ static int prepare_temp_file(
             fprintf(stderr, "Could not open pipe to ledger command.\n");
             exit(1);
         }
+
         while (fgets(l_input, INPUT_MAX, l_fp) != NULL)
-            printf("%s", l_input); // TODO: fill string with 1 line, replacing \n with a space.
+        {
+            if (strlen(l_dat_info) <= 0)
+                sprintf(l_dat_info, "%s", trim_whitespace(l_input));
+            else
+                sprintf(l_dat_info, "%s %s", l_dat_info, trim_whitespace(l_input));
+        }
+        printf("%s\n", l_dat_info);
+        
         if (pclose(l_fp) == -1)
             fprintf(stderr, "Error reported by pclose().\n");
-
         //fprintf(a_file, "%lf %lf\n", 2.0*i, 3.0*i); //Write the data to a temporary file
     }
     return 0;
+}
+
+/*
+ * This function returns a pointer to a substring of the original string.
+ * If the given string was allocated dynamically, the caller must not overwrite
+ * that pointer with the returned value, since the original pointer must be
+ * deallocated using the same allocator with which it was allocated.  The return
+ * value must NOT be deallocated using free() etc.
+ */
+char *trim_whitespace(char *a_string)
+{
+    char *l_end;
+
+    /* Trim leading space/newline. */
+    while(isspace(*a_string) || (*a_string=='\n'))
+        a_string++;
+
+    if(*a_string == 0)  // Exit when done.
+        return a_string;
+
+    /* Trim trailing space/newline. */
+    l_end = a_string + strlen(a_string) - 1;
+    while(
+        l_end > a_string
+        && (isspace(*l_end) || (*l_end == '\n'))
+    )
+    {
+        l_end--;
+    }
+
+    /* Write new null terminator. */
+    *(l_end + 1) = 0;
+    return a_string;
 }
