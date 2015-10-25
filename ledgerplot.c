@@ -13,7 +13,7 @@ char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
         "for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
 char *f_l_income_vs_expenses =
-    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income";
+    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
 // TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
 
 static int prepare_temp_file(
@@ -128,6 +128,9 @@ static int prepare_temp_file(
     // Remove (( and change <space>) to a newline
     // That gives the line to be added to data.temp
     // for a specific year.
+    // Or easier: use grep:
+    // exec ledgerplot command for startyear with  | grep -Eo '[0-9\.]{1,100}' added to it
+
     l_records = (a_end_year - a_start_year);    
     for (i = 0; i < l_records*100; i++)
     {
