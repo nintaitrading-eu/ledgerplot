@@ -8,6 +8,7 @@
 #define GNUPLOT "gnuplot -persist"
 #define NUM_COMMANDS 2
 #define TEMP_FILE "data.temp"
+#define INPUT_MAX 4000
 
 char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
@@ -17,7 +18,7 @@ char *f_l_income_vs_expenses =
 // TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
 
 static int prepare_temp_file(
-    FILE *a_file,
+    char *a_file,
     int a_start_year,
     int a_end_year
 );
@@ -28,11 +29,12 @@ int main(int argc, char *argv[])
     // info from income_vs_expenses.gnu => user settings for a specific graph
     // barchart.gnu => barchart code
     // add the plotting code at the end, through a define.
-    char *l_gcommands[] = {"set title \"TITLEEEEE\"", "plot 'data.temp'"};
+    char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
-    FILE *l_temp = fopen(TEMP_FILE, "w");
+    //FILE *l_temp = fopen(TEMP_FILE, "w");
     int l_start_year;
     int l_end_year;
+    int i;
 
     DocoptArgs args = docopt(
         argc,
@@ -47,18 +49,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf("docopt testing:\n");
-    printf("file given? %s\n", args.file ? "file given" : "file not given");
-    printf("file=%s\n", args.file);
-    printf("startyear=%s\n", args.startyear);
-    printf("endyear=%s\n", args.endyear);
- 
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
-    // TODO: l_gcommands and the points, should be dynamic.
-    // Prepare the data, by executing  ledgerplot with the proper
-    // parameters in batch.
-    // Load all files 1 by 1 (from the ledger output folder) and generate the plots.
     /* 
      * Opens an interface that one can use to send commands as if they were typing into the
      * gnuplot command line. "The -persistent" keeps the plot open even after your
@@ -71,10 +63,11 @@ int main(int argc, char *argv[])
         exit(0);
     }
     
-    // Note: To update in realtime: use fflush(gp)
-    // Otherwise, the application will wait until the processing is finished.
-        int i;
-    if(prepare_temp_file(l_temp, l_start_year, l_end_year) != 0)
+    /* 
+     * Note: To update in realtime: use fflush(gp)
+     * Otherwise, the application will wait until the processing is finished.
+     */
+    if(prepare_temp_file(args.file, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE);
         exit(-1);
@@ -110,17 +103,16 @@ int main(int argc, char *argv[])
  * in a temporary file that can be read by gnuplot.
  */
 static int prepare_temp_file(
-    FILE *a_file,
+    char *a_file,
     int a_start_year,
     int a_end_year
 )
 {
     int l_records;
     int i;
-    /*int i;
-    double l_xvals[NUM_POINTS] = {1.0, 2.0, 3.0, 4.0, 5.0};
-    double l_yvals[NUM_POINTS] = {5.0 ,3.0, 1.0, 3.0, 5.0};
-    */
+    FILE *l_fp;
+    char l_cmd[INPUT_MAX];
+    char l_input[INPUT_MAX];
     // TODO: exec ledgerplot command for startyear
     // exec ledgerplot command for all other years until endyear
     // For each: parse output (scheme app?)
@@ -132,9 +124,21 @@ static int prepare_temp_file(
     // exec ledgerplot command for startyear with  | grep -Eo '[0-9\.]{1,100}' added to it
 
     l_records = (a_end_year - a_start_year);    
-    for (i = 0; i < l_records*100; i++)
-    {
-        fprintf(a_file, "%lf %lf\n", 2.0*i, 3.0*i); //Write the data to a temporary file
+    for (i = 0; i < l_records; i++)
+    {   
+        sprintf(l_cmd, f_l_income_vs_expenses, a_file, 2015);
+        l_fp = popen(l_cmd, "r");
+        if (l_fp == NULL)
+        {
+            fprintf(stderr, "Could not open pipe to ledger command.\n");
+            exit(1);
+        }
+        while (fgets(l_input, INPUT_MAX, l_fp) != NULL)
+            printf("%s", l_input); // TODO: fill string with 1 line, replacing \n with a space.
+        if (pclose(l_fp) == -1)
+            fprintf(stderr, "Error reported by pclose().\n");
+
+        //fprintf(a_file, "%lf %lf\n", 2.0*i, 3.0*i); //Write the data to a temporary file
     }
     return 0;
 }
