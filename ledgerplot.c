@@ -118,6 +118,10 @@ static int prepare_temp_file(
     char l_cmd[INPUT_MAX];
     char l_input[INPUT_MAX];
     char l_dat_info[DAT_MAX];
+    double l_d1;
+    double l_d2;
+    double l_d3;
+    char *l_tmp;
     // TODO: exec ledgerplot command for startyear
     // exec ledgerplot command for all other years until endyear
     // For each: parse output (scheme app?)
@@ -146,11 +150,15 @@ static int prepare_temp_file(
             else
                 sprintf(l_dat_info, "%s %s", l_dat_info, trim_whitespace(l_input));
         }
-        printf("%s\n", l_dat_info);
+        l_d1 = strtod(l_dat_info, &l_tmp);
+        l_d2 = strtod(l_tmp, &l_tmp);
+        l_d3 = strtod(l_tmp, NULL);
         
         if (pclose(l_fp) == -1)
             fprintf(stderr, "Error reported by pclose().\n");
-        //fprintf(a_file, "%lf %lf\n", 2.0*i, 3.0*i); //Write the data to a temporary file
+            
+        // TODO: check if we need to perform operations on these values?
+        fprintf(a_file, "%.2lf %.2lf .2lf\n", l_d1, l_d2, l_d3); //Write the data to a temporary file
     }
     return 0;
 }
