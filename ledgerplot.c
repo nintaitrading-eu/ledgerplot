@@ -8,7 +8,7 @@
 
 #define GNUPLOT "gnuplot -persist"
 #define NUM_COMMANDS 2
-#define TEMP_FILE "data.temp"
+#define FILE_OUTPUT "data.temp"
 #define INPUT_MAX 1024 // MAX line length to copy
 #define DAT_MAX 8000 // MAX command length for the dat info
 
@@ -20,7 +20,8 @@ char *f_l_income_vs_expenses =
 // TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
 
 static int prepare_temp_file(
-    char *a_file,
+    char *a_input_file,
+    FILE *a_output_file,
     int a_start_year,
     int a_end_year
 );
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     // add the plotting code at the end, through a define.
     char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
-    //FILE *l_temp = fopen(TEMP_FILE, "w");
+    FILE *l_output_file;
     int l_start_year;
     int l_end_year;
     int i;
@@ -51,6 +52,13 @@ int main(int argc, char *argv[])
     {
         printf("%s\n", args.help_message);
         return 1;
+    }
+    
+    l_output_file = fopen(FILE_OUTPUT, "w");
+    if (l_output_file == NULL)
+    {
+        printf("Error: could not open output file %s.\n", FILE_OUTPUT);
+        exit(1);
     }
 
     l_start_year = atoi(args.startyear);
@@ -74,7 +82,7 @@ int main(int argc, char *argv[])
     if(prepare_temp_file(args.file, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE);
-        exit(-1);
+        exit(1);
     }
    
     // TODO: for line in first gnu-script
@@ -107,7 +115,8 @@ int main(int argc, char *argv[])
  * in a temporary file that can be read by gnuplot.
  */
 static int prepare_temp_file(
-    char *a_file,
+    char *a_input_file,
+    FILE *a_output_file,
     int a_start_year,
     int a_end_year
 )
@@ -135,7 +144,7 @@ static int prepare_temp_file(
     l_records = (a_end_year - a_start_year);    
     for (i = 0; i < l_records; i++)
     {   
-        sprintf(l_cmd, f_l_income_vs_expenses, a_file, 2015);
+        sprintf(l_cmd, f_l_income_vs_expenses, a_input_file, 2015);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
@@ -158,7 +167,7 @@ static int prepare_temp_file(
             fprintf(stderr, "Error reported by pclose().\n");
             
         // TODO: check if we need to perform operations on these values?
-        fprintf(a_file, "%.2lf %.2lf .2lf\n", l_d1, l_d2, l_d3); //Write the data to a temporary file
+        fprintf(a_output_file, "%.2lf %.2lf .2lf\n", l_d1, l_d2, l_d3); //Write the data to a temporary file
     }
     return 0;
 }
