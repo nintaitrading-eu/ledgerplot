@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     if(argc == 1)
     {
-        printf("%s", args.help_message);
+        printf("%s\n", args.help_message);
         return 1;
     }
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     if (l_gp == NULL)
     {
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
-        exit(0);
+        exit(1);
     }
     
     /* 
