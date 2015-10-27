@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
      * Note: To update in realtime: use fflush(gp)
      * Otherwise, the application will wait until the processing is finished.
      */
-    if(prepare_temp_file(args.file, l_start_year, l_end_year) != 0)
+    if(prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
     {
-        fprintf(stderr, "Could not prepare temporary data-file %s.", TEMP_FILE);
+        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_OUTPUT);
         exit(1);
     }
    
@@ -167,7 +167,7 @@ static int prepare_temp_file(
             fprintf(stderr, "Error reported by pclose().\n");
             
         // TODO: check if we need to perform operations on these values?
-        fprintf(a_output_file, "%.2lf %.2lf .2lf\n", l_d1, l_d2, l_d3); //Write the data to a temporary file
+        fprintf(a_output_file, "%.2lf %.2lf %.2lf\n", l_d1, l_d2, l_d3); //Write the data to a temporary file
     }
     return 0;
 }
