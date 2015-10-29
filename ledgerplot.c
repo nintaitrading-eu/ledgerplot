@@ -17,7 +17,6 @@ char *f_cmd_gnuplot =
         "for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
 char *f_l_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
-// TODO: call exec... on sprintf(l_cmd_str, f_l_income_vs_expenses, "ledger.dat", 2015);
 
 static int prepare_temp_file(
     char *a_input_file,
@@ -25,18 +24,17 @@ static int prepare_temp_file(
     int a_start_year,
     int a_end_year
 );
-
+static int write_to_gnuplot()
 char *trim_whitespace(char *str);
 
+// TODO: write function that loads info from barchart.gnu and combines it with
+// info from income_vs_expenses.gnu => user settings for a specific graph
+// barchart.gnu => barchart code
+// add the plotting code at the end, through a define.
 int main(int argc, char *argv[])
 {
-    // TODO: write function that loads info from barchart.gnu and combines it with
-    // info from income_vs_expenses.gnu => user settings for a specific graph
-    // barchart.gnu => barchart code
-    // add the plotting code at the end, through a define.
     char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
-    FILE *l_gp; // Gnuplot pipe
-    FILE *l_output_file;
+    FILE *l_output_file; // Temp dat file, where the final script is written to.
     int l_start_year;
     int l_end_year;
     int i;
@@ -54,24 +52,13 @@ int main(int argc, char *argv[])
         return 1;
     }
     
+    l_start_year = atoi(args.startyear);
+    l_end_year = atoi(args.endyear);
+    
     l_output_file = fopen(FILE_OUTPUT, "w");
     if (l_output_file == NULL)
     {
         printf("Error: could not open output file %s.\n", FILE_OUTPUT);
-        exit(1);
-    }
-
-    l_start_year = atoi(args.startyear);
-    l_end_year = atoi(args.endyear);
-    /* 
-     * Opens an interface that one can use to send commands as if they were typing into the
-     * gnuplot command line. "The -persistent" keeps the plot open even after your
-     * C program terminates.
-     */
-    l_gp = popen(GNUPLOT, "w");
-    if (l_gp == NULL)
-    {
-        printf("Error opening pipe to GNU plot. Check if you have it!\n");
         exit(1);
     }
     
@@ -84,29 +71,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_OUTPUT);
         exit(1);
     }
-   
-    // TODO: for line in first gnu-script
-    for (i = 0; i < NUM_COMMANDS; i++)
-    {
-       fprintf(l_gp, "%s \n", l_gcommands[i]); /* Send commands to gnuplot one by one. */
-       fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
-    }
-    // TODO: for line in 2nd gnu-script
-    // TODO: add final plot command
     
-    /* 
-     * Other note: you could also make an actual pipe:
-     * mkfifo /tmp/gnuplot
-     * while :; do (gnuplot -persist) < /tmp/gnuplot; done
-     * and then do a simple
-     * echo "plot sin(x)" > /tmp/gnuplot
-     */
-
-    /*fprintf(l_gp, "set samples 2000\n");
-    fprintf(l_gp, "plot abs(sin(x))\n");
-    fprintf(l_gp, "rep abs(cos(x))\n");*/
-    fclose(l_gp);
-    return 0;
+    // TODO: gather script data for use in write_to_gnluplot
+  
+    return write_to_gnuplot();
 }
 
 /*
@@ -131,15 +99,6 @@ static int prepare_temp_file(
     double l_d2;
     double l_d3;
     char *l_tmp;
-    // TODO: exec ledgerplot command for startyear
-    // exec ledgerplot command for all other years until endyear
-    // For each: parse output (scheme app?)
-    // write to temp-file.
-    // Remove (( and change <space>) to a newline
-    // That gives the line to be added to data.temp
-    // for a specific year.
-    // Or easier: use grep:
-    // exec ledgerplot command for startyear with  | grep -Eo '[0-9\.]{1,100}' added to it
 
     l_records = (a_end_year - a_start_year);    
     for (i = 0; i < l_records; i++)
@@ -148,7 +107,7 @@ static int prepare_temp_file(
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
-            fprintf(stderr, "Could not open pipe to ledger command.\n");
+            fprintf(stderr, "Could not execute ledger command.\n");
             exit(1);
         }
 
@@ -171,6 +130,51 @@ static int prepare_temp_file(
     }
     return 0;
 }
+
+/*
+ * Writes the generated script lines to a
+ * gnuplot pipe.
+ */
+static int write_to_gnuplot()
+{
+    FILE *l_gp; // Gnuplot pipe
+    
+     /* 
+     * Opens an interface that one can use to send commands as if they were typing into the
+     * gnuplot command line. "The -persistent" keeps the plot open even after your
+     * C program terminates.
+     */
+    l_gp = popen(GNUPLOT, "w");
+    if (l_gp == NULL)
+    {
+        printf("Error opening pipe to GNU plot. Check if you have it!\n");
+        return 1;
+    }
+    
+    // TODO: for line in first gnu-script
+    for (i = 0; i < NUM_COMMANDS; i++)
+    {
+       fprintf(l_gp, "%s \n", l_gcommands[i]); /* Send commands to gnuplot one by one. */
+       fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
+    }
+    // TODO: for line in 2nd gnu-script
+    // TODO: add final plot command
+    
+    /* 
+     * Other note: you could also make an actual pipe:
+     * mkfifo /tmp/gnuplot
+     * while :; do (gnuplot -persist) < /tmp/gnuplot; done
+     * and then do a simple
+     * echo "plot sin(x)" > /tmp/gnuplot
+     */
+
+    /*fprintf(l_gp, "set samples 2000\n");
+    fprintf(l_gp, "plot abs(sin(x))\n");
+    fprintf(l_gp, "rep abs(cos(x))\n");*/
+    fclose(l_gp);
+    return 0;
+}
+
 
 /*
  * This function returns a pointer to a substring of the original string.
