@@ -24,7 +24,7 @@ static int prepare_temp_file(
     int a_start_year,
     int a_end_year
 );
-static int write_to_gnuplot()
+static int write_to_gnuplot();
 char *trim_whitespace(char *str);
 
 // TODO: write function that loads info from barchart.gnu and combines it with
