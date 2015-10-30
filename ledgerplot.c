@@ -33,11 +33,9 @@ char *trim_whitespace(char *str);
 // add the plotting code at the end, through a define.
 int main(int argc, char *argv[])
 {
-    char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     int l_start_year;
     int l_end_year;
-    int i;
 
     DocoptArgs args = docopt(
         argc,
@@ -137,7 +135,9 @@ static int prepare_temp_file(
  */
 static int write_to_gnuplot()
 {
+    char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
+    int i;
     
      /* 
      * Opens an interface that one can use to send commands as if they were typing into the
