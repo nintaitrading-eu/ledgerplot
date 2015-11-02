@@ -11,6 +11,8 @@
 #define FILE_OUTPUT "data.temp"
 #define INPUT_MAX 1024 // MAX line length to copy
 #define DAT_MAX 8000 // MAX command length for the dat info
+#define DAT_IVE_LAYOUT "income_vs_expenses_layout.gnu" 
+#define DAT_BARCHART "barchart.gnu" 
 
 char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
@@ -26,6 +28,7 @@ static int prepare_temp_file(
 );
 static int write_to_gnuplot();
 char *trim_whitespace(char *str);
+int get_lines_from_file(char *a_file, char a_gnu_command[DAT_MAX]);
 
 // TODO: write function that loads info from barchart.gnu and combines it with
 // info from income_vs_expenses.gnu => user settings for a specific graph
@@ -36,6 +39,7 @@ int main(int argc, char *argv[])
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     int l_start_year;
     int l_end_year;
+    char l_gnu_command[DAT_MAX];
 
     DocoptArgs args = docopt(
         argc,
@@ -71,8 +75,17 @@ int main(int argc, char *argv[])
     }
     
     // TODO: gather script data for use in write_to_gnluplot
-  
-    return write_to_gnuplot();
+    // TODO: send pointer to l_gnu_command, instead of passing the entire array
+    if (get_lines_from_file(FILE_OUTPUT, l_gnu_command) == 0)
+    {
+        // TODO: for line in first gnu-script
+        // TODO: for line in 2nd gnu-script
+        // TODO: add final plot command
+    
+        return write_to_gnuplot();
+    }
+    else
+        return 1;
 }
 
 /*
@@ -91,7 +104,7 @@ static int prepare_temp_file(
     int i;
     FILE *l_fp;
     char l_cmd[INPUT_MAX];
-    char l_input[INPUT_MAX];
+    char l_line[INPUT_MAX];
     char l_dat_info[DAT_MAX];
     double l_d1;
     double l_d2;
@@ -109,12 +122,12 @@ static int prepare_temp_file(
             exit(1);
         }
 
-        while (fgets(l_input, INPUT_MAX, l_fp) != NULL)
+        while (fgets(l_line, INPUT_MAX, l_fp) != NULL)
         {
             if (strlen(l_dat_info) <= 0)
-                sprintf(l_dat_info, "%s", trim_whitespace(l_input));
+                sprintf(l_dat_info, "%s", trim_whitespace(l_line));
             else
-                sprintf(l_dat_info, "%s %s", l_dat_info, trim_whitespace(l_input));
+                sprintf(l_dat_info, "%s %s", l_dat_info, trim_whitespace(l_line));
         }
         l_d1 = strtod(l_dat_info, &l_tmp);
         l_d2 = strtod(l_tmp, &l_tmp);
@@ -138,7 +151,7 @@ static int write_to_gnuplot()
     char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
     int i;
-    
+   
      /* 
      * Opens an interface that one can use to send commands as if they were typing into the
      * gnuplot command line. "The -persistent" keeps the plot open even after your
@@ -151,14 +164,11 @@ static int write_to_gnuplot()
         return 1;
     }
     
-    // TODO: for line in first gnu-script
     for (i = 0; i < NUM_COMMANDS; i++)
     {
        fprintf(l_gp, "%s \n", l_gcommands[i]); /* Send commands to gnuplot one by one. */
        fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
     }
-    // TODO: for line in 2nd gnu-script
-    // TODO: add final plot command
     
     /* 
      * Other note: you could also make an actual pipe:
@@ -207,4 +217,49 @@ char *trim_whitespace(char *a_string)
     /* Write new null terminator. */
     *(l_end + 1) = 0;
     return a_string;
+}
+
+/*
+ * get_lines_from_file
+ * Loads the lines of a file into
+ * an array that will be used
+ * to send to gnuplot.
+ */
+int get_lines_from_file(char *a_file, char a_gnu_command[DAT_MAX])
+{
+    FILE *l_file;
+    char l_line[INPUT_MAX];
+    int l_count;
+  
+    /* 0. Init */
+    l_count = 0;
+    (void)a_file;
+     
+    /* 1. Load layout commands */ 
+    l_file = fopen(DAT_IVE_LAYOUT, "r");
+    if (l_file == NULL)
+    {
+        printf("Error: could not open output file %s.\n", DAT_IVE_LAYOUT);
+        return 1;
+    }
+    while (fgets(l_line, INPUT_MAX, l_file) != NULL)
+    {
+        printf("test0: %s\n", l_line);
+        if (strlen(l_line) > 0)
+        {
+            printf("test2: %c\n", l_line[0]);
+            if (l_line[0] != '#')
+            {
+                l_count++;
+                sprintf(&a_gnu_command[l_count], "%s", trim_whitespace(l_line));
+            }
+        }
+    }
+    fclose(l_file);
+   
+    /* 2. Load barchart commands */ 
+    
+    /* 3. Load barchart plot command */ 
+
+    return 0;
 }
