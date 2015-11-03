@@ -15,9 +15,9 @@
 #define NUM_COMMANDS 2
 
 char *f_cmd_gnuplot =
-    "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
-        "for [COL=STARTCOL:ENDCOL] 'test.dat' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
-char *f_l_income_vs_expenses =
+    "plot for [COL=STARTCOL:ENDCOL] 'data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
+        "for [COL=STARTCOL:ENDCOL] 'data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
+char *f_cmd_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
 
 static int prepare_temp_file(
@@ -74,18 +74,28 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
-    // TODO: gather script data for use in write_to_gnluplot
-    // TODO: send pointer to l_gnu_command, instead of passing the entire array
-    if (get_lines_from_file(FILE_TEMP, l_gnu_command) == 0)
+     /* 1. Load layout commands */ 
+    if (get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command) != 0)
     {
-        // TODO: for line in first gnu-script
-        // TODO: for line in 2nd gnu-script
-        // TODO: add final plot command
-    
-        return write_to_gnuplot();
-    }
-    else
+        fprintf(stderr, "Could not read %s.\n");
         return 1;
+    }
+    /* 2. Load barchart commands */ 
+    if (get_lines_from_file(FILE_BARCHART, l_gnu_command) != 0)
+    {
+        fprintf(stderr, "Could not read %s.\n");
+        return 1;
+    }
+    /* 3. Load barchart plot command */
+    // TODO: doesn't this give the max OUTPUT_ARRAY_MAX + 1?
+    // Perhaps return l_count from get_lines_from_file?
+    l_gnu_command[sizeof(l_gnu_command) + 1]  = f_cmd_gnuplot;
+    /*sprintf(
+        l_gnu_command[sizeof(l_gnu_command) + 1],
+        f_cmd_gnuplot,
+        a_input_file
+    );*/
+    return write_to_gnuplot();
 }
 
 /*
@@ -114,7 +124,7 @@ static int prepare_temp_file(
     l_records = (a_end_year - a_start_year);    
     for (i = 0; i < l_records; i++)
     {   
-        sprintf(l_cmd, f_l_income_vs_expenses, a_input_file, 2015);
+        sprintf(l_cmd, f_cmd_income_vs_expenses, a_input_file, 2015);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
@@ -146,9 +156,8 @@ static int prepare_temp_file(
  * Writes the generated script lines to a
  * gnuplot pipe.
  */
-static int write_to_gnuplot()
+static int write_to_gnuplot(char l_gcommands[])
 {
-    char *l_gcommands[] = {"set title \"TITLE\"", "plot 'data.temp'"};
     FILE *l_gp; // Gnuplot pipe
     int i;
    
@@ -164,7 +173,9 @@ static int write_to_gnuplot()
         return 1;
     }
     
-    for (i = 0; i < NUM_COMMANDS; i++)
+    // TODO: wait, what? the command plots data.temp...
+    // So I need a file with data... that would be data.tmp!
+    for (i = 0; i < OUTPUT_ARRAY_MAX; i++)
     {
        fprintf(l_gp, "%s \n", l_gcommands[i]); /* Send commands to gnuplot one by one. */
        fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
@@ -229,17 +240,12 @@ int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX])
 {
     FILE *l_file;
     char l_line[INPUT_LINE_MAX];
-    int l_count;
-  
-    /* 0. Init */
-    l_count = 0;
-    (void)a_file;
+    int l_count = 0;
      
-    /* 1. Load layout commands */ 
-    l_file = fopen(FILE_IVE_LAYOUT, "r");
+    l_file = fopen(a_file, "r");
     if (l_file == NULL)
     {
-        printf("Error: could not open output file %s.\n", FILE_IVE_LAYOUT);
+        printf("Error: could not open output file %s.\n", a_file);
         return 1;
     }
     while (fgets(l_line, INPUT_LINE_MAX, l_file) != NULL)
@@ -256,10 +262,5 @@ int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX])
         }
     }
     fclose(l_file);
-   
-    /* 2. Load barchart commands */ 
-    
-    /* 3. Load barchart plot command */ 
-
     return 0;
 }
