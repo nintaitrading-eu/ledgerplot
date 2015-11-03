@@ -6,13 +6,13 @@
 #include "ledgerplot.h"
 #include "docopt.c"
 
-#define GNUPLOT "gnuplot -persist"
+#define CMD_GNUPLOT "gnuplot -persist"
+#define FILE_TEMP "data.tmp"
+#define FILE_IVE_LAYOUT "income_vs_expenses_layout.gnu"
+#define FILE_BARCHART "barchart.gnu"
+#define INPUT_LINE_MAX 1024 // MAX line length to copy
+#define OUTPUT_ARRAY_MAX 8000 // MAX command length for the dat info
 #define NUM_COMMANDS 2
-#define FILE_OUTPUT "data.temp"
-#define INPUT_MAX 1024 // MAX line length to copy
-#define DAT_MAX 8000 // MAX command length for the dat info
-#define DAT_IVE_LAYOUT "income_vs_expenses_layout.gnu" 
-#define DAT_BARCHART "barchart.gnu" 
 
 char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'test.dat' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
@@ -28,7 +28,7 @@ static int prepare_temp_file(
 );
 static int write_to_gnuplot();
 char *trim_whitespace(char *str);
-int get_lines_from_file(char *a_file, char a_gnu_command[DAT_MAX]);
+int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX]);
 
 // TODO: write function that loads info from barchart.gnu and combines it with
 // info from income_vs_expenses.gnu => user settings for a specific graph
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     int l_start_year;
     int l_end_year;
-    char l_gnu_command[DAT_MAX];
+    char l_gnu_command[OUTPUT_ARRAY_MAX];
 
     DocoptArgs args = docopt(
         argc,
@@ -57,10 +57,10 @@ int main(int argc, char *argv[])
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
     
-    l_output_file = fopen(FILE_OUTPUT, "w");
+    l_output_file = fopen(FILE_TEMP, "w");
     if (l_output_file == NULL)
     {
-        printf("Error: could not open output file %s.\n", FILE_OUTPUT);
+        printf("Error: could not open output file %s.\n", FILE_TEMP);
         exit(1);
     }
     
@@ -70,13 +70,13 @@ int main(int argc, char *argv[])
      */
     if(prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
     {
-        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_OUTPUT);
+        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_TEMP);
         exit(1);
     }
     
     // TODO: gather script data for use in write_to_gnluplot
     // TODO: send pointer to l_gnu_command, instead of passing the entire array
-    if (get_lines_from_file(FILE_OUTPUT, l_gnu_command) == 0)
+    if (get_lines_from_file(FILE_TEMP, l_gnu_command) == 0)
     {
         // TODO: for line in first gnu-script
         // TODO: for line in 2nd gnu-script
@@ -103,9 +103,9 @@ static int prepare_temp_file(
     int l_records;
     int i;
     FILE *l_fp;
-    char l_cmd[INPUT_MAX];
-    char l_line[INPUT_MAX];
-    char l_dat_info[DAT_MAX];
+    char l_cmd[INPUT_LINE_MAX];
+    char l_line[INPUT_LINE_MAX];
+    char l_dat_info[OUTPUT_ARRAY_MAX];
     double l_d1;
     double l_d2;
     double l_d3;
@@ -122,7 +122,7 @@ static int prepare_temp_file(
             exit(1);
         }
 
-        while (fgets(l_line, INPUT_MAX, l_fp) != NULL)
+        while (fgets(l_line, INPUT_LINE_MAX, l_fp) != NULL)
         {
             if (strlen(l_dat_info) <= 0)
                 sprintf(l_dat_info, "%s", trim_whitespace(l_line));
@@ -157,7 +157,7 @@ static int write_to_gnuplot()
      * gnuplot command line. "The -persistent" keeps the plot open even after your
      * C program terminates.
      */
-    l_gp = popen(GNUPLOT, "w");
+    l_gp = popen(CMD_GNUPLOT, "w");
     if (l_gp == NULL)
     {
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
@@ -225,10 +225,10 @@ char *trim_whitespace(char *a_string)
  * an array that will be used
  * to send to gnuplot.
  */
-int get_lines_from_file(char *a_file, char a_gnu_command[DAT_MAX])
+int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX])
 {
     FILE *l_file;
-    char l_line[INPUT_MAX];
+    char l_line[INPUT_LINE_MAX];
     int l_count;
   
     /* 0. Init */
@@ -236,13 +236,13 @@ int get_lines_from_file(char *a_file, char a_gnu_command[DAT_MAX])
     (void)a_file;
      
     /* 1. Load layout commands */ 
-    l_file = fopen(DAT_IVE_LAYOUT, "r");
+    l_file = fopen(FILE_IVE_LAYOUT, "r");
     if (l_file == NULL)
     {
-        printf("Error: could not open output file %s.\n", DAT_IVE_LAYOUT);
+        printf("Error: could not open output file %s.\n", FILE_IVE_LAYOUT);
         return 1;
     }
-    while (fgets(l_line, INPUT_MAX, l_file) != NULL)
+    while (fgets(l_line, INPUT_LINE_MAX, l_file) != NULL)
     {
         printf("test0: %s\n", l_line);
         if (strlen(l_line) > 0)
