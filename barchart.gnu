@@ -12,8 +12,7 @@ BOXWIDTH = 2./(GAPSIZE+NCOL)
 set style fill solid 0.75 border lt -1
 set boxwidth BOXWIDTH absolute
 set grid nopolar
-set grid noxtics nomxtics ytics nomytics noztics nomztics \
- nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
+set grid noxtics nomxtics ytics nomytics noztics nomztics nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
 set grid layerdefault linetype 0 linewidth 1.000,  linetype 0 linewidth 1.000
 set xzeroaxis linetype 0 linewidth 1.000
 set yzeroaxis linetype 0 linewidth 1.000

@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <time.h>
 #include "ledgerplot.h"
 #include "docopt.c"
 
 #define CMD_GNUPLOT "gnuplot -persist"
-#define FILE_TEMP "data.tmp"
+#define FILE_DATA_TMP "lp_data.tmp"
+#define FILE_GNU_TMP "lp_gnu.tmp"
 #define FILE_IVE_LAYOUT "income_vs_expenses_layout.gnu"
 #define FILE_BARCHART "barchart.gnu"
 #define INPUT_LINE_MAX 1024 // MAX line length to copy
@@ -15,8 +17,7 @@
 #define NUM_COMMANDS 2
 
 char *f_cmd_gnuplot =
-    "plot for [COL=STARTCOL:ENDCOL] 'data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL), \\"
-        "for [COL=STARTCOL:ENDCOL] 'data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-0.5):COL:COL notitle w labels";
+    "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 char *f_cmd_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
 
@@ -28,7 +29,8 @@ static int prepare_temp_file(
 );
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 char *trim_whitespace(char *str);
-int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
+int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index);
+void current_datetime_to_string(char a_result[20]);
 
 // TODO: write function that loads info from barchart.gnu and combines it with
 // info from income_vs_expenses.gnu => user settings for a specific graph
@@ -39,6 +41,8 @@ int main(int argc, char *argv[])
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     int l_start_year;
     int l_end_year;
+    int l_lines = 0;
+    int l_lines_total = 0;
     char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
 
     DocoptArgs args = docopt(
@@ -48,7 +52,7 @@ int main(int argc, char *argv[])
         "ledgerplot version 0.1" /* version */
     );
 
-    if(argc == 1)
+    if (argc == 1)
     {
         printf("%s\n", args.help_message);
         return 1;
@@ -57,10 +61,10 @@ int main(int argc, char *argv[])
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
     
-    l_output_file = fopen(FILE_TEMP, "w");
+    l_output_file = fopen(FILE_DATA_TMP, "w");
     if (l_output_file == NULL)
     {
-        printf("Error: could not open output file %s.\n", FILE_TEMP);
+        printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
         exit(1);
     }
     
@@ -68,34 +72,45 @@ int main(int argc, char *argv[])
      * Note: To update in realtime: use fflush(gp)
      * Otherwise, the application will wait until the processing is finished.
      */
-    if(prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
+    if (prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
     {
-        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_TEMP);
+        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
         exit(1);
     }
-    
-     /* 1. Load layout commands */ 
-    if (get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command) != 0)
+   
+    /* 1. Load layout commands */ 
+    l_lines = get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command, 0);
+    printf("-1- l_lines = %d\n", l_lines);
+    l_lines_total = l_lines;
+    if (l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_IVE_LAYOUT);
-        return 1;
+        exit(1);
     }
     /* 2. Load barchart commands */ 
-    if (get_lines_from_file(FILE_BARCHART, l_gnu_command) != 0)
+    l_lines = get_lines_from_file(FILE_BARCHART, l_gnu_command, l_lines_total+1);
+    printf("-2- l_lines = %d\n", l_lines);
+    l_lines_total += l_lines;
+    if ( l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
-        return 1;
+        exit(1);
     }
     /* 3. Load barchart plot command */
     // TODO: doesn't this give the max OUTPUT_ARRAY_MAX + 1?
     // Perhaps return l_count from get_lines_from_file?
-    //if(!strncmp(l_gnu_command[sizeof(l_gnu_command)/sizeof(char[INPUT_LINE_MAX]) + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
-    //    return 1;
+    if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
+        exit(1);
     /*sprintf(
         l_gnu_command[sizeof(l_gnu_command) + 1],
         f_cmd_gnuplot,
         a_input_file
     );*/
+    printf("@@@@@@@ l_lines_total=%d\n", l_lines_total);
+    for (int i=0; i<l_lines_total+2; i++) 
+    {
+        printf("-- %s\n", l_gnu_command[i]);
+    }
     return write_to_gnuplot(l_gnu_command);
 }
 
@@ -121,11 +136,15 @@ static int prepare_temp_file(
     double l_d2;
     double l_d3;
     char *l_tmp;
+    char l_current_datetime[20];
+    int l_current_year;
 
     l_records = (a_end_year - a_start_year);    
+    l_current_year = a_start_year - 1;
     for (i = 0; i < l_records; i++)
     {   
-        sprintf(l_cmd, f_cmd_income_vs_expenses, a_input_file, 2015);
+        l_current_year += l_records;
+        sprintf(l_cmd, f_cmd_income_vs_expenses, a_input_file, l_current_year);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
@@ -146,12 +165,38 @@ static int prepare_temp_file(
         
         if (pclose(l_fp) == -1)
             fprintf(stderr, "Error reported by pclose().\n");
-            
+        
+        /* 0. Initialise tmp file */    
+        current_datetime_to_string(l_current_datetime);
+        fprintf(a_output_file, "# Generated by ledgerplot on %s.\n", l_current_datetime);
+        fprintf(a_output_file, "year expenses income difference\n");
         // TODO: check if we need to perform operations on these values?
-        fprintf(a_output_file, "%.2lf %.2lf %.2lf\n", l_d1, l_d2, l_d3); //Write the data to a temporary file
+        fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3); //Write the data to a temporary file
     }
     return 0;
 }
+
+/*
+ * current_datetime_to_string
+ * Gets the current datetime and
+ * return it as a formatted string.
+ */
+void current_datetime_to_string(char a_result[20])
+{
+    time_t l_time = time(NULL);
+    struct tm l_localtime = *localtime(&l_time);
+
+    sprintf(
+        a_result,
+        "%d-%d-%d %d:%d:%d",
+        l_localtime.tm_year + 1900,
+        l_localtime.tm_mon + 1,
+        l_localtime.tm_mday,
+        l_localtime.tm_hour,
+        l_localtime.tm_min,
+        l_localtime.tm_sec
+    );
+} 
 
 /*
  * Writes the generated script lines to a
@@ -237,7 +282,7 @@ char *trim_whitespace(char *a_string)
  * an array that will be used
  * to send to gnuplot.
  */
-int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX])
+int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
 {
     FILE *l_file;
     char l_line[INPUT_LINE_MAX];
@@ -247,21 +292,19 @@ int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT
     if (l_file == NULL)
     {
         printf("Error: could not open output file %s.\n", a_file);
-        return 1;
+        return -1;
     }
     while (fgets(l_line, INPUT_LINE_MAX, l_file) != NULL)
     {
-        printf("test0: %s\n", l_line);
         if (strlen(l_line) > 0)
         {
-            printf("test2: %c\n", l_line[0]);
             if (l_line[0] != '#')
             {
                 l_count++;
-                sprintf(a_gnu_command[l_count], "%s", trim_whitespace(l_line));
+                sprintf(a_gnu_command[a_index + l_count], "%s", trim_whitespace(l_line));
             }
         }
     }
     fclose(l_file);
-    return 0;
+    return l_count;
 }
