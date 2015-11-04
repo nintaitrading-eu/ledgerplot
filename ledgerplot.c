@@ -26,9 +26,9 @@ static int prepare_temp_file(
     int a_start_year,
     int a_end_year
 );
-static int write_to_gnuplot();
+static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 char *trim_whitespace(char *str);
-int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX]);
+int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 
 // TODO: write function that loads info from barchart.gnu and combines it with
 // info from income_vs_expenses.gnu => user settings for a specific graph
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     int l_start_year;
     int l_end_year;
-    char l_gnu_command[OUTPUT_ARRAY_MAX];
+    char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
 
     DocoptArgs args = docopt(
         argc,
@@ -77,25 +77,26 @@ int main(int argc, char *argv[])
      /* 1. Load layout commands */ 
     if (get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command) != 0)
     {
-        fprintf(stderr, "Could not read %s.\n");
+        fprintf(stderr, "Could not read %s.\n", FILE_IVE_LAYOUT);
         return 1;
     }
     /* 2. Load barchart commands */ 
     if (get_lines_from_file(FILE_BARCHART, l_gnu_command) != 0)
     {
-        fprintf(stderr, "Could not read %s.\n");
+        fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
         return 1;
     }
     /* 3. Load barchart plot command */
     // TODO: doesn't this give the max OUTPUT_ARRAY_MAX + 1?
     // Perhaps return l_count from get_lines_from_file?
-    l_gnu_command[sizeof(l_gnu_command) + 1]  = f_cmd_gnuplot;
+    //if(!strncmp(l_gnu_command[sizeof(l_gnu_command)/sizeof(char[INPUT_LINE_MAX]) + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
+    //    return 1;
     /*sprintf(
         l_gnu_command[sizeof(l_gnu_command) + 1],
         f_cmd_gnuplot,
         a_input_file
     );*/
-    return write_to_gnuplot();
+    return write_to_gnuplot(l_gnu_command);
 }
 
 /*
@@ -156,7 +157,7 @@ static int prepare_temp_file(
  * Writes the generated script lines to a
  * gnuplot pipe.
  */
-static int write_to_gnuplot(char l_gcommands[])
+static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX])
 {
     FILE *l_gp; // Gnuplot pipe
     int i;
@@ -177,7 +178,7 @@ static int write_to_gnuplot(char l_gcommands[])
     // So I need a file with data... that would be data.tmp!
     for (i = 0; i < OUTPUT_ARRAY_MAX; i++)
     {
-       fprintf(l_gp, "%s \n", l_gcommands[i]); /* Send commands to gnuplot one by one. */
+       fprintf(l_gp, "%s \n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
        fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
     }
     
@@ -236,7 +237,7 @@ char *trim_whitespace(char *a_string)
  * an array that will be used
  * to send to gnuplot.
  */
-int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX])
+int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX])
 {
     FILE *l_file;
     char l_line[INPUT_LINE_MAX];
@@ -257,7 +258,7 @@ int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX])
             if (l_line[0] != '#')
             {
                 l_count++;
-                sprintf(&a_gnu_command[l_count], "%s", trim_whitespace(l_line));
+                sprintf(a_gnu_command[l_count], "%s", trim_whitespace(l_line));
             }
         }
     }
