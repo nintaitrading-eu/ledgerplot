@@ -25,12 +25,12 @@ static int prepare_temp_file(
     int a_end_year
 );
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
-char *trim_whitespace(char *str);
 int get_lines_from_file(
     char *a_file,
     char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX],
     int a_index
 );
+void trim_whitespace(char *a_result, const char *a_string, size_t a_buffersize);
 void timestamp(char *a_result, char *a_dtformat, size_t a_buffersize);
 
 
@@ -141,8 +141,9 @@ static int prepare_temp_file(
     int i;
     FILE *l_fp;
     char l_cmd[INPUT_LINE_MAX];
-    char l_line[INPUT_LINE_MAX];
-    char l_dat_info[OUTPUT_ARRAY_MAX];
+    char l_line_temp[INPUT_LINE_MAX];
+    char l_line_input[INPUT_LINE_MAX];
+    char l_line_output[INPUT_LINE_MAX]; /* The output line may be just as long. */
     double l_d1;
     double l_d2;
     double l_d3;
@@ -163,12 +164,18 @@ static int prepare_temp_file(
             exit(1);
         }
 
-        while (fgets(l_line, INPUT_LINE_MAX, l_fp) != NULL)
+        while (fgets(l_line_input, INPUT_LINE_MAX, l_fp) != NULL)
         {
-            if (strlen(l_dat_info) <= 0)
-                sprintf(l_dat_info, "%s", trim_whitespace(l_line));
+            *l_line_temp = '\0'; /* Make sure temp string is empty. */
+            trim_whitespace(l_line_temp, l_line_input, INPUT_LINE_MAX);
+            if (strlen(l_line_output) <= 0)
+            {
+                sprintf(l_line_output, "%s", l_line_temp);
+            }
             else
-                sprintf(l_dat_info, "%s %s", l_dat_info, trim_whitespace(l_line));
+            {
+                sprintf(l_line_output, "%s %s", l_line_output, l_line_temp);
+            }
         }
         l_d1 = strtod(l_dat_info, &l_tmp);
         l_d2 = strtod(l_tmp, &l_tmp);
@@ -190,32 +197,6 @@ static int prepare_temp_file(
     }
     return 0;
 }
-
-/*
- * current_datetime_to_string
- * Gets the current datetime and
- * return it as a formatted string.
- */
-void timestamp(char *a_result, char *a_dtformat, size_t a_buffersize)
-{
-    time_t l_time = time(NULL);
-    struct tm l_localtime = *localtime(&l_time);
-
-    if (a_buffersize < 1)
-        return 1;
-        
-    snprintf(
-        a_result,
-        buffersize - 1,
-        a_dtformat,
-        l_localtime.tm_year + 1900,
-        l_localtime.tm_mon + 1,
-        l_localtime.tm_mday,
-        l_localtime.tm_hour,
-        l_localtime.tm_min,
-        l_localtime.tm_sec
-    );
-} 
 
 /*
  * Writes the generated script lines to a
@@ -261,6 +242,31 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
     return 0;
 }
 
+/*
+ * current_datetime_to_string
+ * Gets the current datetime and
+ * return it as a formatted string.
+ */
+void timestamp(char *a_result, char *a_dtformat, size_t a_buffersize)
+{
+    time_t l_time = time(NULL);
+    struct tm l_localtime = *localtime(&l_time);
+
+    if (a_buffersize < 1)
+        return 1;
+        
+    snprintf(
+        a_result,
+        buffersize - 1,
+        a_dtformat,
+        l_localtime.tm_year + 1900,
+        l_localtime.tm_mon + 1,
+        l_localtime.tm_mday,
+        l_localtime.tm_hour,
+        l_localtime.tm_min,
+        l_localtime.tm_sec
+    );
+}
 
 /*
  * This function returns a pointer to a substring of the original string.
@@ -269,21 +275,21 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
  * deallocated using the same allocator with which it was allocated.  The return
  * value must NOT be deallocated using free() etc.
  */
-char *trim_whitespace(char *a_string)
+void trim_whitespace(char *a_result, const char *a_string, size_t a_buffersize)
 {
     char *l_end;
-
+    
     /* Trim leading space/newline. */
-    while(isspace(*a_string) || (*a_string=='\n'))
+    while (isspace(*a_string) || (*a_string=='\n'))
         a_string++;
 
-    if(*a_string == 0)  // Exit when done.
-        return a_string;
+    if ((*a_string == 0) || (a_buffersize < 1))  // Exit when done.
+        strncpy(a_result, a_string, a_buffersize - 1);
 
     /* Trim trailing space/newline. */
     l_end = a_string + strlen(a_string) - 1;
-    while(
-        l_end > a_string
+    while (
+        (l_end > a_string)
         && (isspace(*l_end) || (*l_end == '\n'))
     )
     {
@@ -292,7 +298,7 @@ char *trim_whitespace(char *a_string)
 
     /* Write new null terminator. */
     *(l_end + 1) = 0;
-    return a_string;
+    strncpy(a_result, a_string, a_buffersize - 1);
 }
 
 /*
