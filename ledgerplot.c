@@ -164,6 +164,7 @@ static int prepare_temp_file(
             exit(1);
         }
 
+        *l_line_output = '\0';
         while (fgets(l_line_input, INPUT_LINE_MAX, l_fp) != NULL)
         {
             *l_line_temp = '\0'; /* Make sure temp string is empty. */
@@ -177,9 +178,10 @@ static int prepare_temp_file(
                 sprintf(l_line_output, "%s %s", l_line_output, l_line_temp);
             }
         }
-        l_d1 = strtod(l_line_temp, &l_tmp);
+        l_d1 = strtod(l_line_output, &l_tmp);
         l_d2 = strtod(l_tmp, &l_tmp);
         l_d3 = strtod(l_tmp, NULL);
+        //printf("test: l_d1 = %.2f, l_d2 = %.2f, l_d3 = %.2f\n", l_d1, l_d2, l_d3);
         
         if (pclose(l_fp) == -1)
             fprintf(stderr, "Error reported by pclose().\n");
