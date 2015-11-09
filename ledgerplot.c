@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <time.h>
 #include "ledgerplot.h"
 #include "docopt.c"
+#include "c_generic/functions.c"
 
 #define VERSION "version 0.1"
 #define CMD_GNUPLOT "gnuplot -persist"
@@ -25,13 +25,11 @@ static int prepare_temp_file(
     int a_end_year
 );
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
-int get_lines_from_file(
+static int get_lines_from_file(
     char *a_file,
     char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX],
     int a_index
 );
-void trim_whitespace(char *a_result, char *a_string, size_t a_buffersize);
-void timestamp(char *a_result, const char *a_dtformat, size_t a_buffersize);
 
 
 char *f_cmd_gnuplot =
@@ -110,7 +108,7 @@ int main(int argc, char *argv[])
     //if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
     //    exit(1);
     sprintf(
-        l_gnu_command[l_lines_total + 1],
+        l_gnu_command[l_lines_total],
         f_cmd_gnuplot,
         FILE_DATA_TMP
     );
@@ -124,6 +122,7 @@ int main(int argc, char *argv[])
     printf(">>> The filename was specified in %s.\n", FILE_IVE_LAYOUT);
     return write_to_gnuplot(l_gnu_command);
 }
+
 
 /*
  * prepare_temp_file:
@@ -153,7 +152,7 @@ static int prepare_temp_file(
 
     l_records = (a_end_year - a_start_year);    
     l_current_year = a_start_year - 1;
-    for (i = 0; i < l_records + 1; i++)
+    for (i = 0; i <= l_records; i++)
     {   
         l_current_year += l_records;
         sprintf(l_cmd, f_cmd_income_vs_expenses, a_input_file, l_current_year);
@@ -202,6 +201,7 @@ static int prepare_temp_file(
     return 0;
 }
 
+
 /*
  * Writes the generated script lines to a
  * gnuplot pipe.
@@ -223,84 +223,28 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
         return 1;
     }
     
-    // TODO: wait, what? the command plots data.temp...
-    // So I need a file with data... that would be data.tmp!
     for (i = 0; i < OUTPUT_ARRAY_MAX; i++)
     {
-       fprintf(l_gp, "%s \n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
-       fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
+        if (strncmp(a_gnu_command[i], "", INPUT_LINE_MAX) != 0)
+        {
+            //printf("%s\n", a_gnu_command[i]); // Test
+            fprintf(l_gp, "%s\n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
+            fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
+        }
     }
     
     /* 
-     * Other note: you could also make an actual pipe:
+     * Note: you could also make an actual pipe:
      * mkfifo /tmp/gnuplot
      * while :; do (gnuplot -persist) < /tmp/gnuplot; done
      * and then do a simple
      * echo "plot sin(x)" > /tmp/gnuplot
      */
 
-    /*fprintf(l_gp, "set samples 2000\n");
-    fprintf(l_gp, "plot abs(sin(x))\n");
-    fprintf(l_gp, "rep abs(cos(x))\n");*/
     fclose(l_gp);
     return 0;
 }
 
-/*
- * current_datetime_to_string
- * Gets the current datetime and
- * return it as a formatted string.
- */
-void timestamp(char *a_result, const char *a_dtformat, size_t a_buffersize)
-{
-    time_t l_time = time(NULL);
-    struct tm l_localtime = *localtime(&l_time);
-
-    snprintf(
-        a_result,
-        a_buffersize - 1,
-        a_dtformat,
-        l_localtime.tm_year + 1900,
-        l_localtime.tm_mon + 1,
-        l_localtime.tm_mday,
-        l_localtime.tm_hour,
-        l_localtime.tm_min,
-        l_localtime.tm_sec
-    );
-}
-
-/*
- * This function returns a pointer to a substring of the original string.
- * If the given string was allocated dynamically, the caller must not overwrite
- * that pointer with the returned value, since the original pointer must be
- * deallocated using the same allocator with which it was allocated.  The return
- * value must NOT be deallocated using free() etc.
- */
-void trim_whitespace(char *a_result, char *a_string, size_t a_buffersize)
-{
-    char *l_end;
-    
-    /* Trim leading space/newline. */
-    while (isspace(*a_string) || (*a_string=='\n'))
-        a_string++;
-
-    if ((*a_string == 0) || (a_buffersize < 1))  // Exit when done.
-        strncpy(a_result, a_string, a_buffersize - 1);
-
-    /* Trim trailing space/newline. */
-    l_end = a_string + strlen(a_string) - 1;
-    while (
-        (l_end > a_string)
-        && (isspace(*l_end) || (*l_end == '\n'))
-    )
-    {
-        l_end--;
-    }
-
-    /* Write new null terminator. */
-    *(l_end + 1) = 0;
-    strncpy(a_result, a_string, a_buffersize - 1);
-}
 
 /*
  * get_lines_from_file
@@ -308,7 +252,7 @@ void trim_whitespace(char *a_result, char *a_string, size_t a_buffersize)
  * an array that will be used
  * to send to gnuplot.
  */
-int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
+static int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
 {
     FILE *l_file;
     char l_line[INPUT_LINE_MAX];
@@ -329,7 +273,7 @@ int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT
             {
                 l_count++;
                 trim_whitespace(l_line_temp, l_line, INPUT_LINE_MAX);
-                sprintf(a_gnu_command[a_index + l_count], "%s", l_line_temp);
+                sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
             }
         }
     }
