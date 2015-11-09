@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
     }
    
     /* 1. Load layout commands */ 
+    memset(l_gnu_command, '\0', OUTPUT_ARRAY_MAX*INPUT_LINE_MAX*sizeof(char));
     l_lines = get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command, 0);
     l_lines_total = l_lines;
     if (l_lines == -1)
@@ -97,7 +98,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     /* 2. Load barchart commands */ 
-    l_lines = get_lines_from_file(FILE_BARCHART, l_gnu_command, l_lines_total+1);
+    l_lines = get_lines_from_file(FILE_BARCHART, l_gnu_command, l_lines_total);
     l_lines_total += l_lines;
     if ( l_lines == -1)
     {
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])
     //if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
     //    exit(1);
     sprintf(
-        l_gnu_command[l_lines_total],
+        l_gnu_command[l_lines_total - 1],
         f_cmd_gnuplot,
         FILE_DATA_TMP
     );
@@ -227,7 +228,7 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
     {
         if (strncmp(a_gnu_command[i], "", INPUT_LINE_MAX) != 0)
         {
-            //printf("%s\n", a_gnu_command[i]); // Test
+            //printf("%d: %s\n", i, a_gnu_command[i]); /* Used for testing/debugging. */
             fprintf(l_gp, "%s\n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
             fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
         }
@@ -267,14 +268,14 @@ static int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX
     }
     while (fgets(l_line, INPUT_LINE_MAX, l_file) != NULL)
     {
-        if (strlen(l_line) > 0)
+        if (
+            (strlen(l_line) > 0)
+            && (l_line[0] != '#')
+        )
         {
-            if (l_line[0] != '#')
-            {
-                l_count++;
-                trim_whitespace(l_line_temp, l_line, INPUT_LINE_MAX);
-                sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
-            }
+            l_count++;
+            trim_whitespace(l_line_temp, l_line, INPUT_LINE_MAX);
+            sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
         }
     }
     fclose(l_file);
