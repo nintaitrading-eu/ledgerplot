@@ -21,13 +21,13 @@ $(OBJ): $(.PREFIX).c $(DEPS)
 	$(CC) $(CFLAGS) -c $(.PREFIX).c
 	
 install:
-	cp -v ledgerplot /usr/local/bin/
-	chmod 755 /usr/local/bin/ledgerplot
+	cp -v $(TARGET) /usr/local/bin/
+	chmod 755 /usr/local/bin/$(TARGET)
 	
 uninstall:
-	rm -v /usr/local/bin/ledgerplot
+	rm -v /usr/local/bin/$(TARGET)
 	
 .PHONY: clean
 
 clean:
-	rm -rfv ledgerplot *.o
+	rm -rfv $(TARGET) *.o
