@@ -11,8 +11,8 @@
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
 #define FILE_GNU_TMP "lp_gnu.tmp"
-#define FILE_IVE_LAYOUT "income_vs_expenses_layout.gnu"
-#define FILE_BARCHART "barchart.gnu"
+#define FILE_IVE_LAYOUT "gp_income_vs_expenses.gnu"
+#define FILE_BARCHART "gp_barchart.gnu"
 #define INPUT_LINE_MAX 1024 // MAX line length to copy
 #define OUTPUT_ARRAY_MAX 8000 // MAX command length for the dat info
 #define NUM_COMMANDS 2
