@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
         exit(1);
     }
+    fclose(l_output_file);
    
     /* 1. Load layout commands */ 
     memset(l_gnu_command, '\0', OUTPUT_ARRAY_MAX*INPUT_LINE_MAX*sizeof(char));
