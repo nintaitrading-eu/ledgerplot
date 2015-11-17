@@ -38,14 +38,6 @@ char *f_cmd_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
 
 
-//enum f_dateformats = "%d-%d-%d %d:%d:%d"
-//"%d%d%d_%d%d%d"
-
-
-// TODO: write function that loads info from barchart.gnu and combines it with
-// info from income_vs_expenses.gnu => user settings for a specific graph
-// barchart.gnu => barchart code
-// add the plotting code at the end, through a define.
 int main(int argc, char *argv[])
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
