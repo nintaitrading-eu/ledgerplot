@@ -6,6 +6,7 @@
 #include "ledgerplot.h"
 #include "docopt.c"
 #include "c_generic/functions.c"
+#include "modules/income_vs_expenses.c"
 
 #define VERSION "version 0.1"
 #define CMD_GNUPLOT "gnuplot -persist"
