@@ -41,6 +41,9 @@ int main(int argc, char *argv[])
     int l_lines_total = 0;
     char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
 
+    /*
+     * Parse arguments
+     */
     DocoptArgs args = docopt(
         argc,
         argv,
@@ -57,21 +60,31 @@ int main(int argc, char *argv[])
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
     
+    /*
+     * Prepare temporary data file
+     */
     l_output_file = fopen(FILE_DATA_TMP, "w");
     if (l_output_file == NULL)
     {
         printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
         exit(1);
     }
-    
-    if (prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
+    // TODO: switch with extra parameter, to determine the type of graph to export
+    // In a first fase, we could also generate all of them?
+    /* income vs expenses */
+    if (prepare_temp_file_ive(args.file, l_output_file, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
         exit(1);
     }
+    /* expenses per category */
+    /* dividend ... */
+    /* ...*/
     fclose(l_output_file);
    
-    /* 1. Load layout commands */ 
+    /*
+     * Load layout commands
+     */ 
     memset(l_gnu_command, '\0', OUTPUT_ARRAY_MAX*INPUT_LINE_MAX*sizeof(char));
     l_lines = get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command, 0);
     l_lines_total = l_lines;
@@ -80,7 +93,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not read %s.\n", FILE_IVE_LAYOUT);
         exit(1);
     }
-    /* 2. Load barchart commands */ 
+    
+    /*
+     * Load barchart commands
+     */ 
     l_lines = get_lines_from_file(FILE_BARCHART, l_gnu_command, l_lines_total);
     l_lines_total += l_lines;
     if ( l_lines == -1)
@@ -88,7 +104,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
         exit(1);
     }
-    /* 3. Load barchart plot command */
+    /*
+     * Load barchart plot command
+     */
     //if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
     //    exit(1);
     sprintf(
@@ -100,6 +118,9 @@ int main(int argc, char *argv[])
     {
         printf("-- %s\n", l_gnu_command[i]);
     }*/
+    /*
+     * Plot data
+     */
     printf("%s:\n", FILE_IVE_LAYOUT);
     printf(">>> Generated using gnuplot chart info from %s.\n", FILE_BARCHART);
     printf(">>> Data exported to png.\n");
