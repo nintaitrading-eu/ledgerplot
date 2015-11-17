@@ -70,10 +70,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
-    /* 
-     * Note: To update in realtime: use fflush(gp)
-     * Otherwise, the application will wait until the processing is finished.
-     */
     if (prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
