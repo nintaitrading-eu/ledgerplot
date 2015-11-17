@@ -11,11 +11,12 @@
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
 #define FILE_GNU_TMP "lp_gnu.tmp"
-#define FILE_IVE_LAYOUT "gp_income_vs_expenses.gnu"
 #define FILE_BARCHART "gp_barchart.gnu"
+
+#define NUM_COMMANDS 2 // TODO: is dependent on type of graph I guess? e.g. ive / expenses per product / etc.
+
 #define INPUT_LINE_MAX 1024 // MAX line length to copy
 #define OUTPUT_ARRAY_MAX 8000 // MAX command length for the dat info
-#define NUM_COMMANDS 2
 
 
 static int prepare_temp_file(
