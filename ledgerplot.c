@@ -31,7 +31,9 @@ static int get_lines_from_file(
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
-
+/*
+ * Main
+ */
 int main(int argc, char *argv[])
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
