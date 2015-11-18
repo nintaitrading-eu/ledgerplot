@@ -10,7 +10,7 @@
 
 CC = cc
 CFLAGS = -g -O2 -W -Wall -Werror -Wextra
-DEPS = ledgerplot.h
+DEPS = ledgerplot.h c_generic/functions.h modules/income_vs_expenses.h
 OBJ = ledgerplot.o
 TARGET = ledgerplot
 
