@@ -8,17 +8,15 @@
 #include "c_generic/functions.h"
 #include "modules/income_vs_expenses.c"
 
-#define VERSION "version 0.1"
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
-#define FILE_GNU_TMP "lp_gnu.tmp"
 #define FILE_BARCHART "gp_barchart.gnu"
 
 #define NUM_COMMANDS 2 // TODO: is dependent on type of graph I guess? e.g. ive / expenses per product / etc.
 
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 static int get_lines_from_file(
-    char *a_file,
+    const char *a_file,
     char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX],
     int a_index
 );
@@ -86,11 +84,11 @@ int main(int argc, char *argv[])
      * Load layout commands
      */
     memset(l_gnu_command, '\0', OUTPUT_ARRAY_MAX*INPUT_LINE_MAX*sizeof(char));
-    l_lines = get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command, 0);
+    l_lines = get_lines_from_file(f_file_ive_layout, l_gnu_command, 0);
     l_lines_total = l_lines;
     if (l_lines == -1)
     {
-        fprintf(stderr, "Could not read %s.\n", FILE_IVE_LAYOUT);
+        fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
         exit(1);
     }
     
@@ -121,10 +119,10 @@ int main(int argc, char *argv[])
     /*
      * Plot data
      */
-    printf("%s:\n", FILE_IVE_LAYOUT);
+    printf("%s:\n", f_file_ive_layout);
     printf(">>> Generated using gnuplot chart info from %s.\n", FILE_BARCHART);
     printf(">>> Data exported to png.\n");
-    printf(">>> The filename was specified in %s.\n", FILE_IVE_LAYOUT);
+    printf(">>> The filename was specified in %s.\n", f_file_ive_layout);
     return write_to_gnuplot(l_gnu_command);
 }
 
@@ -179,7 +177,7 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
  * an array that will be used
  * to send to gnuplot.
  */
-static int get_lines_from_file(char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
+static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
 {
     FILE *l_file;
     char l_line[INPUT_LINE_MAX];

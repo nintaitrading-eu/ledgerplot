@@ -2,6 +2,8 @@
 #ifndef ledgerplot_h__
 #define ledgerplot_h__
 
+#define VERSION "version 0.1"
+
 enum max_size_t {
     INPUT_LINE_MAX = 1024, /* MAX line length to copy */
     OUTPUT_ARRAY_MAX = 8000 /* MAX command length for the dat info */
