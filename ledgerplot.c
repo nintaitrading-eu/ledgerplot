@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include "ledgerplot.h"
 #include "docopt.c"
-#include "c_generic/functions.c"
+#include "c_generic/functions.h"
 #include "modules/income_vs_expenses.c"
 
 #define VERSION "version 0.1"
@@ -16,10 +16,6 @@
 
 #define NUM_COMMANDS 2 // TODO: is dependent on type of graph I guess? e.g. ive / expenses per product / etc.
 
-#define INPUT_LINE_MAX 1024 // MAX line length to copy
-#define OUTPUT_ARRAY_MAX 8000 // MAX command length for the dat info
-
-
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 static int get_lines_from_file(
     char *a_file,
@@ -28,9 +24,8 @@ static int get_lines_from_file(
 );
 
 
-static enum layout_files_category_t = {FILE_IVE_LAYOUT = 0};
-static enum layout_files_chart_t = {FILE_BARCHART = 0};
-
+static const char *f_file_ive_layout =
+    "gp_income_vs_expenses.gnu";
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 

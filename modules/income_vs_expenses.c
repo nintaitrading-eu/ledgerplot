@@ -1,14 +1,11 @@
 /* See LICENSE file for copyright and license info. */
 
-#define FILE_IVE_LAYOUT "gp_income_vs_expenses.gnu"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "../ledgerplot.h"
+#include "../c_generic/functions.h"
 
-
-extern int ive_prepare_temp_file(
-    char *a_input_file,
-    FILE *a_output_file,
-    int a_start_year,
-    int a_end_year
-);
 
 static char *f_cmd_income_vs_expenses =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
