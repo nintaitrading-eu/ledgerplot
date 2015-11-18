@@ -28,6 +28,9 @@ static int get_lines_from_file(
 );
 
 
+static enum layout_files_category_t = {FILE_IVE_LAYOUT = 0};
+static enum layout_files_chart_t = {FILE_BARCHART = 0};
+
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
@@ -74,7 +77,7 @@ int main(int argc, char *argv[])
     // TODO: switch with extra parameter, to determine the type of graph to export
     // In a first fase, we could also generate all of them?
     /* income vs expenses */
-    if (prepare_temp_file_ive(args.file, l_output_file, l_start_year, l_end_year) != 0)
+    if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
         exit(1);
@@ -86,7 +89,7 @@ int main(int argc, char *argv[])
    
     /*
      * Load layout commands
-     */ 
+     */
     memset(l_gnu_command, '\0', OUTPUT_ARRAY_MAX*INPUT_LINE_MAX*sizeof(char));
     l_lines = get_lines_from_file(FILE_IVE_LAYOUT, l_gnu_command, 0);
     l_lines_total = l_lines;
