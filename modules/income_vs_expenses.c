@@ -3,7 +3,7 @@
 #define FILE_IVE_LAYOUT "gp_income_vs_expenses.gnu"
 
 
-static int prepare_temp_file(
+extern int ive_prepare_temp_file(
     char *a_input_file,
     FILE *a_output_file,
     int a_start_year,
@@ -19,7 +19,7 @@ static char *f_cmd_income_vs_expenses =
  * This function prepares the data to be plotted,
  * in a temporary file that can be read by gnuplot.
  */
-static int prepare_temp_file(
+int ive_prepare_temp_file(
     char *a_input_file,
     FILE *a_output_file,
     int a_start_year,
