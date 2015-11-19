@@ -1,0 +1,37 @@
+.TH LEDGERPLOT 1 ledgerplot\-VERSION
+.SH NAME
+ledgerplot \- create gnuplot charts from ledger data
+.SH SYNOPSIS
+.B ledgerplot
+.RB [ \-v ]
+.SH DEPENDS ON
+The cli ledger application called ledger.
+More info at http://www.ledger-cli.org/.
+Only version 3.0 is supported, not the 2.6.3 version.
+.SH DESCRIPTION
+ledgerplot is a c program, that calls the ledger application and parses it's output.
+That data is then written to a temporary data file and a graph is created with that data.
+Several plot types are supported, including: income vs expenses, expenses per category, ...
+The plots are exported to png files, in the same directory where the ledgerplot application
+is started.
+.SH OPTIONS
+.TP
+.B \-v
+Prints version information to standard output, then exits.
+.B \-\-file=<filename>
+Used to specify the ledger dat file to query.
+.B \-\-startyear=<year_start>
+Start year for the ledger query.
+.B \-\-endyear=<year_end>
+End year for the ledger query.
+.SH USAGE
+.SH SEE ALSO
+.BR ledger (1)
+.BR gnuplot (1)
+.SH CUSTOMIZATION
+ledgerplot is customized by creating a custom config.h and (re)compiling the source
+code. You can also change the gnuplot scripts, though this might break the application if you don't know what you are doing.
+.SH BUGS
+TBD
+.SH EXAMPLES
+ledgerplot --file=/home/johnny/ledger/ledger.dat --startyear=2014 --endyear=2015
