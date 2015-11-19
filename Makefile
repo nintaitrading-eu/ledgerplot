@@ -35,7 +35,7 @@ clean:
 dist: clean
 	@echo creating dist tarball
 	@mkdir -p ledgerplot-${VERSION}
-	@cp -R LICENSE TODO BUGS Makefile README config.def.h config.mk \
+	@cp -R LICENSE.txt Makefile README.adoc config.def.h config.mk \
 		ledgerplot.1 ledgerplot.h ${SRC} ledgerplot-${VERSION}
 	@tar -cf ledgerplot-${VERSION}.tar ledgerplot-${VERSION}
 	@gzip ledgerplot-${VERSION}.tar
