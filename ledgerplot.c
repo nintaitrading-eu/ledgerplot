@@ -10,7 +10,7 @@
 
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
-#define FILE_BARCHART "gp_barchart.gnu"
+#define FILE_BARCHART "gnuplot/gp_barchart.gnu"
 
 #define NUM_COMMANDS 2 // TODO: is dependent on type of graph I guess? e.g. ive / expenses per product / etc.
 
@@ -23,7 +23,7 @@ static int get_lines_from_file(
 
 
 static const char *f_file_ive_layout =
-    "gp_income_vs_expenses.gnu";
+    "gnuplot/gp_income_vs_expenses.gnu";
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 

@@ -5,8 +5,10 @@ VERSION = 0.1
 
 # paths
 PREFIX = /usr/local
-MANPREFIX = ${PREFIX}/share/man
+# Note: the below will be /share/man on linux.
+MANPREFIX = ${PREFIX}/man
 INCLUDE = /usr/src/include
+SHARE = ${PREFIX}/share
 
 # includes and libs
 #INCS = -I${X11INC} -I${FREETYPEINC}
@@ -26,5 +28,4 @@ LDFLAGS  = -s ${LIBS}
 #LDFLAGS = ${LIBS}
 
 # compiler and linker
-CC = clang -v
-#CC = gcc48 -v
+CC = clang

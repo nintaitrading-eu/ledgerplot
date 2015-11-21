@@ -5,7 +5,7 @@ include config.mk
 
 SRC = ledgerplot.c functions.c income_vs_expenses.c
 OBJ = ${SRC:.c=.o}
-VPATH = c_generic:modules
+VPATH = .:c_generic:modules
 
 all: options ledgerplot
 
@@ -26,8 +26,8 @@ config.h:
 	@cp config.def.h $@
 
 ledgerplot: ${OBJ}
-	@echo CC -o $@ ${OBJ}
-	@${CC} -o $@ -o ${OBJ} ${LDFLAGS}
+	@echo CC -o $@ ${OBJ} ${LDFLAGS}
+	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
 	@echo cleaning...
@@ -47,6 +47,10 @@ install: all
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f ledgerplot ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/ledgerplot
+	@echo installing gnuplot scripts to ${DESTDIR}${PREFIX}/bin
+	@mkdir -p ${DESTDIR}${SHARE}/ledgerplot
+	@cp -rfv gnuplot ${DESTDIR}${SHARE}/ledgerplot/gnuplot
+	@chmod 644 ${DESTDIR}${SHARE}/ledgerplot/gnuplot/*
 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@sed "s/VERSION/${VERSION}/g" < ledgerplot.1 > ${DESTDIR}${MANPREFIX}/man1/ledgerplot.1
@@ -55,6 +59,8 @@ install: all
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/ledgerplot
+	@echo removing data in /usr/local/share from ${DESTDIR}${SHARE}/ledgerplot
+	@rm -rf ${DESTDIR}${SHARE}/ledgerplot
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/ledgerplot.1
 
