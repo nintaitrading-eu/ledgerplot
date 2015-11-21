@@ -19,10 +19,13 @@ set xlabel  offset character 0, -2, 0 font "" textcolor rgb "gold"  norotate
 set ylabel "Value (EUR)" 
 set ylabel textcolor rgb "gold"
 
-####################################################################################
-# Gnuplot 4.6 script for plotting multiple groups of 3 bars in a barchart.
-# This part is static and can not be altered.
-####################################################################################
+### axis / grid
+set grid nopolar
+set grid xtics nomxtics ytics nomytics noztics nomztics nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
+set grid layerdefault linetype 0 linewidth 1.000 linecolor "grey", linetype 0 linewidth 1.000 linecolor "grey"
+set xzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
+set yzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
+set zzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 
 ### legend
 set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"

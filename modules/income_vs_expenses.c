@@ -8,7 +8,7 @@
 
 
 static char *f_cmd_income_vs_expenses =
-    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[0-9\\.]{1,100}'";
+    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 
 
 /*
@@ -65,7 +65,10 @@ int ive_prepare_temp_file(
             }
         }
         l_d1 = strtod(l_line_output, &l_tmp);
-        l_d2 = strtod(l_tmp, &l_tmp);
+        l_d2 = -1.0 * strtod(l_tmp, &l_tmp); /* Income is the second number, it's
+                                              * always negative in accounting.
+                                              * Reverse for correct display in graph.
+                                              */
         l_d3 = strtod(l_tmp, NULL);
         //printf("test: l_d1 = %.2f, l_d2 = %.2f, l_d3 = %.2f\n", l_d1, l_d2, l_d3);
         
@@ -82,7 +85,6 @@ int ive_prepare_temp_file(
             fprintf(a_output_file, "year expenses income difference\n");
         }
         /* Write data to tmp file */
-        // TODO: check if we need to perform operations on these values?
         fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3); 
     }
     return 0;

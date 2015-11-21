@@ -4,23 +4,17 @@
 ####################################################################################
 
 ### main code
-GAPSIZE = 5
+GAPSIZE = 3
 NCOL = ENDCOL-STARTCOL+1
 BOXWIDTH = 2./(GAPSIZE+NCOL)
 
-### barchart layout - axis + grid
+### barchart layout
 set style fill solid 0.75 border lt -1
-set boxwidth BOXWIDTH absolute
-set grid nopolar
-set grid noxtics nomxtics ytics nomytics noztics nomztics nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
-set grid layerdefault linetype 0 linewidth 1.000,  linetype 0 linewidth 1.000
-set xzeroaxis linetype 0 linewidth 1.000
-set yzeroaxis linetype 0 linewidth 1.000
-set zzeroaxis linetype 0 linewidth 1.000
+#set boxwidth BOXWIDTH absolute
 
 ### Set tics and histograms
-# Note: I can not use GAPSIZE below, for some reason... hardcoded 4 is used instead
-set style histogram clustered gap 5 title offset character 2, 0.25, 0
+# Note: I can not use GAPSIZE below, for some reason... hardcoded value is used instead
+set style histogram clustered gap 3 title offset character 1, 0.25, 0
 set datafile missing '-'
 set style data histograms
 set xtics border in scale 0,0 nomirror rotate by -45  offset character 0, 0, 0 autojustify

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <unistd.h> /* For the sleep function. */
 #include "ledgerplot.h"
 #include "docopt.c"
 #include "c_generic/functions.h"
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
     int l_lines = 0;
     int l_lines_total = 0;
     char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
+    int l_status = 0;
 
     /*
      * Parse arguments
@@ -46,13 +48,13 @@ int main(int argc, char *argv[])
         argc,
         argv,
         1, /* help */
-        "0.1" //VERSION /* version */
+        VERSION /* version */
     );
 
     if (argc == 1)
     {
         printf("%s\n", args.help_message);
-        return 1;
+        return EXIT_FAILURE;
     }
     
     l_start_year = atoi(args.startyear);
@@ -65,20 +67,26 @@ int main(int argc, char *argv[])
     if (l_output_file == NULL)
     {
         printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
-        exit(1);
+        l_status = EXIT_FAILURE;
     }
     // TODO: switch with extra parameter, to determine the type of graph to export
     // In a first fase, we could also generate all of them?
     /* income vs expenses */
-    if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
+    if (
+        (l_status == EXIT_SUCCESS)
+        && (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
+    )
     {
         fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-        exit(1);
+        l_status = EXIT_FAILURE;
     }
     /* expenses per category */
     /* dividend ... */
     /* ...*/
     fclose(l_output_file);
+
+    if (l_status == EXIT_FAILURE)
+        return l_status;
    
     /*
      * Load layout commands
@@ -89,7 +97,7 @@ int main(int argc, char *argv[])
     if (l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     
     /*
@@ -100,7 +108,7 @@ int main(int argc, char *argv[])
     if ( l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     /*
      * Load barchart plot command
@@ -121,9 +129,21 @@ int main(int argc, char *argv[])
      */
     printf("%s:\n", f_file_ive_layout);
     printf(">>> Generated using gnuplot chart info from %s.\n", FILE_BARCHART);
+    l_status = write_to_gnuplot(l_gnu_command);
     printf(">>> Data exported to png.\n");
     printf(">>> The filename was specified in %s.\n", f_file_ive_layout);
-    return write_to_gnuplot(l_gnu_command);
+    /*
+     * Cleanup tmp files.
+     */
+    printf(">>> Cleaning up temporary file(s)...\n");
+    sleep(3); /* Give gnuplot time to read from the temporary file. */
+    if (remove(FILE_DATA_TMP) != 0)
+    {
+        fprintf(stderr, "Could not delete file %s.\n", FILE_DATA_TMP);
+        l_status = EXIT_FAILURE;
+    }
+    printf(">>> Done.\n");
+    return l_status;
 }
 
 
@@ -167,7 +187,7 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
      */
 
     fclose(l_gp);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -188,7 +208,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARR
     if (l_file == NULL)
     {
         printf("Error: could not open output file %s.\n", a_file);
-        return -1;
+        return EXIT_FAILURE;
     }
     while (fgets(l_line, INPUT_LINE_MAX, l_file) != NULL)
     {
