@@ -355,8 +355,10 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version)
     };
     Tokens ts;
     Command commands[] = {
+        {""}
     };
     Argument arguments[] = {
+        {""}
     };
     Option options[] = {
         {"-h", "--help", 0, 0, NULL},

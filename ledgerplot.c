@@ -6,7 +6,7 @@
 #include "ledgerplot.h"
 #include "docopt.c"
 #include "c_generic/functions.h"
-#include "modules/income_vs_expenses.c"
+#include "modules/income_vs_expenses.h"
 
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         argc,
         argv,
         1, /* help */
-        VERSION /* version */
+        "0.1" //VERSION /* version */
     );
 
     if (argc == 1)

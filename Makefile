@@ -3,8 +3,9 @@
 
 include config.mk
 
-SRC = ledgerplot.c c_generic/functions.c modules/income_vs_expenses.c
+SRC = ledgerplot.c functions.c income_vs_expenses.c
 OBJ = ${SRC:.c=.o}
+VPATH = c_generic:modules
 
 all: options ledgerplot
 
@@ -25,12 +26,12 @@ config.h:
 	@cp config.def.h $@
 
 ledgerplot: ${OBJ}
-	@echo CC -o $@
-	@${CC} -o $@ ${OBJ} ${LDFLAGS}
+	@echo CC -o $@ ${OBJ}
+	@${CC} -o $@ -o ${OBJ} ${LDFLAGS}
 
 clean:
-	@echo cleaning
-	@rm -f ledgerplot ${OBJ} ledgerplot-${VERSION}.tar.gz
+	@echo cleaning...
+	@rm -fv ledgerplot ${OBJ} ledgerplot-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
