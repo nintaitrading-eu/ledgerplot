@@ -13,8 +13,6 @@
 #define FILE_DATA_TMP "lp_data.tmp"
 #define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
 
-#define NUM_COMMANDS 2 // TODO: is dependent on type of graph I guess? e.g. ive / expenses per product / etc.
-
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 static int get_lines_from_file(
     const char *a_file,
