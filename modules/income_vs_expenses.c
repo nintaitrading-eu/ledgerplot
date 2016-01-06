@@ -39,9 +39,9 @@ int ive_prepare_temp_file(
 
     l_records = (a_end_year - a_start_year);    
     l_current_year = a_start_year - 1;
-    for (i = 0; i <= l_records; i++)
+    for (i = 0; i < l_records; i++)
     {   
-        l_current_year += l_records;
+        l_current_year += i;
         sprintf(l_cmd, f_cmd_income_vs_expenses, a_input_file, l_current_year);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
