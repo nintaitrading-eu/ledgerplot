@@ -37,8 +37,8 @@ int ive_prepare_temp_file(
     char l_current_datetime[20];
     int l_current_year;
 
-    l_records = (a_end_year - a_start_year);    
-    l_current_year = a_start_year - 1;
+    l_records = (a_end_year - a_start_year) + 1;    
+    l_current_year = a_start_year;
     for (i = 0; i < l_records; i++)
     {   
         l_current_year += i;
