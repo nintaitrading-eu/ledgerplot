@@ -1,6 +1,5 @@
 /* See LICENSE.txt for license and copyright information. */
-#ifndef ledgerplot_h__
-#define ledgerplot_h__
+#pragma once
 
 #define VERSION "0.1"
 
@@ -11,5 +10,3 @@ enum max_size_t {
 enum chart_category_t {
     INCOME_VS_EXPENSES = 0
 };
-
-#endif  // ledgerplot_h__
