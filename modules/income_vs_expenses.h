@@ -1,6 +1,5 @@
 /* See LICENSE.txt for license and copyright information. */
-#ifndef income_vs_expenses_h__
-#define income_vs_expenses_h__
+#pragma once
 
 extern int ive_prepare_temp_file(
     char *a_input_file,
@@ -8,5 +7,3 @@ extern int ive_prepare_temp_file(
     int a_start_year,
     int a_end_year
 );
-
-#endif  // income_vs_expenses_h__
