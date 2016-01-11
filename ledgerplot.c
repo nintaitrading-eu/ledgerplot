@@ -33,12 +33,12 @@ static char *f_cmd_gnuplot =
 int main(int argc, char *argv[])
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
-    int l_start_year;
-    int l_end_year;
-    int l_lines = 0;
-    int l_lines_total = 0;
-    uint8_t l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
-    int l_status = 0;
+    uint32_t l_start_year;
+    uint32_t l_end_year;
+    uint32_t l_lines = 0;
+    uint32_t l_lines_total = 0;
+    char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
+    uint32_t l_status = 0;
 
     /*
      * Parse arguments
@@ -145,7 +145,6 @@ int main(int argc, char *argv[])
     return l_status;
 }
 
-
 /*
  * Writes the generated script lines to a
  * gnuplot pipe.
@@ -153,7 +152,6 @@ int main(int argc, char *argv[])
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX])
 {
     FILE *l_gp; // Gnuplot pipe
-    int i;
    
      /* 
      * Opens an interface that one can use to send commands as if they were typing into the
@@ -167,7 +165,7 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
         return 1;
     }
     
-    for (i = 0; i < OUTPUT_ARRAY_MAX; i++)
+    for (uint32_t i = 0; i < OUTPUT_ARRAY_MAX; i++)
     {
         if (strncmp(a_gnu_command[i], "", INPUT_LINE_MAX) != 0)
         {
@@ -189,7 +187,6 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
     return EXIT_SUCCESS;
 }
 
-
 /*
  * get_lines_from_file
  * Loads the lines of a file into
@@ -199,9 +196,9 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
 static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
 {
     FILE *l_file;
-    uint8_t l_line[INPUT_LINE_MAX];
-    uint8_t l_line_temp[INPUT_LINE_MAX];
-    int l_count = 0;
+    char l_line[INPUT_LINE_MAX];
+    char l_line_temp[INPUT_LINE_MAX];
+    uint32_t l_count = 0;
      
     l_file = fopen(a_file, "r");
     if (l_file == NULL)
