@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <unistd.h> /* For the sleep function. */
 #include "ledgerplot.h"
 #include "docopt.c"
@@ -36,7 +37,7 @@ int main(int argc, char *argv[])
     int l_end_year;
     int l_lines = 0;
     int l_lines_total = 0;
-    char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
+    uint8_t l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
     int l_status = 0;
 
     /*
@@ -198,8 +199,8 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
 static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
 {
     FILE *l_file;
-    char l_line[INPUT_LINE_MAX];
-    char l_line_temp[INPUT_LINE_MAX];
+    uint8_t l_line[INPUT_LINE_MAX];
+    uint8_t l_line_temp[INPUT_LINE_MAX];
     int l_count = 0;
      
     l_file = fopen(a_file, "r");
