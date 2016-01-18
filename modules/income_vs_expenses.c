@@ -7,7 +7,10 @@
 #include "../c_generic/functions.h"
 
 
-static char *f_cmd_income_vs_expenses =
+static char *f_cmd_income_vs_expenses_yearly =
+    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+// TODO: -b "startdate" -e "enddate"
+static char *f_cmd_income_vs_expenses_range =
     "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 
 
@@ -43,7 +46,7 @@ int ive_prepare_temp_file(
     {   
         if (i > 0)
             l_current_year++;
-        sprintf(l_cmd, f_cmd_income_vs_expenses, a_input_file, l_current_year);
+        sprintf(l_cmd, f_cmd_income_vs_expenses_yearly, a_input_file, l_current_year);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
