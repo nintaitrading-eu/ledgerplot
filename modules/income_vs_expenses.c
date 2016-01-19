@@ -8,10 +8,10 @@
 
 
 static char *f_cmd_income_vs_expenses_yearly =
-    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+    "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 // TODO: -b "startdate" -e "enddate"
-static char *f_cmd_income_vs_expenses_range =
-    "ledger -f %s bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+//static char *f_cmd_income_vs_expenses_range =
+//    "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 
 
 /*
