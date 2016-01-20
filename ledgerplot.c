@@ -13,6 +13,26 @@
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
 #define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
+// TODO: I don't think I can define another GENERATE_ENUM here again.
+// Combine the below with the insert from modules/income_vs_expenses.c
+#define FOREACH_PLOT(PLOT) \
+        PLOT(income_vs_expenses)
+        
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+enum PLOT_ENUM {
+    FOREACH_PLOT(GENERATE_ENUM)
+};
+
+static const char *PLOT_STRING[] = {
+    FOREACH_FRUIT(GENERATE_STRING)
+};
+// END enum stuff for plot type
+
+enum PLOT_TYPE_ENUM {
+    yearly, monthly
+};
 
 static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
 static int get_lines_from_file(
