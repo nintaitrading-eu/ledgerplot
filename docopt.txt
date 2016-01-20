@@ -2,7 +2,6 @@ Ledgerplot.
 
 Usage:
     ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]
-    ]
     ledgerplot --help
     ledgerplot --version
 
