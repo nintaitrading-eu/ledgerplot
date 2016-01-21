@@ -125,6 +125,8 @@ int parse_doubledash(Tokens *ts, Elements *elements) {
 
     // not implemented yet
     // return parsed + [Argument(None, v) for v in tokens]
+    (void)ts;
+    (void)elements;
     return 0;
 }
 
@@ -320,8 +322,10 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     };
     Tokens ts;
     Command commands[] = {
+        {""}
     };
     Argument arguments[] = {
+        {""}
     };
     Option options[] = {
         {NULL, "--expenses_per_category", 0, 0, NULL},
