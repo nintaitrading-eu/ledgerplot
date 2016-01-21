@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = ledgerplot.c functions.c income_vs_expenses.c
+SRC = ledgerplot.c functions.c enum.c income_vs_expenses.c
 OBJ = ${SRC:.c=.o}
 VPATH = .:c_generic:modules
 
