@@ -164,7 +164,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
     if (l_gp == NULL)
     {
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
-        return 1;
+        return EXIT_FAILURE;
     }
     
     for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
