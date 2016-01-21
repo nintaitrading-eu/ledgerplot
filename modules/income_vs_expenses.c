@@ -5,46 +5,15 @@
 #include <string.h>
 #include "../ledgerplot.h"
 #include "../c_generic/functions.h"
-
-// TODO: put the below month enum stuff in generic code
-/*
- * Note: The below code will give a month as an enum (integer value) and also
- * a lowercase string of the enum name.
- * Example usage:
- * printf("enum month of january as a string: %s\n", MONTH_STRING[january]);
- */
-#define FOREACH_MONTH(MONTH) \
-        MONTH(january)   \
-        MONTH(february)  \
-        MONTH(march)   \
-        MONTH(april)  \
-        MONTH(may)  \
-        MONTH(june)  \
-        MONTH(july)  \
-        MONTH(august)  \
-        MONTH(september)  \
-        MONTH(october)  \
-        MONTH(november)  \
-        MONTH(december)
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum MONTH_ENUM {
-    FOREACH_MONTH(GENERATE_ENUM)
-};
-
-static const char *MONTH_STRING[] = {
-    FOREACH_MONTH(GENERATE_STRING)
-};
-// TODO: end of put the below...
+#include "enum.c"
 
 
 static char *f_cmd_income_vs_expenses_yearly =
     "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 static char *f_cmd_income_vs_expenses_monthly =
-    "ledger -f %s --strict bal --real -X EUR -s -p %s -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+    "ledger -f %s --strict bal --real -X EUR -s -p \"%s %d\" -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 // Note: substitute s with the month names january, february, etc. Define an enum or something for that.
+// e.g. -p "may 2015"
 // TODO: -b "startdate" -e "enddate"
 //static char *f_cmd_income_vs_expenses_range =
 //    "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
