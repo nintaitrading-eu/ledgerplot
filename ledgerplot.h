@@ -4,6 +4,6 @@
 #define VERSION "0.1"
 
 enum max_size_t {
-    INPUT_LINE_MAX = 1024, /* MAX line length to copy */
-    OUTPUT_ARRAY_MAX = 8000 /* MAX command length for the dat info */
+    MS_INPUT_LINE = 1024, /* MAX line length to copy */
+    MS_OUTPUT_ARRAY = 8000 /* MAX command length for the dat info */
 };
