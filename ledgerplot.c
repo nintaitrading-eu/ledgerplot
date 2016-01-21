@@ -16,10 +16,10 @@
 #define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
 
 
-static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]);
+static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static int get_lines_from_file(
     const char *a_file,
-    char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX],
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     int a_index
 );
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     uint32_t l_end_year;
     uint32_t l_lines = 0;
     uint32_t l_lines_total = 0;
-    char l_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX];
+    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_status = 0;
 
     /*
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     /*
      * Load layout commands
      */
-    memset(l_gnu_command, '\0', OUTPUT_ARRAY_MAX*INPUT_LINE_MAX*sizeof(char));
+    memset(l_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
     l_lines = get_lines_from_file(f_file_ive_layout, l_gnu_command, 0);
     l_lines_total = l_lines;
     if (l_lines == -1)
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
  * Writes the generated script lines to a
  * gnuplot pipe.
  */
-static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX])
+static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 {
     FILE *l_gp; // Gnuplot pipe
    
@@ -167,9 +167,9 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
         return 1;
     }
     
-    for (uint32_t i = 0; i < OUTPUT_ARRAY_MAX; i++)
+    for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
     {
-        if (strncmp(a_gnu_command[i], "", INPUT_LINE_MAX) != 0)
+        if (strncmp(a_gnu_command[i], "", MS_INPUT_LINE) != 0)
         {
             //printf("%d: %s\n", i, a_gnu_command[i]); /* Used for testing/debugging. */
             fprintf(l_gp, "%s\n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
@@ -195,11 +195,11 @@ static int write_to_gnuplot(char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX]
  * an array that will be used
  * to send to gnuplot.
  */
-static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARRAY_MAX][INPUT_LINE_MAX], int a_index)
+static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], int a_index)
 {
     FILE *l_file;
-    char l_line[INPUT_LINE_MAX];
-    char l_line_temp[INPUT_LINE_MAX];
+    char l_line[MS_INPUT_LINE];
+    char l_line_temp[MS_INPUT_LINE];
     uint32_t l_count = 0;
      
     l_file = fopen(a_file, "r");
@@ -208,7 +208,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARR
         printf("Error: could not open output file %s.\n", a_file);
         return EXIT_FAILURE;
     }
-    while (fgets(l_line, INPUT_LINE_MAX, l_file) != NULL)
+    while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
     {
         if (
             (strlen(l_line) > 0)
@@ -216,7 +216,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[OUTPUT_ARR
         )
         {
             l_count++;
-            trim_whitespace(l_line_temp, l_line, INPUT_LINE_MAX);
+            trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
             sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
         }
     }
