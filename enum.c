@@ -7,18 +7,18 @@
  * printf("enum month of january as a string: %s\n", MONTH_STRING[january]);
  */
 #define FOREACH_MONTH(MONTH) \
-        MONTH(january)   \
-        MONTH(february)  \
-        MONTH(march)   \
-        MONTH(april)  \
-        MONTH(may)  \
-        MONTH(june)  \
-        MONTH(july)  \
-        MONTH(august)  \
-        MONTH(september)  \
-        MONTH(october)  \
-        MONTH(november)  \
-        MONTH(december)
+        MONTH(JANUARY)   \
+        MONTH(FEBRUARY)  \
+        MONTH(MARCH)   \
+        MONTH(APRIL)  \
+        MONTH(MAY)  \
+        MONTH(JUNE)  \
+        MONTH(JULY)  \
+        MONTH(AUGUST)  \
+        MONTH(SEPTEMBER)  \
+        MONTH(OCTOBER)  \
+        MONTH(NOVEMBER)  \
+        MONTH(DECEMBER)
         
 #define FOREACH_PLOT(PLOT) \
         PLOT(income_vs_expenses)
@@ -43,18 +43,20 @@ static const char *PLOT_STRING[] = {
 };
 
 enum enum_plot_type_t {
-    yearly, monthly
+    YEARLY,
+    MONTHLY,
+    WEEKLY
 };
 
-static int string_to_enumvalue(const char* a_string, const enum_value_t *a_lst);
+static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst);
 
-typedef struct enum_value_t
+typedef struct
 {
     const char *enum_string;
     int enum_value;
-} enum_value_t;
+} EnumValue;
 
-static int string_to_enumvalue(const char* a_string, const enum_value_t *a_lst)
+static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
 {
   int z_idx;
   for (z_idx = 0; a_lst[z_idx].enum_string; z_idx++)
