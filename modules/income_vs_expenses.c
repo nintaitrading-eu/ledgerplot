@@ -35,7 +35,7 @@ enum MONTH_ENUM {
 };
 
 static const char *MONTH_STRING[] = {
-    FOREACH_FRUIT(GENERATE_STRING)
+    FOREACH_MONTH(GENERATE_STRING)
 };
 // TODO: end of put the below...
 
