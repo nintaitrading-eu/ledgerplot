@@ -1,5 +1,7 @@
 /* See LICENSE.txt for license and copyright information. */
 
+#include <string.h>
+
 /*
  * Note: The below code will give a month as an enum (integer value) and also
  * a lowercase string of the enum name.
@@ -48,13 +50,13 @@ enum enum_plot_type_t {
     WEEKLY
 };
 
-static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst);
-
 typedef struct
 {
     const char *enum_string;
     int enum_value;
 } EnumValue;
+
+static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst);
 
 static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
 {

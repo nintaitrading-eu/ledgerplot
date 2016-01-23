@@ -5,7 +5,7 @@
 #include <string.h>
 #include "../ledgerplot.h"
 #include "../c_generic/functions.h"
-#include "enum.c"
+#include "../enum.c"
 
 
 static char *f_cmd_income_vs_expenses_yearly =
@@ -34,10 +34,10 @@ int ive_prepare_temp_file(
     int l_records;
     int i;
     FILE *l_fp;
-    char l_cmd[INPUT_LINE_MAX];
-    char l_line_temp[INPUT_LINE_MAX];
-    char l_line_input[INPUT_LINE_MAX];
-    char l_line_output[INPUT_LINE_MAX]; /* The output line may be just as long. */
+    char l_cmd[MS_INPUT_LINE];
+    char l_line_temp[MS_INPUT_LINE];
+    char l_line_input[MS_INPUT_LINE];
+    char l_line_output[MS_INPUT_LINE]; /* The output line may be just as long. */
     double l_d1;
     double l_d2;
     double l_d3;
@@ -60,10 +60,10 @@ int ive_prepare_temp_file(
         }
 
         *l_line_output = '\0';
-        while (fgets(l_line_input, INPUT_LINE_MAX, l_fp) != NULL)
+        while (fgets(l_line_input, MS_INPUT_LINE, l_fp) != NULL)
         {
             *l_line_temp = '\0'; /* Make sure temp string is empty. */
-            trim_whitespace(l_line_temp, l_line_input, INPUT_LINE_MAX);
+            trim_whitespace(l_line_temp, l_line_input, MS_INPUT_LINE);
             if (strlen(l_line_output) <= 0)
             {
                 sprintf(l_line_output, "%s", l_line_temp);
