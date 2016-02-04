@@ -18,6 +18,7 @@ typedef struct {
     int income_vs_expenses;
     int monthly;
     int version;
+    int daily;
     int weekly;
     int yearly;
     /* options with arguments */
@@ -33,7 +34,7 @@ const char help_message[] =
 "Ledgerplot.\n"
 "\n"
 "Usage:\n"
-"    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
+"    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly|--daily]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
 "\n"
@@ -47,13 +48,14 @@ const char help_message[] =
 "    --yearly                    Plot totals per year.\n"
 "    --monthly                   Plot totals per month.\n"
 "    --weekly                    Plot totals per week.\n"
+"    --daily                    Plot totals per day.\n"
 "    -h --help                   Show this screen.\n"
 "    --version                   Show version.\n"
 "";
 
 const char usage_pattern[] =
 "Usage:\n"
-"    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
+"    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly|--daily]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version";
 
@@ -284,6 +286,8 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
             args->monthly = option->value;
         } else if (!strcmp(option->olong, "--version")) {
             args->version = option->value;
+        } else if (!strcmp(option->olong, "--daily")) {
+            args->daily = option->value;
         } else if (!strcmp(option->olong, "--weekly")) {
             args->weekly = option->value;
         } else if (!strcmp(option->olong, "--yearly")) {
@@ -334,6 +338,7 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--income_vs_expenses", 0, 0, NULL},
         {NULL, "--monthly", 0, 0, NULL},
         {NULL, "--version", 0, 0, NULL},
+        {NULL, "--daily", 0, 0, NULL},
         {NULL, "--weekly", 0, 0, NULL},
         {NULL, "--yearly", 0, 0, NULL},
         {NULL, "--endyear", 1, 0, NULL},
