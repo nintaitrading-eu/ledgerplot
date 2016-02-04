@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     uint32_t l_lines_total = 0;
     char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_status = 0;
+    enum enum_plot_type_t l_plot_type;
 
     /*
      * Parse arguments
@@ -70,20 +71,27 @@ int main(int argc, char *argv[])
         printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
         l_status = EXIT_FAILURE;
     }
-    // TODO: switch with extra parameter, to determine the type of graph to export
-    // In a first fase, we could also generate all of them?
-    /* income vs expenses */
-    if (
-        (l_status == EXIT_SUCCESS)
-        && (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
-    )
+    // TODO: get l_plot_type from parameters
+    l_plot_type = income_vs_expenses;
+    if (l_status == EXIT_SUCCESS)
     {
-        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-        l_status = EXIT_FAILURE;
+        switch(l_plot_type)
+        {
+            case income_vs_expenses:
+                if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
+                {
+                    fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
+                    l_status = EXIT_FAILURE;
+                };
+                break;
+            /* expenses per category */
+            /* dividend ... */
+            /* ...*/
+            default:
+                fprintf(stderr, "Unknown plot type %s.\n", PLOT_TYPE_STRING[income_vs_expenses]);
+                l_status = EXIT_FAILURE;
+        }
     }
-    /* expenses per category */
-    /* dividend ... */
-    /* ...*/
     fclose(l_output_file);
 
     if (l_status == EXIT_FAILURE)
