@@ -24,6 +24,12 @@
         
 #define FOREACH_PLOT(PLOT) \
         PLOT(income_vs_expenses)
+        
+#define FOREACH_PLOT_TYPE(PLOT_TYPE) \
+        PLOT_TYPE(yearly) \
+        PLOT_TYPE(monthly) \
+        PLOT_TYPE(weeky) \
+        PLOT_TYPE(daily)
 
 #define GENERATE_ENUM(ENUM) ENUM,
 #define GENERATE_STRING(STRING) #STRING,
@@ -45,9 +51,11 @@ static const char *PLOT_STRING[] = {
 };
 
 enum enum_plot_type_t {
-    YEARLY,
-    MONTHLY,
-    WEEKLY
+    FOREACH_PLOT_TYPE(GENERATE_ENUM)
+};
+
+static const char *PLOT_TYPE_STRING[] = {
+    FOREACH_PLOT_TYPE(GENERATE_STRING)
 };
 
 typedef struct
