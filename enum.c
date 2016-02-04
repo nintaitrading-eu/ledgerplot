@@ -71,8 +71,8 @@ static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
     int z_idx;
     for (z_idx = 0; a_lst[z_idx].enum_string; z_idx++)
     {
-      if (strcmp(a_lst[z_idx].enum_string, a_string) == 0)
-          return z_idx;
+        if (strcmp(a_lst[z_idx].enum_string, a_string) == 0)
+            return z_idx;
     }
     return -1;
 };
