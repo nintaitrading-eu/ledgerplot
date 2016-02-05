@@ -75,4 +75,4 @@ static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
             return z_idx;
     }
     return -1;
-};
+}
