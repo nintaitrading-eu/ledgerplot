@@ -1,6 +1,7 @@
 /* See LICENSE.txt for license and copyright information. */
 
 #include <string.h>
+#include "enum.h"
 
 /*
  * Note: The below code will give a month as an enum (integer value) and also
@@ -8,65 +9,59 @@
  * Example usage:
  * printf("enum month of january as a string: %s\n", MONTH_STRING[january]);
  */
-#define FOREACH_MONTH(MONTH) \
-        MONTH(JANUARY)   \
-        MONTH(FEBRUARY)  \
-        MONTH(MARCH)   \
-        MONTH(APRIL)  \
-        MONTH(MAY)  \
-        MONTH(JUNE)  \
-        MONTH(JULY)  \
-        MONTH(AUGUST)  \
-        MONTH(SEPTEMBER)  \
-        MONTH(OCTOBER)  \
-        MONTH(NOVEMBER)  \
-        MONTH(DECEMBER)
+/*#define FOREACH_MONTH(MONTH) \
+        MONTH(january)   \
+        MONTH(february)  \
+        MONTH(march)   \
+        MONTH(april)  \
+        MONTH(may)  \
+        MONTH(june)  \
+        MONTH(july)  \
+        MONTH(august)  \
+        MONTH(september)  \
+        MONTH(october)  \
+        MONTH(november)  \
+        MONTH(december)
+ */       
+/*#define FOREACH_PLOT_TYPE(PLOT_TYPE) \
+        PLOT_TYPE(income_vs_expenses)
         
-#define FOREACH_PLOT(PLOT) \
-        PLOT(income_vs_expenses)
-        
-#define FOREACH_PLOT_TYPE(PLOT_TYPE) \
-        PLOT_TYPE(yearly) \
-        PLOT_TYPE(monthly) \
-        PLOT_TYPE(weeky) \
-        PLOT_TYPE(daily)
+#define FOREACH_PLOT_TIMEFRAME(PLOT_TIMEFRAME) \
+        PLOT_TIMEFRAME(yearly) \
+        PLOT_TIMEFRAME(monthly) \
+        PLOT_TIMEFRAME(weeky) \
+        PLOT_TIMEFRAME(daily)
+*/
 
-#define GENERATE_ENUM(ENUM) ENUM,
+/*#define GENERATE_ENUM(ENUM) ENUM,
 #define GENERATE_STRING(STRING) #STRING,
 
 enum enum_month_t {
     FOREACH_MONTH(GENERATE_ENUM)
 };
 
-static const char *MONTH_STRING[] = {
+const char *MONTH_STRING[] = {
     FOREACH_MONTH(GENERATE_STRING)
 };
-
-enum enum_plot_t {
-    FOREACH_PLOT(GENERATE_ENUM)
-};
-
-static const char *PLOT_STRING[] = {
-    FOREACH_PLOT(GENERATE_STRING)
-};
-
-enum enum_plot_type_t {
+*/
+/*enum enum_plot_type_t {
     FOREACH_PLOT_TYPE(GENERATE_ENUM)
 };
 
-static const char *PLOT_TYPE_STRING[] = {
+const char *PLOT_TYPE_STRING[] = {
     FOREACH_PLOT_TYPE(GENERATE_STRING)
 };
 
-typedef struct
-{
-    const char *enum_string;
-    int enum_value;
-} EnumValue;
+enum enum_plot_timeframe_t {
+    FOREACH_PLOT_TIMEFRAME(GENERATE_ENUM)
+};
 
-static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst);
+const char *PLOT_TIMEFRAME_STRING[] = {
+    FOREACH_PLOT_TIMEFRAME(GENERATE_STRING)
+};
+*/
 
-static int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
+int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
 {
     int z_idx;
     for (z_idx = 0; a_lst[z_idx].enum_string; z_idx++)

@@ -5,7 +5,8 @@
 #include <string.h>
 #include "../ledgerplot.h"
 #include "../c_generic/functions.h"
-#include "../enum.c"
+#include "../enum.h"
+#include "income_vs_expenses.h"
 
 
 static char *f_cmd_income_vs_expenses_yearly =
@@ -28,7 +29,8 @@ int ive_prepare_temp_file(
     char *a_input_file,
     FILE *a_output_file,
     int a_start_year,
-    int a_end_year
+    int a_end_year,
+    enum enum_plot_timeframe_t a_plot_timeframe_t
 )
 {
     int l_records;

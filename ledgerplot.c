@@ -8,8 +8,8 @@
 #include "ledgerplot.h"
 #include "docopt.c"
 #include "c_generic/functions.h"
+#include "enum.h"
 #include "modules/income_vs_expenses.h"
-#include "enum.c"
 
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_status = 0;
     enum enum_plot_type_t l_plot_type;
+    enum enum_plot_timeframe_t l_plot_timeframe;
 
     /*
      * Parse arguments
@@ -72,13 +73,15 @@ int main(int argc, char *argv[])
         l_status = EXIT_FAILURE;
     }
     // TODO: get l_plot_type from parameters
+    // TODO: get l_plot_timeframe from parameters
     l_plot_type = income_vs_expenses;
+    l_plot_timeframe = yearly;
     if (l_status == EXIT_SUCCESS)
     {
         switch(l_plot_type)
         {
             case income_vs_expenses:
-                if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year) != 0)
+                if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
                 {
                     fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
                     l_status = EXIT_FAILURE;
@@ -88,7 +91,7 @@ int main(int argc, char *argv[])
             /* dividend ... */
             /* ...*/
             default:
-                fprintf(stderr, "Unknown plot type %s.\n", PLOT_TYPE_STRING[income_vs_expenses]);
+                fprintf(stderr, "Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
                 l_status = EXIT_FAILURE;
         }
     }
