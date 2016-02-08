@@ -102,7 +102,7 @@ int ive_prepare_temp_file(
 }
 
 char *ive_get_full_cmd(
-    enum a_enum_plot_timeframe_t,
+    enum enum_plot_timeframe_t a_enum_plot_timeframe_t,
     char *a_input_file,
     int a_current_year
 )
