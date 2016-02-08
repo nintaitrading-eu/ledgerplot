@@ -16,6 +16,7 @@
 #define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
 
 
+static int prepare_data_file();
 static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static int get_lines_from_file(
     const char *a_file,
@@ -34,7 +35,6 @@ static char *f_cmd_gnuplot =
  */
 int main(int argc, char *argv[])
 {
-    FILE *l_output_file; // Temp dat file, where the final script is written to.
     uint32_t l_start_year;
     uint32_t l_end_year;
     uint32_t l_lines = 0;
@@ -62,43 +62,9 @@ int main(int argc, char *argv[])
     
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
-    
-    /*
-     * Prepare temporary data file
-     */
-    l_output_file = fopen(FILE_DATA_TMP, "w");
-    if (l_output_file == NULL)
-    {
-        printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
-        l_status = EXIT_FAILURE;
-    }
-    // TODO: get l_plot_type from parameters
-    // TODO: get l_plot_timeframe from parameters
-    l_plot_type = income_vs_expenses;
-    l_plot_timeframe = yearly;
-    if (l_status == EXIT_SUCCESS)
-    {
-        switch(l_plot_type)
-        {
-            case income_vs_expenses:
-                if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
-                {
-                    fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-                    l_status = EXIT_FAILURE;
-                };
-                break;
-            /* expenses per category */
-            /* dividend ... */
-            /* ...*/
-            default:
-                fprintf(stderr, "Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
-                l_status = EXIT_FAILURE;
-        }
-    }
-    fclose(l_output_file);
 
-    if (l_status == EXIT_FAILURE)
-        return l_status;
+    if (!prepare_data_file())
+        return EXIT_FAILURE;
    
     /*
      * Load layout commands
@@ -109,7 +75,7 @@ int main(int argc, char *argv[])
     if (l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
     
     /*
@@ -120,7 +86,7 @@ int main(int argc, char *argv[])
     if ( l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
     /*
      * Load barchart plot command
@@ -152,9 +118,49 @@ int main(int argc, char *argv[])
     if (remove(FILE_DATA_TMP) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", FILE_DATA_TMP);
-        l_status = EXIT_FAILURE;
+        l_status = false;
     }
     printf(">>> Done.\n");
+    return !l_status; // EXIT_FAILURE when l_status is false.
+}
+
+/*
+ * prepare_data_file:
+ * Prepare temporary data file
+ */
+static int prepare_data_file()
+{
+    FILE *l_output_file; // Temp dat file, where the final script is written to.
+    bool l_status;
+    
+    l_output_file = fopen(FILE_DATA_TMP, "w");
+    if (l_output_file == NULL)
+    {
+        printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
+        return false;
+    }
+    // TODO: get l_plot_type from parameters
+    // TODO: get l_plot_timeframe from parameters
+    l_status = true;
+    l_plot_type = income_vs_expenses;
+    l_plot_timeframe = yearly;
+    switch(l_plot_type)
+    {
+        case income_vs_expenses:
+            if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
+            {
+                fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
+                l_status = false;
+            };
+            break;
+        /* expenses per category */
+        /* dividend ... */
+        /* ...*/
+        default:
+            fprintf(stderr, "Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
+            l_status = false;
+    }
+    fclose(l_output_file);
     return l_status;
 }
 
@@ -175,7 +181,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
     if (l_gp == NULL)
     {
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
-        return EXIT_FAILURE;
+        return false;
     }
     
     for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
@@ -197,7 +203,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
      */
 
     fclose(l_gp);
-    return EXIT_SUCCESS;
+    return true;
 }
 
 /*
@@ -205,6 +211,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
  * Loads the lines of a file into
  * an array that will be used
  * to send to gnuplot.
+ * It returns an integer for the number of lines read.
  */
 static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], int a_index)
 {
