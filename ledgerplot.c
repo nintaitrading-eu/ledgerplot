@@ -30,6 +30,13 @@ static const char *f_file_ive_layout =
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
+enum enum_return_generic_t
+{
+    FAILED,
+    SUCCEEDED
+};
+
+
 /*
  * Main
  */
@@ -63,20 +70,11 @@ int main(int argc, char *argv[])
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
 
-    if (!prepare_data_file())
+    if (prepare_data_file() == FAILED)
         return EXIT_FAILURE;
    
-    /*
-     * Load layout commands
-     */
-    memset(l_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
-    l_lines = get_lines_from_file(f_file_ive_layout, l_gnu_command, 0);
-    l_lines_total = l_lines;
-    if (l_lines == -1)
-    {
-        fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
+    if (load_layout_commands() == FAILED)
         return EXIT_FAILURE;
-    }
     
     /*
      * Load barchart commands
@@ -118,12 +116,29 @@ int main(int argc, char *argv[])
     if (remove(FILE_DATA_TMP) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", FILE_DATA_TMP);
-        l_status = false;
+        l_status = FAILED;
     }
     printf(">>> Done.\n");
-    return !l_status; // EXIT_FAILURE when l_status is false.
+    return l_status; // EXIT_FAILURE when l_status is false. // TODO: return error code from enum?
 }
 
+ /*
+  * load_layout_commands:
+  * Load layout commands from gnuplot file with layout data.
+  */
+static int load_layout_commands()
+{
+    memset(l_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
+    l_lines = get_lines_from_file(f_file_ive_layout, l_gnu_command, 0);
+    l_lines_total = l_lines;
+    if (l_lines == -1)
+    {
+        fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
+        return FAILED;
+    }
+    return SUCCEEDED;
+}
+    
 /*
  * prepare_data_file:
  * Prepare temporary data file
