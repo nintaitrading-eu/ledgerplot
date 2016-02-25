@@ -70,22 +70,15 @@ int main(int argc, char *argv[])
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
 
-    if (prepare_data_file() == FAILED)
+    if (!prepare_data_file())
         return EXIT_FAILURE;
    
-    if (load_layout_commands() == FAILED)
+    if (!load_layout_commands())
         return EXIT_FAILURE;
     
-    /*
-     * Load barchart commands
-     */ 
-    l_lines = get_lines_from_file(FILE_BARCHART, l_gnu_command, l_lines_total);
-    l_lines_total += l_lines;
-    if ( l_lines == -1)
-    {
-        fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
-        return EXIT_FAILURE;
-    }
+    if (!load_barchart_commands())
+       return EXIT_FAILURE; 
+
     /*
      * Load barchart plot command
      */
@@ -122,10 +115,31 @@ int main(int argc, char *argv[])
     return l_status; // EXIT_FAILURE when l_status is false. // TODO: return error code from enum?
 }
 
- /*
-  * load_layout_commands:
-  * Load layout commands from gnuplot file with layout data.
-  */
+
+/*
+ * load_barchart_commands:
+ * Load layout commands from gnuplot file with layout data,
+ * with the barchart specific options.
+ */
+static int load_barchart_commands(
+    int *l_lines,
+    int *l_lines_total,
+    char *l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
+)
+{
+    &l_lines = get_lines_from_file(FILE_BARCHART, &l_gnu_command, &l_lines_total);
+    &l_lines_total += &l_lines;
+    if ( &l_lines == -1)
+    {
+        fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
+        return EXIT_FAILURE;
+    }
+}
+
+/*
+ * load_layout_commands:
+ * Load layout commands from gnuplot file with layout data.
+ */
 static int load_layout_commands()
 {
     memset(l_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
@@ -177,6 +191,15 @@ static int prepare_data_file()
     }
     fclose(l_output_file);
     return l_status;
+}
+
+/*
+ * prepare_income_vs_expenses:
+ * Calls the proper prepare function and return
+ * wether it succeeded or not.
+ */
+static int prepare_income_vs_expenses()
+{
 }
 
 /*
