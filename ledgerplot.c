@@ -176,11 +176,7 @@ static int prepare_data_file()
     switch(l_plot_type)
     {
         case income_vs_expenses:
-            if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
-            {
-                fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-                l_status = false;
-            };
+            prepare_income_vs_expenses();
             break;
         /* expenses per category */
         /* dividend ... */
@@ -200,6 +196,12 @@ static int prepare_data_file()
  */
 static int prepare_income_vs_expenses()
 {
+    if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
+    {
+        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
+        return false;
+    };
+    return true;
 }
 
 /*
