@@ -23,6 +23,16 @@ static int get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     int a_index
 );
+static int load_layout_commands(
+    int *l_lines,
+    int *l_lines_total,
+    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
+);
+static int load_barchart_commands(
+    int *l_lines,
+    int *l_lines_total,
+    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
+);
 
 
 static const char *f_file_ive_layout =
@@ -44,9 +54,11 @@ int main(int argc, char *argv[])
 {
     uint32_t l_start_year;
     uint32_t l_end_year;
-    uint32_t l_lines = 0;
-    uint32_t l_lines_total = 0;
-    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    int32_t l_lines = 0;
+    int32_t l_lines_total = 0;
+    char l_gnu_command_layout[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char l_gnu_command_data[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char l_gnu_command_plot[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_status = 0;
     enum enum_plot_type_t l_plot_type;
     enum enum_plot_timeframe_t l_plot_timeframe;
@@ -73,10 +85,18 @@ int main(int argc, char *argv[])
     if (!prepare_data_file())
         return EXIT_FAILURE;
    
-    if (!load_layout_commands())
+    if (!load_layout_commands(
+        &l_lines,
+        &l_lines_total,
+        l_gnu_command_layout
+    ))
         return EXIT_FAILURE;
     
-    if (!load_barchart_commands())
+    if (!load_barchart_commands(
+        &l_lines,
+        &l_lines_total,
+        l_gnu_command_data
+    ))
        return EXIT_FAILURE; 
 
     /*
@@ -85,7 +105,7 @@ int main(int argc, char *argv[])
     //if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
     //    exit(1);
     sprintf(
-        l_gnu_command[l_lines_total - 1],
+        l_gnu_command_plot[l_lines_total - 1],
         f_cmd_gnuplot,
         FILE_DATA_TMP
     );
@@ -122,14 +142,14 @@ int main(int argc, char *argv[])
  * with the barchart specific options.
  */
 static int load_barchart_commands(
-    int *l_lines,
-    int *l_lines_total,
-    char *l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
+    int *a_lines,
+    int *a_lines_total,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    &l_lines = get_lines_from_file(FILE_BARCHART, &l_gnu_command, &l_lines_total);
-    &l_lines_total += &l_lines;
-    if ( &l_lines == -1)
+    a_lines = get_lines_from_file(FILE_BARCHART, a_gnu_command, *a_lines_total);
+    a_lines_total += a_lines;
+    if ( a_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
         return EXIT_FAILURE;
@@ -140,11 +160,15 @@ static int load_barchart_commands(
  * load_layout_commands:
  * Load layout commands from gnuplot file with layout data.
  */
-static int load_layout_commands()
+static int load_layout_commands(
+    int *a_lines,
+    int *a_lines_total,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
+)
 {
-    memset(l_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
-    l_lines = get_lines_from_file(f_file_ive_layout, l_gnu_command, 0);
-    l_lines_total = l_lines;
+    memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
+    a_lines = get_lines_from_file(f_file_ive_layout, a_gnu_command, 0);
+    a_lines_total = a_lines;
     if (l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
@@ -176,7 +200,11 @@ static int prepare_data_file()
     switch(l_plot_type)
     {
         case income_vs_expenses:
-            prepare_income_vs_expenses();
+            if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
+            {
+                fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
+                l_status = false;
+            };
             break;
         /* expenses per category */
         /* dividend ... */
@@ -196,12 +224,6 @@ static int prepare_data_file()
  */
 static int prepare_income_vs_expenses()
 {
-    if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
-    {
-        fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-        return false;
-    };
-    return true;
 }
 
 /*
