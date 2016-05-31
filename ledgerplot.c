@@ -24,16 +24,6 @@ static int get_lines_from_file(
     int a_index
 );
 static int merge_data_files();
-static int load_layout_commands(
-    int *l_lines,
-    int *l_lines_total,
-    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
-);
-static int load_barchart_commands(
-    int *l_lines,
-    int *l_lines_total,
-    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
-);
 
 
 static const char *f_file_ive_layout =
