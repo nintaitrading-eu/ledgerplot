@@ -23,6 +23,10 @@ static int get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     int a_index
 );
+static int load_data(
+    int *l_lines,
+    int *l_lines_total
+);
 static int load_layout_commands(
     int *l_lines,
     int *l_lines_total,
@@ -78,26 +82,32 @@ int main(int argc, char *argv[])
         printf("%s\n", args.help_message);
         return EXIT_FAILURE;
     }
-    
+
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
 
     if (!prepare_data_file())
         return EXIT_FAILURE;
-   
+
+    if (!load_data(
+        &l_lines,
+        &l_lines_total
+    ))
+       return EXIT_FAILURE;
+
     if (!load_layout_commands(
         &l_lines,
         &l_lines_total,
         l_gnu_command_layout
     ))
         return EXIT_FAILURE;
-    
+
     if (!load_barchart_commands(
         &l_lines,
         &l_lines_total,
         l_gnu_command_data
     ))
-       return EXIT_FAILURE; 
+       return EXIT_FAILURE;
 
     /*
      * Load barchart plot command
@@ -109,7 +119,7 @@ int main(int argc, char *argv[])
         f_cmd_gnuplot,
         FILE_DATA_TMP
     );
-    /*for (int i=0; i<l_lines_total+2; i++) 
+    /*for (int i=0; i<l_lines_total+2; i++)
     {
         printf("-- %s\n", l_gnu_command[i]);
     }*/
@@ -147,13 +157,25 @@ static int load_barchart_commands(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    a_lines = get_lines_from_file(FILE_BARCHART, a_gnu_command, *a_lines_total);
+    a_lines += get_lines_from_file(FILE_BARCHART, a_gnu_command, *a_lines_total);
     a_lines_total += a_lines;
     if ( a_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
         return EXIT_FAILURE;
     }
+}
+/*
+ * load_data:
+ * Load layout, data and gnuplot specific options
+ * into a temporary file we can plot from.
+ */
+static int load_data(
+    int *a_lines,
+    int *a_lines_total
+)
+{
+    return FAILED;
 }
 
 /*
@@ -176,7 +198,7 @@ static int load_layout_commands(
     }
     return SUCCEEDED;
 }
-    
+
 /*
  * prepare_data_file:
  * Prepare temporary data file
@@ -185,7 +207,7 @@ static int prepare_data_file()
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     bool l_status;
-    
+
     l_output_file = fopen(FILE_DATA_TMP, "w");
     if (l_output_file == NULL)
     {
@@ -233,8 +255,8 @@ static int prepare_income_vs_expenses()
 static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 {
     FILE *l_gp; // Gnuplot pipe
-   
-     /* 
+
+     /*
      * Opens an interface that one can use to send commands as if they were typing into the
      * gnuplot command line. "The -persistent" keeps the plot open even after your
      * C program terminates.
@@ -245,7 +267,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
         return false;
     }
-    
+
     for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
     {
         if (strncmp(a_gnu_command[i], "", MS_INPUT_LINE) != 0)
@@ -255,8 +277,8 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
             fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
         }
     }
-    
-    /* 
+
+    /*
      * Note: you could also make an actual pipe:
      * mkfifo /tmp/gnuplot
      * while :; do (gnuplot -persist) < /tmp/gnuplot; done
@@ -281,7 +303,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
     char l_line[MS_INPUT_LINE];
     char l_line_temp[MS_INPUT_LINE];
     uint32_t l_count = 0;
-     
+
     l_file = fopen(a_file, "r");
     if (l_file == NULL)
     {
