@@ -87,17 +87,12 @@ int main(int argc, char *argv[])
     if (!merge_data_files())
        return EXIT_FAILURE;
 
-    if (!load_data(
-        &l_lines_total,
-        l_gnu_command_layout
-    ))
+    if (!load_data(&l_lines_total, l_gnu_command_layout))
         return EXIT_FAILURE;
 
     /*
      * Load barchart plot command
      */
-    //if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
-    //    exit(1);
     sprintf(
         l_gnu_command[l_lines_total - 1],
         f_cmd_gnuplot,
