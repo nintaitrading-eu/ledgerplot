@@ -23,7 +23,7 @@ static int get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     int a_index
 );
-static int load_data(
+static int merge_data_files(
     int *l_lines,
     int *l_lines_total
 );
@@ -60,9 +60,7 @@ int main(int argc, char *argv[])
     uint32_t l_end_year;
     int32_t l_lines = 0;
     int32_t l_lines_total = 0;
-    char l_gnu_command_layout[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
-    char l_gnu_command_data[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
-    char l_gnu_command_plot[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_status = 0;
     enum enum_plot_type_t l_plot_type;
     enum enum_plot_timeframe_t l_plot_timeframe;
@@ -89,25 +87,18 @@ int main(int argc, char *argv[])
     if (!prepare_data_file())
         return EXIT_FAILURE;
 
-    if (!load_data(
+    if (!merge_data_files(
         &l_lines,
         &l_lines_total
     ))
        return EXIT_FAILURE;
 
-    if (!load_layout_commands(
+    if (!load_data(
         &l_lines,
         &l_lines_total,
         l_gnu_command_layout
     ))
         return EXIT_FAILURE;
-
-    if (!load_barchart_commands(
-        &l_lines,
-        &l_lines_total,
-        l_gnu_command_data
-    ))
-       return EXIT_FAILURE;
 
     /*
      * Load barchart plot command
@@ -166,15 +157,20 @@ static int load_barchart_commands(
     }
 }
 /*
- * load_data:
- * Load layout, data and gnuplot specific options
- * into a temporary file we can plot from.
+ * merge_data_files:
+ * Load layout, data and gnuplot specific file-data 
+ * into one temporary file we can plot from.
  */
-static int load_data(
+static int merge_data_files(
     int *a_lines,
     int *a_lines_total
 )
 {
+    // TODO: TBD
+    // load_layout_commands, but append to tmp_merged.dat file, instead of in memory (a_gnu_command)
+    // idem for the data
+    // idem for the gnuplot commands
+    // This is just reading a file and appending to a new file, this 3 times.
     return FAILED;
 }
 
