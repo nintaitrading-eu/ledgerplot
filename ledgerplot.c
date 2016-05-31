@@ -23,10 +23,7 @@ static int get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     int a_index
 );
-static int merge_data_files(
-    int *l_lines,
-    int *l_lines_total
-);
+static int merge_data_files();
 static int load_layout_commands(
     int *l_lines,
     int *l_lines_total,
@@ -87,14 +84,10 @@ int main(int argc, char *argv[])
     if (!prepare_data_file())
         return EXIT_FAILURE;
 
-    if (!merge_data_files(
-        &l_lines,
-        &l_lines_total
-    ))
+    if (!merge_data_files())
        return EXIT_FAILURE;
 
     if (!load_data(
-        &l_lines,
         &l_lines_total,
         l_gnu_command_layout
     ))
@@ -106,7 +99,7 @@ int main(int argc, char *argv[])
     //if (!strncpy(l_gnu_command[l_lines_total + 1], f_cmd_gnuplot, INPUT_LINE_MAX))
     //    exit(1);
     sprintf(
-        l_gnu_command_plot[l_lines_total - 1],
+        l_gnu_command[l_lines_total - 1],
         f_cmd_gnuplot,
         FILE_DATA_TMP
     );
@@ -142,7 +135,7 @@ int main(int argc, char *argv[])
  * Load layout commands from gnuplot file with layout data,
  * with the barchart specific options.
  */
-static int load_barchart_commands(
+/*static int load_barchart_commands(
     int *a_lines,
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
@@ -155,7 +148,8 @@ static int load_barchart_commands(
         fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
         return EXIT_FAILURE;
     }
-}
+}*/
+
 /*
  * merge_data_files:
  * Load layout, data and gnuplot specific file-data 
@@ -178,7 +172,7 @@ static int merge_data_files(
  * load_layout_commands:
  * Load layout commands from gnuplot file with layout data.
  */
-static int load_layout_commands(
+/*static int load_layout_commands(
     int *a_lines,
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
@@ -193,7 +187,7 @@ static int load_layout_commands(
         return FAILED;
     }
     return SUCCEEDED;
-}
+}*/
 
 /*
  * prepare_data_file:
@@ -233,15 +227,6 @@ static int prepare_data_file()
     }
     fclose(l_output_file);
     return l_status;
-}
-
-/*
- * prepare_income_vs_expenses:
- * Calls the proper prepare function and return
- * wether it succeeded or not.
- */
-static int prepare_income_vs_expenses()
-{
 }
 
 /*
