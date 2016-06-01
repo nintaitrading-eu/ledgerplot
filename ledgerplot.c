@@ -146,17 +146,16 @@ int main(int argc, char *argv[])
  * Load layout commands from gnuplot file with layout data,
  * with the barchart specific options.
  */
-/*static int load_barchart_commands(
-    int *a_lines,
+static int load_data(
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    a_lines += get_lines_from_file(FILE_BARCHART, a_gnu_command, *a_lines_total);
+    a_lines = get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, *a_lines_total);
     a_lines_total += a_lines;
     if ( a_lines == -1)
     {
-        fprintf(stderr, "Could not read %s.\n", FILE_BARCHART);
+        fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return EXIT_FAILURE;
     }
 }*/
