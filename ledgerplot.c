@@ -13,17 +13,34 @@
 
 #define CMD_GNUPLOT "gnuplot -persist"
 #define FILE_DATA_TMP "lp_data.tmp"
+#define FILE_MERGED_TMP "lp_merged.tmp"
 #define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
 
 
-static int prepare_data_file();
+static int prepare_data_file(
+    const char *a_file,
+    enum enum_plot_type_t a_plot_type,
+    enum enum_plot_timeframe_t a_plot_timeframe,
+    int a_start_year,
+    int a_end_year
+);
 static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static int get_lines_from_file(
     const char *a_file,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     int a_index
 );
+/*static int append_to_file(
+    const char *a_file,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+    int a_index
+);*/
 static int merge_data_files();
+static int load_data(
+    int *a_lines_total,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
+);
+static int remove_tmp_file(const char *a_file_name);
 
 
 static const char *f_file_ive_layout =
@@ -71,13 +88,22 @@ int main(int argc, char *argv[])
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
 
-    if (!prepare_data_file())
+    // TODO: get l_plot_type from parameters
+    // TODO: get l_plot_timeframe from parameters
+    l_plot_type = income_vs_expenses;
+    l_plot_timeframe = yearly;
+    if (!prepare_data_file(
+        args.file,
+        l_plot_type,
+        l_plot_timeframe,
+        l_start_year,
+        l_end_year))
         return EXIT_FAILURE;
 
     if (!merge_data_files())
        return EXIT_FAILURE;
 
-    if (!load_data(&l_lines_total, l_gnu_command_layout))
+    if (!load_data(&l_lines_total, l_gnu_command))
         return EXIT_FAILURE;
 
     /*
@@ -135,9 +161,23 @@ int main(int argc, char *argv[])
     }
 }*/
 
+/* remove_tmp_file:
+ * Remove given tmp file.
+ */
+static int remove_tmp_file(const char *a_file_name)
+{
+    int l_status = SUCCEEDED;
+    if (remove(a_file_name) != 0)
+    {
+        fprintf(stderr, "Could not delete file %s.\n", a_file_name);
+        l_status = FAILED;
+    }
+    return l_status;
+}
+
 /*
  * merge_data_files:
- * Load layout, data and gnuplot specific file-data 
+ * Load layout, data and gnuplot specific file-data
  * into one temporary file we can plot from.
  */
 static int merge_data_files(
@@ -145,7 +185,16 @@ static int merge_data_files(
     int *a_lines_total
 )
 {
-    // TODO: TBD
+    FILE *l_output_file; // Temp dat file, where the final script is written to.
+    bool l_status;
+
+    l_output_file = fopen(FILE_MERGED_TMP, "w");
+    if (l_output_file == NULL)
+    {
+        printf("Error: could not open merge-output file %s.\n", FILE_MERGED_TMP);
+        return false;
+    }
+    // TODO:
     // load_layout_commands, but append to tmp_merged.dat file, instead of in memory (a_gnu_command)
     // idem for the data
     // idem for the gnuplot commands
@@ -178,7 +227,13 @@ static int merge_data_files(
  * prepare_data_file:
  * Prepare temporary data file
  */
-static int prepare_data_file()
+static int prepare_data_file(
+    const char *a_file,
+    enum enum_plot_type_t a_plot_type,
+    enum enum_plot_timeframe_t a_plot_timeframe,
+    int a_start_year,
+    int a_end_year
+)
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     bool l_status;
@@ -189,15 +244,11 @@ static int prepare_data_file()
         printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
         return false;
     }
-    // TODO: get l_plot_type from parameters
-    // TODO: get l_plot_timeframe from parameters
     l_status = true;
-    l_plot_type = income_vs_expenses;
-    l_plot_timeframe = yearly;
-    switch(l_plot_type)
+    switch(a_plot_type)
     {
         case income_vs_expenses:
-            if (ive_prepare_temp_file(args.file, l_output_file, l_start_year, l_end_year, l_plot_timeframe) != 0)
+            if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != 0)
             {
                 fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
                 l_status = false;
@@ -274,7 +325,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
     if (l_file == NULL)
     {
         printf("Error: could not open output file %s.\n", a_file);
-        return EXIT_FAILURE;
+        return FAILED;
     }
     while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
     {

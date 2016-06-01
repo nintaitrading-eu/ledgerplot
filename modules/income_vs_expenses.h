@@ -2,7 +2,7 @@
 #pragma once
 
 int ive_prepare_temp_file(
-    char *a_input_file,
+    const char *a_input_file,
     FILE *a_output_file,
     int a_start_year,
     int a_end_year,
