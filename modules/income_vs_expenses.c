@@ -36,7 +36,7 @@ int ive_prepare_temp_file(
     int l_records;
     int i;
     FILE *l_fp;
-    char l_cmd[MS_INPUT_LINE];
+    char *l_cmd;
     char l_line_temp[MS_INPUT_LINE];
     char l_line_input[MS_INPUT_LINE];
     char l_line_output[MS_INPUT_LINE]; /* The output line may be just as long. */
@@ -47,13 +47,13 @@ int ive_prepare_temp_file(
     char l_current_datetime[20];
     int l_current_year;
 
-    l_records = (a_end_year - a_start_year) + 1;    
+    l_records = (a_end_year - a_start_year) + 1;
     l_current_year = a_start_year;
     for (i = 0; i < l_records; i++)
-    {   
+    {
         if (i > 0)
             l_current_year++;
-        l_cmd = ive_get_full_cmd(a_plot_timeframe_t, a_input_file, l_current_year); 
+        l_cmd = ive_get_full_cmd(a_plot_timeframe_t, a_input_file, l_current_year);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
@@ -82,12 +82,12 @@ int ive_prepare_temp_file(
                                               */
         l_d3 = strtod(l_tmp, NULL);
         //printf("test: l_d1 = %.2f, l_d2 = %.2f, l_d3 = %.2f\n", l_d1, l_d2, l_d3);
-        
+
         if (pclose(l_fp) == -1)
             fprintf(stderr, "Error reported by pclose().\n");
-        
-        /* Initialize tmp file */    
-        if (i == 0) 
+
+        /* Initialize tmp file */
+        if (i == 0)
         {
             // TODO: move timestamp function in its own module.
             // TODO: make format an enum?
@@ -96,14 +96,14 @@ int ive_prepare_temp_file(
             fprintf(a_output_file, "year expenses income difference\n");
         }
         /* Write data to tmp file */
-        fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3); 
+        fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3);
     }
     return 0;
 }
 
 char *ive_get_full_cmd(
     enum enum_plot_timeframe_t a_enum_plot_timeframe_t,
-    char *a_input_file,
+    const char *a_input_file,
     int a_current_year
 )
 {
@@ -111,16 +111,16 @@ char *ive_get_full_cmd(
     switch(a_enum_plot_timeframe_t)
     {
         case daily:
-            //sprintf(l_result, f_cmd_daiy, a_input_file, l_current_year);
+            //sprintf(l_result, f_cmd_daiy, a_input_file, a_current_year);
             break;
         case weekly:
-            //sprintf(l_result, f_cmd_weekly, a_input_file, l_current_year);
+            //sprintf(l_result, f_cmd_weekly, a_input_file, a_current_year);
             break;
         case monthly:
-            sprintf(l_result, f_cmd_monthly, a_input_file, l_current_year);
+            sprintf(l_result, f_cmd_monthly, a_input_file, a_current_year);
             break;
-        else:
-            sprintf(l_result, f_cmd_yearly, a_input_file, l_current_year);
+        default:
+            sprintf(l_result, f_cmd_yearly, a_input_file, a_current_year);
     }
     return l_result;
 }

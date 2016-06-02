@@ -48,12 +48,6 @@ static const char *f_file_ive_layout =
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
-enum enum_return_generic_t
-{
-    FAILED,
-    SUCCEEDED
-};
-
 
 /*
  * Main
@@ -134,10 +128,10 @@ int main(int argc, char *argv[])
     if (remove(FILE_DATA_TMP) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", FILE_DATA_TMP);
-        l_status = FAILED;
+        l_status = 0;
     }
     printf(">>> Done.\n");
-    return l_status; // EXIT_FAILURE when l_status is false. // TODO: return error code from enum?
+    return l_status; // EXIT_FAILURE when l_status is 0. // TODO: return error code from enum?
 }
 
 
@@ -165,11 +159,11 @@ static int load_data(
  */
 static int remove_tmp_file(const char *a_file_name)
 {
-    int l_status = SUCCEEDED;
+    int l_status = 1;
     if (remove(a_file_name) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", a_file_name);
-        l_status = FAILED;
+        l_status = 0;
     }
     return l_status;
 }
@@ -190,14 +184,14 @@ static int merge_data_files(
     if (l_output_file == NULL)
     {
         printf("Error: could not open merge-output file %s.\n", FILE_MERGED_TMP);
-        return false;
+        return 0;
     }
     // TODO:
     // load_layout_commands, but append to tmp_merged.dat file, instead of in memory (a_gnu_command)
     // idem for the data
     // idem for the gnuplot commands
     // This is just reading a file and appending to a new file, this 3 times.
-    return FAILED;
+    return 0;
 }
 
 /*
@@ -216,9 +210,9 @@ static int merge_data_files(
     if (l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
-        return FAILED;
+        return 0;
     }
-    return SUCCEEDED;
+    return 1;
 }*/
 
 /*
@@ -240,16 +234,16 @@ static int prepare_data_file(
     if (l_output_file == NULL)
     {
         printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
-        return false;
+        return 0;
     }
-    l_status = true;
+    l_status = 1;
     switch(a_plot_type)
     {
         case income_vs_expenses:
             if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != 0)
             {
                 fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-                l_status = false;
+                l_status = 0;
             };
             break;
         /* expenses per category */
@@ -257,7 +251,7 @@ static int prepare_data_file(
         /* ...*/
         default:
             fprintf(stderr, "Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
-            l_status = false;
+            l_status = 0;
     }
     fclose(l_output_file);
     return l_status;
@@ -279,7 +273,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
     if (l_gp == NULL)
     {
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
-        return false;
+        return 0;
     }
 
     for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
@@ -301,7 +295,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
      */
 
     fclose(l_gp);
-    return true;
+    return 1;
 }
 
 /*
@@ -320,7 +314,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     if (l_src == NULL)
     {
         printf("Error: could not open source file %s.\n", a_src);
-        return false;
+        return 0;
     }
 
     l_dst = fopen(a_dst, "a");
@@ -328,7 +322,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     {
         printf("Error: could not open source file %s.\n", a_src);
         fclose(l_src); // Note: Was already opened.
-        return false;
+        return 0;
     }
 
     while (fgets(l_line, MS_INPUT_LINE, l_src) != NULL)
@@ -364,7 +358,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
     if (l_file == NULL)
     {
         printf("Error: could not open output file %s.\n", a_file);
-        return FAILED;
+        return 0;
     }
     while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
     {
