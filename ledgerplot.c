@@ -28,13 +28,9 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static int get_lines_from_file(
     const char *a_file,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-    int a_index
+    int *a_lines_total
 );
-/*static int append_to_file(
-    const char *a_file,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-    int a_index
-);*/
+static int append_content_to_file(const char *a_src, const char *a_dst);
 static int merge_data_files();
 static int load_data(
     int *a_lines_total,
@@ -48,6 +44,12 @@ static const char *f_file_ive_layout =
 static char *f_cmd_gnuplot =
     "plot for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] 'lp_data.tmp' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
+enum enum_return_generic_t
+{
+    SUCCEEDED,
+    FAILED
+    /* Other error codes can go here... */
+};
 
 /*
  * Main
@@ -86,18 +88,13 @@ int main(int argc, char *argv[])
     // TODO: get l_plot_timeframe from parameters
     l_plot_type = income_vs_expenses;
     l_plot_timeframe = yearly;
-    if (!prepare_data_file(
-        args.file,
-        l_plot_type,
-        l_plot_timeframe,
-        l_start_year,
-        l_end_year))
+    if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) <> SUCCEEDED)
         return EXIT_FAILURE;
 
-    if (!merge_data_files())
+    if (merge_data_files() <> SUCCEEDED)
        return EXIT_FAILURE;
 
-    if (!load_data(&l_lines_total, l_gnu_command))
+    if (load_data(&l_lines_total, l_gnu_command) <> SUCCEEDED)
         return EXIT_FAILURE;
 
     /*
@@ -128,7 +125,7 @@ int main(int argc, char *argv[])
     if (remove(FILE_DATA_TMP) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", FILE_DATA_TMP);
-        l_status = 0;
+        l_status = FAILED;
     }
     printf(">>> Done.\n");
     return l_status; // EXIT_FAILURE when l_status is 0. // TODO: return error code from enum?
@@ -136,34 +133,31 @@ int main(int argc, char *argv[])
 
 
 /*
- * load_barchart_commands:
- * Load layout commands from gnuplot file with layout data, with the barchart specific options.
+ * load_data:
+ * Load data from merged file with layout data, gnuplot data and gnuplot commands.
  */
 static int load_data(
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    uint32_t l_lines = 0;
-    l_lines = get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, *a_lines_total);
-    a_lines_total += l_lines;
-    if ( l_lines == -1)
+    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, &a_lines_total) <> SUCCEEDED)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return EXIT_FAILURE;
     }
-}*/
+}
 
 /* remove_tmp_file:
  * Remove given tmp file.
  */
 static int remove_tmp_file(const char *a_file_name)
 {
-    int l_status = 1;
+    int l_status = SUCCEEDED;
     if (remove(a_file_name) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", a_file_name);
-        l_status = 0;
+        l_status = FAILED;
     }
     return l_status;
 }
@@ -184,14 +178,14 @@ static int merge_data_files(
     if (l_output_file == NULL)
     {
         printf("Error: could not open merge-output file %s.\n", FILE_MERGED_TMP);
-        return 0;
+        return FAILED;
     }
     // TODO:
     // load_layout_commands, but append to tmp_merged.dat file, instead of in memory (a_gnu_command)
     // idem for the data
     // idem for the gnuplot commands
     // This is just reading a file and appending to a new file, this 3 times.
-    return 0;
+    return SUCCEEDED;
 }
 
 /*
@@ -210,9 +204,9 @@ static int merge_data_files(
     if (l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", f_file_ive_layout);
-        return 0;
+        return FAILED;
     }
-    return 1;
+    return SUCCEEDED;
 }*/
 
 /*
@@ -234,16 +228,16 @@ static int prepare_data_file(
     if (l_output_file == NULL)
     {
         printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
-        return 0;
+        return FAILED;
     }
-    l_status = 1;
+    l_status = SUCCEEDED;
     switch(a_plot_type)
     {
         case income_vs_expenses:
             if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != 0)
             {
                 fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
-                l_status = 0;
+                l_status = FAILED;
             };
             break;
         /* expenses per category */
@@ -251,7 +245,7 @@ static int prepare_data_file(
         /* ...*/
         default:
             fprintf(stderr, "Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
-            l_status = 0;
+            l_status = FAILED;
     }
     fclose(l_output_file);
     return l_status;
@@ -273,7 +267,8 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
     if (l_gp == NULL)
     {
         printf("Error opening pipe to GNU plot. Check if you have it!\n");
-        return 0;
+        fclose(l_gp);
+        return FAILED;
     }
 
     for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
@@ -295,13 +290,12 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
      */
 
     fclose(l_gp);
-    return 1;
+    return SUCCEEDED;
 }
 
 /*
  * append_content_to_file:
  * Reads a file and appends it's non-comment and non-empty lines output to the tmp merge file.
- * Returns the number of lines written to the destination file.
  */
 static int append_content_to_file(const char *a_src, const char *a_dst)
 {
@@ -314,15 +308,15 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     if (l_src == NULL)
     {
         printf("Error: could not open source file %s.\n", a_src);
-        return 0;
+        return FAILED;
     }
 
     l_dst = fopen(a_dst, "a");
     if (l_dst == NULL)
     {
-        printf("Error: could not open source file %s.\n", a_src);
+        fprintf(stderr, "Error: could not open source file %s.\n", a_src);
         fclose(l_src); // Note: Was already opened.
-        return 0;
+        return FAILED;
     }
 
     while (fgets(l_line, MS_INPUT_LINE, l_src) != NULL)
@@ -339,7 +333,8 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     }
     fclose(l_dst);
     fclose(l_src);
-    return l_count;
+    fprintf(stdout, "%d lines copied from %s to %s.\n", l_count, a_src, a_dst);
+    return SUCCEEDED;
 }
 
 /*
@@ -347,7 +342,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
  * Loads the lines of a file into an array that will be used to send to gnuplot. It returns an integer for the number
  * of lines read.
  */
-static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], int a_index)
+static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], int *a_lines_total)
 {
     FILE *l_file;
     char l_line[MS_INPUT_LINE];
@@ -358,7 +353,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
     if (l_file == NULL)
     {
         printf("Error: could not open output file %s.\n", a_file);
-        return 0;
+        return FAILED;
     }
     while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
     {
@@ -369,9 +364,10 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
+            sprintf(a_gnu_command[a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
+    a_lines_total += l_count;
     fclose(l_file);
     return l_count;
 }
