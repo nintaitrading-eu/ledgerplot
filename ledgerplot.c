@@ -340,7 +340,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            fprintf(l_dst, "%s\n", l_line_temp); 
+            fprintf(l_dst, "%s\n", l_line_temp);
         }
     }
     fclose(l_dst);
