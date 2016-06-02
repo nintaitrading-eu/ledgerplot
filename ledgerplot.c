@@ -31,7 +31,7 @@ static int get_lines_from_file(
     int *a_lines_total
 );
 static int append_content_to_file(const char *a_src, const char *a_dst);
-static int merge_data_files(const char *a_file_layout); // TODO: va_args function...
+static int merge_data_files(uint32_t a_nargs, ...);
 static int load_data(
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) <> SUCCEEDED)
         return EXIT_FAILURE;
 
-    if (merge_data_files(f_file_ive_layout) <> SUCCEEDED)
+    if (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_DATA_BARCHART) <> SUCCEEDED)
        return EXIT_FAILURE;
 
     if (load_data(&l_lines_total, l_gnu_command) <> SUCCEEDED)
@@ -148,7 +148,7 @@ static int load_data(
     }
 }
 
-/* 
+/*
  * remove_tmp_file:
  * Remove given tmp file.
  */
@@ -166,22 +166,29 @@ static int remove_tmp_file(const char *a_file_name)
  * merge_data_files:
  * Load layout, data and gnuplot specific file-data into one temporary file we can plot from.
  */
-static int merge_data_files(const char *a_file_layout)
+static int merge_data_files(uint32_t a_nargs, ...)
 {
-    FILE *l_output_file; // Temp dat file, where the final script is written to.
-
+    FILE *l_output_file; // Temp dat file, where the merged data is written to.
     l_output_file = fopen(FILE_MERGED_TMP, "w");
     if (l_output_file == NULL)
     {
         printf("Error: could not open merge-output file %s.\n", FILE_MERGED_TMP);
         return FAILED;
     }
-    // TODO:
-    // Make this more generic, by using src dst parms with FILE_MERGED_TMP as dst parm.
-    append_content_to_file(a_file_layout);
-    append_content_to_file(FILE_DATA_TMP);
-    append_content_to_file(FILE_DATA_BARCHART);
-    return SUCCEEDED;
+
+    register int l_i;
+    va_list l_ap;
+    char *l_current;
+    uint32_t l_status = SUCCEEDED;
+    va_start(l_ap, a_nargs);
+    for (l_i = 0; l_i < a_nargs; l_i++)
+    {
+         l_current = va_arg(l_ap, char *);
+         if(append_content_to_file(l_current) <> SUCCEEDED)
+            l_status = FAILED;
+    }
+    va_end(l_ap);
+    return l_status;
 }
 
 /*
