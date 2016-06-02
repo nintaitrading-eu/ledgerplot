@@ -31,7 +31,7 @@ static int get_lines_from_file(
     int *a_lines_total
 );
 static int append_content_to_file(const char *a_src, const char *a_dst);
-static int merge_data_files();
+static int merge_data_files(const char *a_file_layout); // TODO: va_args function...
 static int load_data(
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) <> SUCCEEDED)
         return EXIT_FAILURE;
 
-    if (merge_data_files() <> SUCCEEDED)
+    if (merge_data_files(f_file_ive_layout) <> SUCCEEDED)
        return EXIT_FAILURE;
 
     if (load_data(&l_lines_total, l_gnu_command) <> SUCCEEDED)
@@ -144,35 +144,31 @@ static int load_data(
     if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, &a_lines_total) <> SUCCEEDED)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
-        return EXIT_FAILURE;
+        return FAILED;
     }
 }
 
-/* remove_tmp_file:
+/* 
+ * remove_tmp_file:
  * Remove given tmp file.
  */
 static int remove_tmp_file(const char *a_file_name)
 {
-    int l_status = SUCCEEDED;
     if (remove(a_file_name) != 0)
     {
         fprintf(stderr, "Could not delete file %s.\n", a_file_name);
-        l_status = FAILED;
+        return FAILED;
     }
-    return l_status;
+    return SUCCEEDED;
 }
 
 /*
  * merge_data_files:
  * Load layout, data and gnuplot specific file-data into one temporary file we can plot from.
  */
-static int merge_data_files(
-    int *a_lines,
-    int *a_lines_total
-)
+static int merge_data_files(const char *a_file_layout)
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
-    bool l_status;
 
     l_output_file = fopen(FILE_MERGED_TMP, "w");
     if (l_output_file == NULL)
@@ -181,10 +177,10 @@ static int merge_data_files(
         return FAILED;
     }
     // TODO:
-    // load_layout_commands, but append to tmp_merged.dat file, instead of in memory (a_gnu_command)
-    // idem for the data
-    // idem for the gnuplot commands
-    // This is just reading a file and appending to a new file, this 3 times.
+    // Make this more generic, by using src dst parms with FILE_MERGED_TMP as dst parm.
+    append_content_to_file(a_file_layout);
+    append_content_to_file(FILE_DATA_TMP);
+    append_content_to_file(FILE_DATA_BARCHART);
     return SUCCEEDED;
 }
 
