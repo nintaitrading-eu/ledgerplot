@@ -307,8 +307,31 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 /*
  * append_content_to_file:
  * Reads a file and appends it's non-comment and non-empty lines output to the tmp merge file.
+ * Returns the number of lines written to the destination file.
  */
-while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
+static int append_content_to_file(const char *a_src, const char *a_dst)
+{
+    FILE *l_src;
+    FILE *l_dst;
+    char l_line[MS_INPUT_LINE];
+    uint32_t l_count = 0;
+
+    l_src = fopen(a_src, "r");
+    if (l_src == NULL)
+    {
+        printf("Error: could not open source file %s.\n", a_src);
+        return false;
+    }
+
+    l_dst = fopen(a_dst, "a");
+    if (l_dst == NULL)
+    {
+        printf("Error: could not open source file %s.\n", a_src);
+        fclose(l_src); // Note: Was already opened.
+        return false;
+    }
+
+    while (fgets(l_line, MS_INPUT_LINE, l_src) != NULL)
     {
         if (
             (strlen(l_line) > 0)
@@ -317,11 +340,13 @@ while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
+            fprintf(l_dst, "%s\n", l_line_temp); 
         }
     }
-    fclose(l_file);
+    fclose(l_dst);
+    fclose(l_src);
     return l_count;
+}
 
 /*
  * get_lines_from_file
