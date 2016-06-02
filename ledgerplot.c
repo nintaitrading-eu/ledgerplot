@@ -143,17 +143,17 @@ int main(int argc, char *argv[])
 
 /*
  * load_barchart_commands:
- * Load layout commands from gnuplot file with layout data,
- * with the barchart specific options.
+ * Load layout commands from gnuplot file with layout data, with the barchart specific options.
  */
 static int load_data(
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    a_lines = get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, *a_lines_total);
-    a_lines_total += a_lines;
-    if ( a_lines == -1)
+    uint32_t l_lines = 0;
+    l_lines = get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, *a_lines_total);
+    a_lines_total += l_lines;
+    if ( l_lines == -1)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return EXIT_FAILURE;
@@ -176,8 +176,7 @@ static int remove_tmp_file(const char *a_file_name)
 
 /*
  * merge_data_files:
- * Load layout, data and gnuplot specific file-data
- * into one temporary file we can plot from.
+ * Load layout, data and gnuplot specific file-data into one temporary file we can plot from.
  */
 static int merge_data_files(
     int *a_lines,
@@ -265,17 +264,16 @@ static int prepare_data_file(
 }
 
 /*
- * Writes the generated script lines to a
- * gnuplot pipe.
+ * write_to_gnuplot:
+ * Writes the generated script lines to a gnuplot pipe.
  */
 static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 {
     FILE *l_gp; // Gnuplot pipe
 
      /*
-     * Opens an interface that one can use to send commands as if they were typing into the
-     * gnuplot command line. "The -persistent" keeps the plot open even after your
-     * C program terminates.
+     * Opens an interface that one can use to send commands as if they were typing into the gnuplot command line.
+     * The "-persistent" keeps the plot open even after your C program terminates.
      */
     l_gp = popen(CMD_GNUPLOT, "w");
     if (l_gp == NULL)
@@ -307,11 +305,28 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 }
 
 /*
+ * append_content_to_file:
+ * Reads a file and appends it's non-comment and non-empty lines output to the tmp merge file.
+ */
+while (fgets(l_line, MS_INPUT_LINE, l_file) != NULL)
+    {
+        if (
+            (strlen(l_line) > 0)
+            && (l_line[0] != '#')
+        )
+        {
+            l_count++;
+            trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
+            sprintf(a_gnu_command[a_index + l_count - 1], "%s", l_line_temp);
+        }
+    }
+    fclose(l_file);
+    return l_count;
+
+/*
  * get_lines_from_file
- * Loads the lines of a file into
- * an array that will be used
- * to send to gnuplot.
- * It returns an integer for the number of lines read.
+ * Loads the lines of a file into an array that will be used to send to gnuplot. It returns an integer for the number
+ * of lines read.
  */
 static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], int a_index)
 {
