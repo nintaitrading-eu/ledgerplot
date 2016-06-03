@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <unistd.h> /* For the sleep function. */
+#include <stdarg.h>
 #include "ledgerplot.h"
 #include "docopt.c"
 #include "c_generic/functions.h"
@@ -31,7 +32,7 @@ static int load_data(int *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_
 static int append_plot_cmd(int *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
     const char *a_file_chart_cmd);
-static int remove_tmp_files(uint32_t a_nargs, ...)
+static int remove_tmp_files(uint32_t a_nargs, ...);
 static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static int append_content_to_file(const char *a_src, const char *a_dst);
 
@@ -47,14 +48,14 @@ enum enum_return_status_generic_t
     FAILED
     /* Other error codes can go here... */
 };
-static inline char *return_status_to_string(enum enum_return_status_generic_t a_return_status)
+static inline const char *return_status_to_string(enum enum_return_status_generic_t a_return_status)
 {
     static const char *l_return_status_strings[] = {
         "SUCCEEDED",
         "FAILED"
         /* continue for rest of values */
     };
-    return l_return_status_strings[f];
+    return l_return_status_strings[a_return_status];
 }
 
 /*
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 
     printf(">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_DATA_BARCHART) != SUCCEEDED))
+        && (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     printf(">>> Merging %s.\n", return_status_to_string(l_status));
 
@@ -130,7 +131,7 @@ int main(int argc, char *argv[])
      */
     printf(">>> Plotting...\n");
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED)
+        && (plot_data(l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     printf(">>> Plotting %s.\n", return_status_to_string(l_status));
     /*
@@ -191,24 +192,16 @@ static int prepare_data_file(
  */
 static int merge_data_files(uint32_t a_nargs, ...)
 {
-    FILE *l_output_file; // Temp dat file, where the merged data is written to.
-    printf(">>> Merging...\n");
-    l_output_file = fopen(FILE_MERGED_TMP, "w");
-    if (l_output_file == NULL)
-    {
-        printf("Error: could not open merge-output file %s.\n", FILE_MERGED_TMP);
-        return FAILED;
-    }
-
     register int l_i;
     va_list l_ap;
     char *l_current;
     uint32_t l_status = SUCCEEDED;
+    printf(">>> Merging...\n");
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
          l_current = va_arg(l_ap, char *);
-         if(append_content_to_file(l_current) != SUCCEEDED)
+         if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
             l_status = FAILED;
     }
     va_end(l_ap);
