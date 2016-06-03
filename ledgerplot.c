@@ -24,23 +24,16 @@ static int prepare_data_file(
     int a_start_year,
     int a_end_year
 );
-static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static int get_lines_from_file(
-    const char *a_file,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-    int *a_lines_total
-);
-static int append_content_to_file(const char *a_src, const char *a_dst);
+static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+    int *a_lines_total);
 static int merge_data_files(uint32_t a_nargs, ...);
-static int load_data(
-    int *a_lines_total,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
-);
-static int load_plot_cmd(
-    int *a_lines_total,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
-);
-static int remove_tmp_file(const char *a_file_name);
+static int load_data(int *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static int append_plot_cmd(int *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+    const char *a_file_chart_cmd);
+static int remove_tmp_files(uint32_t a_nargs, ...)
+static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static int append_content_to_file(const char *a_src, const char *a_dst);
 
 
 static const char *f_file_ive_layout =
@@ -64,7 +57,6 @@ int main(int argc, char *argv[])
     uint32_t l_end_year;
     int32_t l_lines_total = 0;
     char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
-    uint32_t l_status = 0;
     enum enum_plot_type_t l_plot_type;
     enum enum_plot_timeframe_t l_plot_timeframe;
 
@@ -91,42 +83,55 @@ int main(int argc, char *argv[])
     // TODO: get l_plot_timeframe from parameters
     l_plot_type = income_vs_expenses;
     l_plot_timeframe = yearly;
+
+    /*
+     * Preparation of data.
+     */
+    uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
+    printf(">>> Preparing data...\n");
     if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) != SUCCEEDED)
-        return EXIT_FAILURE;
+        l_status = EXIT_FAILURE;
+    printf(">>> Preparation %s.\n", status_to_string(l_status));
 
-    if (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_DATA_BARCHART) != SUCCEEDED)
-        return EXIT_FAILURE;
+    printf(">>> Merging data...\n");
+    if ((l_status != EXIT_FAILURE)
+        && (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_DATA_BARCHART) != SUCCEEDED))
+        l_status = EXIT_FAILURE;
+    printf(">>> Merging %s.\n", status_to_string(l_status));
 
-    if (load_data(&l_lines_total, l_gnu_command) != SUCCEEDED)
-        return EXIT_FAILURE;
+    printf(">>> Loading data...\n");
+    if ((l_status != EXIT_FAILURE)
+        && (load_data(&l_lines_total, l_gnu_command) != SUCCEEDED))
+        l_status = EXIT_FAILURE;
+    printf(">>> Loading %s.\n", status_to_string(l_status));
 
-    if (load_plot_cmd(&l_lines_total, l_gnu_command) != SUCCEEDED)
-        return EXIT_FAILURE;
+    printf(">>> Appending plot cmd...\n");
+    if ((l_status != EXIT_FAILURE)
+        && (append_plot_cmd(&l_lines_total, l_gnu_command) != SUCCEEDED))
+        l_status = EXIT_FAILURE;
+    printf(">>> Appending %s.\n", status_to_string(l_status));
 
     /*for (int i=0; i<l_lines_total+2; i++)
     {
         printf("-- %s\n", l_gnu_command[i]);
     }*/
+
     /*
      * Plot data
      */
-    printf("%s:\n", f_file_ive_layout);
-    printf(">>> Generated using gnuplot chart info from %s.\n", FILE_BARCHART);
-    l_status = write_to_gnuplot(l_gnu_command);
-    printf(">>> Data exported to png.\n");
-    printf(">>> The filename was specified in %s.\n", f_file_ive_layout);
+    printf(">>> Plotting...\n");
+    if ((l_status != EXIT_FAILURE)
+        && (plot_data(l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED)
+        l_status = EXIT_FAILURE;
+    printf(">>> Plotting %s.\n", status_to_string(l_status));
     /*
      * Cleanup tmp files.
      */
-    printf(">>> Cleaning up temporary file(s)...\n");
     sleep(3); /* Give gnuplot time to read from the temporary file. */
-    if (remove(FILE_DATA_TMP) != 0)
-    {
-        fprintf(stderr, "Could not delete file %s.\n", FILE_DATA_TMP);
-        l_status = FAILED;
-    }
+    if (remove_tmp_files(2, FILE_DATA_TMP, FILE_MERGED_TMP) != SUCCEEDED)
+        l_status = EXIT_FAILURE;
     printf(">>> Done.\n");
-    return l_status; // EXIT_FAILURE when l_status is 0. // TODO: return error code from enum?
+    return l_status;
 }
 
 /*
@@ -178,6 +183,7 @@ static int prepare_data_file(
 static int merge_data_files(uint32_t a_nargs, ...)
 {
     FILE *l_output_file; // Temp dat file, where the merged data is written to.
+    printf(">>> Merging...\n");
     l_output_file = fopen(FILE_MERGED_TMP, "w");
     if (l_output_file == NULL)
     {
@@ -197,6 +203,7 @@ static int merge_data_files(uint32_t a_nargs, ...)
             l_status = FAILED;
     }
     va_end(l_ap);
+    printf(">>> Merging done.\n");
     return l_status;
 }
 
@@ -215,13 +222,14 @@ static int load_data(
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return FAILED;
     }
+    return SUCCEEDED;
 }
 
 /*
- * load_plot_cmd:
+ * append_plot_cmd:
  * Append a line to the command array, with the actual plot command.
  */
-static int load_plot_cmd(
+static int append_plot_cmd(
     int *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
@@ -325,17 +333,52 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
 }
 
 /*
- * remove_tmp_file:
- * Remove given tmp file.
+ * plot_data:
+ * Plot the data and display information about what's going on.
  */
-static int remove_tmp_file(const char *a_file_name)
+static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+    const char *a_file_chart_cmd)
 {
-    if (remove(a_file_name) != 0)
+    printf("%s:\n", a_file_layout);
+    printf(">>> Generated using gnuplot chart info from %s.\n", a_file_chart_cmd);
+    if (write_to_gnuplot(a_gnu_command) <> SUCCEEDED)
     {
-        fprintf(stderr, "Could not delete file %s.\n", a_file_name);
+        printf(">>> Error exporting data to png!\n");
         return FAILED;
     }
+    else
+    {
+        printf(">>> Data exported to png.\n");
+        printf(">>> The filename was specified in %s.\n", f_file_ive_layout);
+    }
     return SUCCEEDED;
+}
+
+/*
+ * remove_tmp_files:
+ * Remove given tmp files.
+ */
+static int remove_tmp_files(uint32_t a_nargs, ...)
+{
+    register int l_i;
+    va_list l_ap;
+    char *l_current;
+    uint32_t l_status = SUCCEEDED;
+
+    printf(">>> Cleaning up temporary file(s)...\n");
+    va_start(l_ap, a_nargs);
+    for (l_i = 0; l_i < a_nargs; l_i++)
+    {
+         l_current = va_arg(l_ap, char *);
+        if (remove(a_file_name) != 0)
+        {
+            fprintf(stderr, "Could not delete file %s.\n", a_file_name);
+            l_status = FAILED;
+        }
+    }
+    va_end(l_ap);
+    printf(">>> Cleaning done.\n");
+    return l_status;
 }
 
 /*
@@ -373,3 +416,9 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
     fclose(l_file);
     return l_count;
 }
+
+/*
+ * status_to_string:
+ * Turn the return status to a string.
+ */
+// TODO: create an enumvalue_to_string in enum.c, if possible.
