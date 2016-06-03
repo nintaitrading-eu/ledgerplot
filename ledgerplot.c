@@ -241,11 +241,12 @@ static int append_plot_cmd(
      * Load barchart plot command
      */
     sprintf(
-        a_gnu_command[a_lines_total - 1],
+        a_gnu_command[*a_lines_total - 1],
         f_cmd_gnuplot_barchart,
         FILE_MERGED_TMP,
         FILE_MERGED_TMP
     );
+    return SUCCEEDED;
 }
 
 /*
@@ -412,10 +413,10 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            sprintf(a_gnu_command[a_lines_total + l_count - 1], "%s", l_line_temp);
+            sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
-    a_lines_total += l_count;
+    *a_lines_total += l_count;
     fclose(l_file);
     return l_count;
 }

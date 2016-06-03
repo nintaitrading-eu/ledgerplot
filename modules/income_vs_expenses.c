@@ -107,7 +107,7 @@ char *ive_get_full_cmd(
     int a_current_year
 )
 {
-    char *l_result;
+    char *l_result = NULL;
     switch(a_enum_plot_timeframe_t)
     {
         case daily:
