@@ -219,7 +219,7 @@ static int load_data(
 )
 {
     memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
-    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, &a_lines_total) != SUCCEEDED)
+    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, a_lines_total) != SUCCEEDED)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return FAILED;
@@ -299,6 +299,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     FILE *l_src;
     FILE *l_dst;
     char l_line[MS_INPUT_LINE];
+    char l_line_temp[MS_INPUT_LINE];
     uint32_t l_count = 0;
 
     l_src = fopen(a_src, "r");
@@ -343,7 +344,7 @@ static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const c
 {
     printf("%s:\n", a_file_layout);
     printf(">>> Generated using gnuplot chart info from %s.\n", a_file_chart_cmd);
-    if (write_to_gnuplot(a_gnu_command) <> SUCCEEDED)
+    if (write_to_gnuplot(a_gnu_command) != SUCCEEDED)
     {
         printf(">>> Error exporting data to png!\n");
         return FAILED;
@@ -372,9 +373,9 @@ static int remove_tmp_files(uint32_t a_nargs, ...)
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
          l_current = va_arg(l_ap, char *);
-        if (remove(a_file_name) != 0)
+        if (remove(l_current) != 0)
         {
-            fprintf(stderr, "Could not delete file %s.\n", a_file_name);
+            fprintf(stderr, "Could not delete file %s.\n", l_current);
             l_status = FAILED;
         }
     }
