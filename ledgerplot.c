@@ -88,13 +88,13 @@ int main(int argc, char *argv[])
     // TODO: get l_plot_timeframe from parameters
     l_plot_type = income_vs_expenses;
     l_plot_timeframe = yearly;
-    if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) <> SUCCEEDED)
+    if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) != SUCCEEDED)
         return EXIT_FAILURE;
 
-    if (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_DATA_BARCHART) <> SUCCEEDED)
+    if (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_DATA_BARCHART) != SUCCEEDED)
        return EXIT_FAILURE;
 
-    if (load_data(&l_lines_total, l_gnu_command) <> SUCCEEDED)
+    if (load_data(&l_lines_total, l_gnu_command) != SUCCEEDED)
         return EXIT_FAILURE;
 
     /*
@@ -141,7 +141,7 @@ static int load_data(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, &a_lines_total) <> SUCCEEDED)
+    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, &a_lines_total) != SUCCEEDED)
     {
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return FAILED;
@@ -184,7 +184,7 @@ static int merge_data_files(uint32_t a_nargs, ...)
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
          l_current = va_arg(l_ap, char *);
-         if(append_content_to_file(l_current) <> SUCCEEDED)
+         if(append_content_to_file(l_current) != SUCCEEDED)
             l_status = FAILED;
     }
     va_end(l_ap);
