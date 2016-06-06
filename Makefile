@@ -9,6 +9,9 @@ VPATH = .:c_generic:modules
 
 all: options ledgerplot
 
+debug: ${CFLAGS} += -DDEBUG -g
+debug: options ledgerplot
+
 options:
 	@echo ledgerplot build options:
 	@echo "CFLAGS   = ${CFLAGS}"
