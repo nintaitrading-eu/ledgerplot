@@ -157,7 +157,7 @@ static int prepare_data_file(
 )
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
-    bool l_status;
+    uint32_t l_status;
 
     l_output_file = fopen(FILE_DATA_TMP, "w");
     if (l_output_file == NULL)
