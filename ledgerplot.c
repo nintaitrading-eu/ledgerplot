@@ -200,9 +200,16 @@ static int merge_data_files(uint32_t a_nargs, ...)
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
-         l_current = va_arg(l_ap, char *);
-         if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        l_current = va_arg(l_ap, char *);
+        printf(">>> [%s]", l_current);
+        if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        {
+            printf(" [FAIL]");
             l_status = FAILED;
+        }
+        else
+            printf(" [OK]");
+        printf("\n");
     }
     va_end(l_ap);
     printf(">>> Merging done.\n");
