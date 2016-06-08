@@ -157,7 +157,7 @@ static int prepare_data_file(
 )
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
-    bool l_status;
+    uint32_t l_status;
 
     l_output_file = fopen(FILE_DATA_TMP, "w");
     if (l_output_file == NULL)
@@ -169,7 +169,7 @@ static int prepare_data_file(
     switch(a_plot_type)
     {
         case income_vs_expenses:
-            if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != 0)
+            if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
             {
                 fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
                 l_status = FAILED;
@@ -200,9 +200,16 @@ static int merge_data_files(uint32_t a_nargs, ...)
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
-         l_current = va_arg(l_ap, char *);
-         if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        l_current = va_arg(l_ap, char *);
+        printf(">>> [%s]", l_current);
+        if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        {
+            printf(" [FAIL]");
             l_status = FAILED;
+        }
+        else
+            printf(" [OK]");
+        printf("\n");
     }
     va_end(l_ap);
     printf(">>> Merging done.\n");
