@@ -423,7 +423,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
             sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
-    *a_lines_total += l_count;
+    a_lines_total += l_count;
     fclose(l_file);
     return l_count;
 }

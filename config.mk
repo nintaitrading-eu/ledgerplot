@@ -22,7 +22,7 @@ CPPFLAGS = -D_BSD_SOURCE -D_POSIX_C_SOURCE=2
 # release
 #CFLAGS   = -std=c11 -Wpedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 # debug
-CFLAGS = -g -Wall -Werror -std=c11 -O2 ${INCS}
+CFLAGS = -g -c -Wall -Werror -std=c11 -O2 ${INCS}
 
 #LDFLAGS  = -s ${LIBS}
 
