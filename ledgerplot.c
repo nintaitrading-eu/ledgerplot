@@ -169,7 +169,7 @@ static int prepare_data_file(
     switch(a_plot_type)
     {
         case income_vs_expenses:
-            if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != 0)
+            if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
             {
                 fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
                 l_status = FAILED;
