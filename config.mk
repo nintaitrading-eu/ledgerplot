@@ -18,12 +18,13 @@ LIBS =
 
 # flags
 #CPPFLAGS = -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\"
-CPPFLAGS = -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 
+CPPFLAGS = -D_BSD_SOURCE -D_POSIX_C_SOURCE=2
 # release
 #CFLAGS   = -std=c11 -Wpedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 # debug
-CFLAGS   = -g -DDEBUG -std=c11 -Wpedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
-LDFLAGS  = -s ${LIBS}
+CFLAGS = -g -Wall -Werror -std=c11 -O2 ${INCS}
+
+#LDFLAGS  = -s ${LIBS}
 
 # Solaris
 #CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"
