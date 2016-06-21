@@ -1,0 +1,3 @@
+[submodule "c_generic"]
+	path = c_generic
+	url = https://github.com/rockwolf/c_generic.git
