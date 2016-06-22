@@ -42,22 +42,6 @@ static const char *f_file_ive_layout =
 static char *f_cmd_gnuplot_barchart =
     "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
-enum enum_return_status_generic_t
-{
-    SUCCEEDED,
-    FAILED
-    /* Other error codes can go here... */
-};
-static inline const char *return_status_to_string(enum enum_return_status_generic_t a_return_status)
-{
-    static const char *l_return_status_strings[] = {
-        "SUCCEEDED",
-        "FAILED"
-        /* continue for rest of values */
-    };
-    return l_return_status_strings[a_return_status];
-}
-
 /*
  * Main
  */

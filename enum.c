@@ -61,7 +61,7 @@ const char *PLOT_TIMEFRAME_STRING[] = {
 };
 */
 
-int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
+/*int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
 {
     int z_idx;
     for (z_idx = 0; a_lst[z_idx].enum_string; z_idx++)
@@ -70,4 +70,4 @@ int string_to_enumvalue(const char* a_string, const EnumValue *a_lst)
             return z_idx;
     }
     return -1;
-}
+};*/

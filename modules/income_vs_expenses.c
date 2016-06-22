@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include "../ledgerplot.h"
 #include "../c_generic/functions.h"
@@ -28,13 +29,11 @@ static char *f_cmd_monthly =
 int ive_prepare_temp_file(
     const char *a_input_file,
     FILE *a_output_file,
-    int a_start_year,
-    int a_end_year,
+    uint32_t a_start_year,
+    uint32_t a_end_year,
     enum enum_plot_timeframe_t a_plot_timeframe_t
 )
 {
-    int l_records;
-    int i;
     FILE *l_fp;
     char *l_cmd;
     char l_line_temp[MS_INPUT_LINE];
@@ -45,20 +44,23 @@ int ive_prepare_temp_file(
     double l_d3;
     char *l_tmp;
     char l_current_datetime[20];
-    int l_current_year;
+    uint32_t l_current_year;
 
-    l_records = (a_end_year - a_start_year) + 1;
+    uint32_t l_records = (a_end_year - a_start_year) + 1;
     l_current_year = a_start_year;
-    for (i = 0; i < l_records; i++)
+    for (uint32_t i = 0; i < l_records; i++)
     {
+        printf("test -- %d\n", i);
         if (i > 0)
             l_current_year++;
+        printf("test2 -- %d\n", l_current_year);
+        printf("test3 -- %s\n", a_input_file);
         l_cmd = ive_get_full_cmd(a_plot_timeframe_t, a_input_file, l_current_year);
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
             fprintf(stderr, "Could not execute ledger command.\n");
-            exit(1);
+            return FAILED;
         }
 
         *l_line_output = '\0';
@@ -104,10 +106,11 @@ int ive_prepare_temp_file(
 char *ive_get_full_cmd(
     enum enum_plot_timeframe_t a_enum_plot_timeframe_t,
     const char *a_input_file,
-    int a_current_year
+    uint32_t a_current_year
 )
 {
     char *l_result = NULL;
+    printf("test -- %s\n", string_plot_timeframe(a_enum_plot_timeframe_t));
     switch(a_enum_plot_timeframe_t)
     {
         case daily:
