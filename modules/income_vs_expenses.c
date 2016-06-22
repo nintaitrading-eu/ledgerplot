@@ -110,7 +110,6 @@ char *ive_get_full_cmd(
 )
 {
     char *l_result = NULL;
-    printf("test -- %s\n", string_plot_timeframe(a_enum_plot_timeframe_t));
     switch(a_enum_plot_timeframe_t)
     {
         case daily:
@@ -123,6 +122,9 @@ char *ive_get_full_cmd(
             sprintf(l_result, f_cmd_monthly, a_input_file, a_current_year);
             break;
         default:
+            printf("test-a -- %s\n", f_cmd_yearly);
+            printf("test-b -- %s\n", a_input_file);
+            printf("test-c -- %d\n", a_current_year);
             sprintf(l_result, f_cmd_yearly, a_input_file, a_current_year);
     }
     return l_result;
