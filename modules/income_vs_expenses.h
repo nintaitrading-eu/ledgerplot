@@ -8,9 +8,3 @@ int ive_prepare_temp_file(
     uint32_t a_end_year,
     enum enum_plot_timeframe_t a_plot_timeframe_t
 );
-
-char *ive_get_full_cmd(
-    enum enum_plot_timeframe_t a_enum_plot_timeframe_t,
-    const char *a_input_file,
-    uint32_t a_current_year
-);

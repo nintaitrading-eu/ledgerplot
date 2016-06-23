@@ -10,10 +10,12 @@
 #include "income_vs_expenses.h"
 
 
+#define MAX_CMD_LENGTH 512
+
 static char *f_cmd_yearly =
     "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
-static char *f_cmd_monthly =
-    "ledger -f %s --strict bal --real -X EUR -s -p \"%s %d\" -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+//static char *f_cmd_monthly =
+//    "ledger -f %s --strict bal --real -X EUR -s -p \"%s %d\" -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 // Note: substitute s with the month names january, february, etc. Define an enum or something for that.
 // e.g. -p "may 2015"
 // TODO: -b "startdate" -e "enddate"
@@ -31,11 +33,11 @@ int ive_prepare_temp_file(
     FILE *a_output_file,
     uint32_t a_start_year,
     uint32_t a_end_year,
-    enum enum_plot_timeframe_t a_plot_timeframe_t
+    enum enum_plot_timeframe_t a_enum_plot_timeframe
 )
 {
     FILE *l_fp;
-    char *l_cmd;
+    char l_cmd[MAX_CMD_LENGTH];
     char l_line_temp[MS_INPUT_LINE];
     char l_line_input[MS_INPUT_LINE];
     char l_line_output[MS_INPUT_LINE]; /* The output line may be just as long. */
@@ -50,12 +52,24 @@ int ive_prepare_temp_file(
     l_current_year = a_start_year;
     for (uint32_t i = 0; i < l_records; i++)
     {
-        printf("test -- %d\n", i);
+        memset(l_cmd, '\0', sizeof(char) * MAX_CMD_LENGTH);
         if (i > 0)
             l_current_year++;
-        printf("test2 -- %d\n", l_current_year);
-        printf("test3 -- %s\n", a_input_file);
-        l_cmd = ive_get_full_cmd(a_plot_timeframe_t, a_input_file, l_current_year);
+        switch(a_enum_plot_timeframe)
+        {
+            case daily:
+                //sprintf(l_result, f_cmd_daiy, a_input_file, a_current_year);
+                break;
+            case weekly:
+                //sprintf(l_result, f_cmd_weekly, a_input_file, a_current_year);
+                break;
+            case monthly:
+                //sprintf(l_result, f_cmd_monthly, a_input_file, a_current_year);
+                break;
+            default:
+                snprintf(l_cmd, MAX_CMD_LENGTH - 1, f_cmd_yearly, a_input_file, l_current_year);
+        }
+
         l_fp = popen(l_cmd, "r");
         if (l_fp == NULL)
         {
@@ -101,31 +115,4 @@ int ive_prepare_temp_file(
         fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3);
     }
     return 0;
-}
-
-char *ive_get_full_cmd(
-    enum enum_plot_timeframe_t a_enum_plot_timeframe_t,
-    const char *a_input_file,
-    uint32_t a_current_year
-)
-{
-    char *l_result = NULL;
-    switch(a_enum_plot_timeframe_t)
-    {
-        case daily:
-            //sprintf(l_result, f_cmd_daiy, a_input_file, a_current_year);
-            break;
-        case weekly:
-            //sprintf(l_result, f_cmd_weekly, a_input_file, a_current_year);
-            break;
-        case monthly:
-            sprintf(l_result, f_cmd_monthly, a_input_file, a_current_year);
-            break;
-        default:
-            printf("test-a -- %s\n", f_cmd_yearly);
-            printf("test-b -- %s\n", a_input_file);
-            printf("test-c -- %d\n", a_current_year);
-            sprintf(l_result, f_cmd_yearly, a_input_file, a_current_year);
-    }
-    return l_result;
 }

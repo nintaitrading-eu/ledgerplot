@@ -85,25 +85,25 @@ int main(int argc, char *argv[])
     printf(">>> Preparing data...\n");
     if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) != SUCCEEDED)
         l_status = EXIT_FAILURE;
-    printf(">>> Preparation %s.\n", return_status_to_string(l_status));
+    printf(">>> Preparation %s.\n", string_return_status(l_status));
 
     printf(">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
         && (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
-    printf(">>> Merging %s.\n", return_status_to_string(l_status));
+    printf(">>> Merging %s.\n", string_return_status(l_status));
 
     printf(">>> Loading data...\n");
     if ((l_status != EXIT_FAILURE)
         && (load_data(&l_lines_total, l_gnu_command) != SUCCEEDED))
         l_status = EXIT_FAILURE;
-    printf(">>> Loading %s.\n", return_status_to_string(l_status));
+    printf(">>> Loading %s.\n", string_return_status(l_status));
 
     printf(">>> Appending plot cmd...\n");
     if ((l_status != EXIT_FAILURE)
         && (append_plot_cmd(&l_lines_total, l_gnu_command) != SUCCEEDED))
         l_status = EXIT_FAILURE;
-    printf(">>> Appending %s.\n", return_status_to_string(l_status));
+    printf(">>> Appending %s.\n", string_return_status(l_status));
 
     /*for (int i=0; i<l_lines_total+2; i++)
     {
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     if ((l_status != EXIT_FAILURE)
         && (plot_data(l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
-    printf(">>> Plotting %s.\n", return_status_to_string(l_status));
+    printf(">>> Plotting %s.\n", string_return_status(l_status));
     /*
      * Cleanup tmp files.
      */
@@ -155,7 +155,7 @@ static int prepare_data_file(
         case income_vs_expenses:
             if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
             {
-                fprintf(stderr, "Could not prepare temporary data-file %s.", FILE_DATA_TMP);
+                fprintf(stderr, "Could not prepare temporary data-file %s.\n", FILE_DATA_TMP);
                 l_status = FAILED;
             };
             break;
@@ -185,7 +185,7 @@ static int merge_data_files(uint32_t a_nargs, ...)
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
         l_current = va_arg(l_ap, char *);
-        printf(">>> [%s]", l_current);
+        printf(">>> [%s] ", l_current);
         if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
         {
             printf(" [FAIL]");
@@ -323,7 +323,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     }
     fclose(l_dst);
     fclose(l_src);
-    fprintf(stdout, "%d lines copied from %s to %s.\n", l_count, a_src, a_dst);
+    fprintf(stdout, "%d lines copied from %s to %s.", l_count, a_src, a_dst);
     return SUCCEEDED;
 }
 
