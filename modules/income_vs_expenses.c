@@ -83,13 +83,9 @@ int ive_prepare_temp_file(
             *l_line_temp = '\0'; /* Make sure temp string is empty. */
             trim_whitespace(l_line_temp, l_line_input, MS_INPUT_LINE);
             if (strlen(l_line_output) <= 0)
-            {
                 sprintf(l_line_output, "%s", l_line_temp);
-            }
             else
-            {
                 sprintf(l_line_output, "%s %s", l_line_output, l_line_temp);
-            }
         }
         l_d1 = strtod(l_line_output, &l_tmp);
         l_d2 = -1.0 * strtod(l_tmp, &l_tmp); /* Income is the second number, it's
