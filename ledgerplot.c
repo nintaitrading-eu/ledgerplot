@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     printf(">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(3, f_file_ive_layout,  FILE_DATA_TMP, FILE_BARCHART) != SUCCEEDED))
+        && (merge_data_files(2, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     printf(">>> Merging %s.\n", string_return_status(l_status));
 
@@ -234,8 +234,8 @@ static int append_plot_cmd(
     sprintf(
         a_gnu_command[*a_lines_total - 1],
         f_cmd_gnuplot_barchart,
-        FILE_MERGED_TMP,
-        FILE_MERGED_TMP
+        FILE_DATA_TMP,
+        FILE_DATA_TMP
     );
     return SUCCEEDED;
 }
@@ -297,15 +297,15 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
     l_src = fopen(a_src, "r");
     if (l_src == NULL)
     {
-        printf("Error: could not open source file %s.\n", a_src);
+        fprintf(stderr, "Error: could not open source file %s.\n", a_src);
         return FAILED;
     }
 
     l_dst = fopen(a_dst, "a");
     if (l_dst == NULL)
     {
-        fprintf(stderr, "Error: could not open source file %s.\n", a_src);
-        fclose(l_src); // Note: Was already opened.
+        fprintf(stderr, "Error: could not open destination file %s.\n", a_dst);
+        fclose(l_dst); // Note: Was already opened.
         return FAILED;
     }
 
@@ -360,6 +360,7 @@ static int remove_tmp_files(uint32_t a_nargs, ...)
     char *l_current;
     uint32_t l_status = SUCCEEDED;
 
+    return SUCCEEDED;
     printf(">>> Cleaning up temporary file(s)...\n");
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
@@ -395,8 +396,10 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         return FAILED;
     }
     /* Note: l_count < MS_OUTPUT_ARRAY -> leave 1 row for the plot command, that is added in a final step. */
+    printf("test 0\n");
     while ((fgets(l_line, MS_INPUT_LINE, l_file) != NULL) && (l_count < MS_OUTPUT_ARRAY))
     {
+        printf("test 1a - %s\n", l_line);
         if (
             (strlen(l_line) > 0)
             && (l_line[0] != '#')
@@ -404,6 +407,7 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
+            printf("test 1b - %s\n", l_line_temp);
             sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
