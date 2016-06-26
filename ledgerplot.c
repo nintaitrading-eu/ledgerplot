@@ -202,7 +202,7 @@ static int merge_data_files(uint32_t a_nargs, ...)
 
 /*
  * load_data:
- * Load data from merged file with layout data, gnuplot data and gnuplot commands.
+ * Load data from merged file with layout data and gnuplot commands.
  */
 static int load_data(
     int *a_lines_total,
@@ -210,11 +210,14 @@ static int load_data(
 )
 {
     memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
+    printf("test load_data 1 - a_lines_total = %d\n", *a_lines_total);
     if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, a_lines_total) != SUCCEEDED)
     {
+        printf("test load_data 2 - a_lines_total = %d\n", *a_lines_total);
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return FAILED;
     }
+    printf("test load_data 3 - a_lines_total = %d\n", *a_lines_total);
     return SUCCEEDED;
 }
 
@@ -231,6 +234,8 @@ static int append_plot_cmd(
     /*
      * Load barchart plot command
      */
+    printf("test append_plot_cmd - f_cmd_gnuplot_barchart = %s\n", f_cmd_gnuplot_barchart);
+    printf("test append_plot_cmd - a_lines_total = %d\n", *a_lines_total);
     sprintf(
         a_gnu_command[*a_lines_total - 1],
         f_cmd_gnuplot_barchart,
@@ -396,10 +401,8 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         return FAILED;
     }
     /* Note: l_count < MS_OUTPUT_ARRAY -> leave 1 row for the plot command, that is added in a final step. */
-    printf("test 0\n");
     while ((fgets(l_line, MS_INPUT_LINE, l_file) != NULL) && (l_count < MS_OUTPUT_ARRAY))
     {
-        printf("test 1a - %s\n", l_line);
         if (
             (strlen(l_line) > 0)
             && (l_line[0] != '#')
@@ -407,11 +410,12 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            printf("test 1b - %s\n", l_line_temp);
             sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
-    a_lines_total += l_count;
+    printf("test get_lines_from_file 1 - l_count = %d\n", l_count);
+    *a_lines_total += l_count;
     fclose(l_file);
+    printf("test get_lines_from_file 2 - a_lines_total = %d\n", *a_lines_total);
     return l_count;
 }
