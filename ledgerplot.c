@@ -410,11 +410,11 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
+            sprintf(a_gnu_command[(int)a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
     printf("test get_lines_from_file 1 - l_count = %d\n", l_count);
-    *a_lines_total += l_count;
+    a_lines_total += l_count;
     fclose(l_file);
     printf("test get_lines_from_file 2 - a_lines_total = %d\n", a_lines_total);
     return l_count;
