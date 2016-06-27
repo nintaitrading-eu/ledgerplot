@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         argc,
         argv,
         1, /* help */
-        VERSION /* version */
+        LEDGERPLOT_VERSION /* version */
     );
 
     if (argc == 1)
@@ -180,7 +180,6 @@ static uint32_t merge_data_files(uint32_t a_nargs, ...)
     va_list l_ap;
     char *l_current;
     uint32_t l_status = SUCCEEDED;
-    printf(">>> Merging...\n");
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
@@ -196,7 +195,6 @@ static uint32_t merge_data_files(uint32_t a_nargs, ...)
         printf("\n");
     }
     va_end(l_ap);
-    printf(">>> Merging done.\n");
     return l_status;
 }
 
