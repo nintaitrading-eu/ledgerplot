@@ -18,23 +18,23 @@
 #define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
 
 
-static int prepare_data_file(
+static uint32_t prepare_data_file(
     const char *a_file,
     enum enum_plot_type_t a_plot_type,
     enum enum_plot_timeframe_t a_plot_timeframe,
-    int a_start_year,
-    int a_end_year
+    uint32_t a_start_year,
+    uint32_t a_end_year
 );
-static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-    int *a_lines_total);
-static int merge_data_files(uint32_t a_nargs, ...);
-static int load_data(int *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static int append_plot_cmd(int *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+    uint32_t *a_lines_total);
+static uint32_t merge_data_files(uint32_t a_nargs, ...);
+static uint32_t load_data(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static uint32_t append_plot_cmd(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static uint32_t plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
     const char *a_file_chart_cmd);
-static int remove_tmp_files(uint32_t a_nargs, ...);
-static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static int append_content_to_file(const char *a_src, const char *a_dst);
+static uint32_t remove_tmp_files(uint32_t a_nargs, ...);
+static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static uint32_t append_content_to_file(const char *a_src, const char *a_dst);
 
 
 static const char *f_file_ive_layout =
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 {
     uint32_t l_start_year;
     uint32_t l_end_year;
-    int32_t l_lines_total = 0;
+    uint32_t l_lines_total = 0;
     char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     enum enum_plot_type_t l_plot_type;
     enum enum_plot_timeframe_t l_plot_timeframe;
@@ -95,17 +95,17 @@ int main(int argc, char *argv[])
 
     printf(">>> Loading data...\n");
     if ((l_status != EXIT_FAILURE)
-        && (load_data((int *)l_lines_total, l_gnu_command) != SUCCEEDED))
+        && (load_data(&l_lines_total, l_gnu_command) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     printf(">>> Loading %s.\n", string_return_status(l_status));
 
     printf(">>> Appending plot cmd...\n");
     if ((l_status != EXIT_FAILURE)
-        && (append_plot_cmd((int *)l_lines_total, l_gnu_command) != SUCCEEDED))
+        && (append_plot_cmd(&l_lines_total, l_gnu_command) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     printf(">>> Appending %s.\n", string_return_status(l_status));
 
-    /*for (int i=0; i<l_lines_total+2; i++)
+    /*for (uint32_t i=0; i<l_lines_total+2; i++)
     {
         printf("-- %s\n", l_gnu_command[i]);
     }*/
@@ -132,12 +132,12 @@ int main(int argc, char *argv[])
  * prepare_data_file:
  * Prepare temporary data file
  */
-static int prepare_data_file(
+static uint32_t prepare_data_file(
     const char *a_file,
     enum enum_plot_type_t a_plot_type,
     enum enum_plot_timeframe_t a_plot_timeframe,
-    int a_start_year,
-    int a_end_year
+    uint32_t a_start_year,
+    uint32_t a_end_year
 )
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
@@ -174,9 +174,9 @@ static int prepare_data_file(
  * merge_data_files:
  * Load layout, data and gnuplot specific file-data into one temporary file we can plot from.
  */
-static int merge_data_files(uint32_t a_nargs, ...)
+static uint32_t merge_data_files(uint32_t a_nargs, ...)
 {
-    register int l_i;
+    register uint32_t l_i;
     va_list l_ap;
     char *l_current;
     uint32_t l_status = SUCCEEDED;
@@ -204,20 +204,20 @@ static int merge_data_files(uint32_t a_nargs, ...)
  * load_data:
  * Load data from merged file with layout data and gnuplot commands.
  */
-static int load_data(
-    int *a_lines_total,
+static uint32_t load_data(
+    uint32_t *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
     memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
-    printf("test load_data 1 - a_lines_total = %d\n", a_lines_total);
-    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, a_lines_total) != SUCCEEDED)
+    printf("test load_data 1 - a_lines_total = %d\n", *a_lines_total);
+    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, (uint32_t *)a_lines_total) != SUCCEEDED)
     {
-        printf("test load_data 2 - a_lines_total = %d\n", a_lines_total);
+        printf("test load_data 2 - a_lines_total = %d\n", *a_lines_total);
         fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
         return FAILED;
     }
-    printf("test load_data 3 - a_lines_total = %d\n", a_lines_total);
+    printf("test load_data 3 - a_lines_total = %d\n", *a_lines_total);
     return SUCCEEDED;
 }
 
@@ -225,8 +225,8 @@ static int load_data(
  * append_plot_cmd:
  * Append a line to the command array, with the actual plot command.
  */
-static int append_plot_cmd(
-    int *a_lines_total,
+static uint32_t append_plot_cmd(
+    uint32_t *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
@@ -235,9 +235,9 @@ static int append_plot_cmd(
      * Load barchart plot command
      */
     printf("test append_plot_cmd - f_cmd_gnuplot_barchart = %s\n", f_cmd_gnuplot_barchart);
-    printf("test append_plot_cmd - a_lines_total = %d\n", a_lines_total);
+    printf("test append_plot_cmd - a_lines_total = %d\n", *a_lines_total);
     sprintf(
-        a_gnu_command[(int)a_lines_total - 1],
+        a_gnu_command[*a_lines_total - 1],
         f_cmd_gnuplot_barchart,
         FILE_DATA_TMP,
         FILE_DATA_TMP
@@ -249,7 +249,7 @@ static int append_plot_cmd(
  * write_to_gnuplot:
  * Writes the generated script lines to a gnuplot pipe.
  */
-static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
+static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 {
     FILE *l_gp; // Gnuplot pipe
 
@@ -291,7 +291,7 @@ static int write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
  * append_content_to_file:
  * Reads a file and appends it's non-comment and non-empty lines output to the tmp merge file.
  */
-static int append_content_to_file(const char *a_src, const char *a_dst)
+static uint32_t append_content_to_file(const char *a_src, const char *a_dst)
 {
     FILE *l_src;
     FILE *l_dst;
@@ -336,7 +336,7 @@ static int append_content_to_file(const char *a_src, const char *a_dst)
  * plot_data:
  * Plot the data and display information about what's going on.
  */
-static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+static uint32_t plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
     const char *a_file_chart_cmd)
 {
     printf("%s:\n", a_file_layout);
@@ -358,9 +358,9 @@ static int plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const c
  * remove_tmp_files:
  * Remove given tmp files.
  */
-static int remove_tmp_files(uint32_t a_nargs, ...)
+static uint32_t remove_tmp_files(uint32_t a_nargs, ...)
 {
-    register int l_i;
+    register uint32_t l_i;
     va_list l_ap;
     char *l_current;
     uint32_t l_status = SUCCEEDED;
@@ -387,7 +387,8 @@ static int remove_tmp_files(uint32_t a_nargs, ...)
  * Loads the lines of a file into an array that will be used to send to gnuplot. It returns an integer for the number
  * of lines read.
  */
-static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], int *a_lines_total)
+static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+        uint32_t *a_lines_total)
 {
     FILE *l_file;
     char l_line[MS_INPUT_LINE];
@@ -410,12 +411,12 @@ static int get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_
         {
             l_count++;
             trim_whitespace(l_line_temp, l_line, MS_INPUT_LINE);
-            sprintf(a_gnu_command[(int)a_lines_total + l_count - 1], "%s", l_line_temp);
+            sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
     printf("test get_lines_from_file 1 - l_count = %d\n", l_count);
     a_lines_total += l_count;
     fclose(l_file);
-    printf("test get_lines_from_file 2 - a_lines_total = %d\n", a_lines_total);
+    printf("test get_lines_from_file 2 - a_lines_total = %d\n", *a_lines_total);
     return l_count;
 }
