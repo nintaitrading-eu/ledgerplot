@@ -146,7 +146,7 @@ static uint32_t prepare_data_file(
     l_output_file = fopen(FILE_DATA_TMP, "w");
     if (l_output_file == NULL)
     {
-        printf("Error: could not open output file %s.\n", FILE_DATA_TMP);
+        fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA_TMP);
         return FAILED;
     }
     l_status = SUCCEEDED;
@@ -155,7 +155,7 @@ static uint32_t prepare_data_file(
         case income_vs_expenses:
             if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
             {
-                fprintf(stderr, "Could not prepare temporary data-file %s.\n", FILE_DATA_TMP);
+                fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-file %s.\n", FILE_DATA_TMP);
                 l_status = FAILED;
             };
             break;
@@ -163,7 +163,7 @@ static uint32_t prepare_data_file(
         /* dividend ... */
         /* ...*/
         default:
-            fprintf(stderr, "Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
+            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
             l_status = FAILED;
     }
     fclose(l_output_file);
@@ -210,14 +210,11 @@ static uint32_t load_data(
 )
 {
     memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
-    printf("test load_data 1 - a_lines_total = %d\n", *a_lines_total);
-    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, (uint32_t *)a_lines_total) != SUCCEEDED)
+    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, a_lines_total) != SUCCEEDED)
     {
-        printf("test load_data 2 - a_lines_total = %d\n", *a_lines_total);
-        fprintf(stderr, "Could not read %s.\n", FILE_MERGED_TMP);
+        fprintf(stderr, "Error in load_data: Could not read %s.\n", FILE_MERGED_TMP);
         return FAILED;
     }
-    printf("test load_data 3 - a_lines_total = %d\n", *a_lines_total);
     return SUCCEEDED;
 }
 
@@ -234,8 +231,6 @@ static uint32_t append_plot_cmd(
     /*
      * Load barchart plot command
      */
-    printf("test append_plot_cmd - f_cmd_gnuplot_barchart = %s\n", f_cmd_gnuplot_barchart);
-    printf("test append_plot_cmd - a_lines_total = %d\n", *a_lines_total);
     sprintf(
         a_gnu_command[*a_lines_total - 1],
         f_cmd_gnuplot_barchart,
@@ -365,7 +360,6 @@ static uint32_t remove_tmp_files(uint32_t a_nargs, ...)
     char *l_current;
     uint32_t l_status = SUCCEEDED;
 
-    return SUCCEEDED;
     printf(">>> Cleaning up temporary file(s)...\n");
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
@@ -388,7 +382,7 @@ static uint32_t remove_tmp_files(uint32_t a_nargs, ...)
  * of lines read.
  */
 static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-        uint32_t *a_lines_total)
+    uint32_t *a_lines_total)
 {
     FILE *l_file;
     char l_line[MS_INPUT_LINE];
@@ -414,9 +408,7 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
             sprintf(a_gnu_command[*a_lines_total + l_count - 1], "%s", l_line_temp);
         }
     }
-    printf("test get_lines_from_file 1 - l_count = %d\n", l_count);
-    a_lines_total += l_count;
+    *a_lines_total += l_count;
     fclose(l_file);
-    printf("test get_lines_from_file 2 - a_lines_total = %d\n", *a_lines_total);
-    return l_count;
+    return SUCCEEDED;
 }
