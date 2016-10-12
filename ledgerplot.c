@@ -161,7 +161,7 @@ static uint32_t prepare_data_file(
             break;
         /* expenses per category */
         /* dividend ... */
-        /* ...*/
+        /* ... */
         default:
             fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
             l_status = FAILED;
