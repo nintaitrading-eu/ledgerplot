@@ -18,6 +18,7 @@ typedef struct {
     int income_vs_expenses;
     int monthly;
     int version;
+    int verbose;
     int weekly;
     int yearly;
     /* options with arguments */
@@ -36,6 +37,7 @@ const char help_message[] =
 "    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
+"    ledgerplot --verbose\n"
 "\n"
 "Options:\n"
 "    --file=<file_name>          Ledger dat filename to use.\n"
@@ -49,13 +51,15 @@ const char help_message[] =
 "    --weekly                    Plot totals per week.\n"
 "    -h --help                   Show this screen.\n"
 "    --version                   Show version.\n"
+"    --verbose                   Display info on stdout.\n"
 "";
 
 const char usage_pattern[] =
 "Usage:\n"
 "    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
-"    ledgerplot --version";
+"    ledgerplot --version"
+"    ledgerplot --verbose";
 
 typedef struct {
     const char *name;
@@ -282,6 +286,8 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
             args->monthly = option->value;
         } else if (!strcmp(option->olong, "--version")) {
             args->version = option->value;
+        } else if (!strcmp(option->olong, "--verbose")) {
+            args->verbose = option->value;
         } else if (!strcmp(option->olong, "--weekly")) {
             args->weekly = option->value;
         } else if (!strcmp(option->olong, "--yearly")) {
@@ -315,7 +321,7 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
-        0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;
@@ -332,6 +338,7 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--income_vs_expenses", 0, 0, NULL},
         {NULL, "--monthly", 0, 0, NULL},
         {NULL, "--version", 0, 0, NULL},
+        {NULL, "--verbose", 0, 0, NULL},
         {NULL, "--weekly", 0, 0, NULL},
         {NULL, "--yearly", 0, 0, NULL},
         {NULL, "--endyear", 1, 0, NULL},

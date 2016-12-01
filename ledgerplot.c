@@ -35,6 +35,7 @@ static uint32_t plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], co
 static uint32_t remove_tmp_files(uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_content_to_file(const char *a_src, const char *a_dst);
+void print_if_verbose(int *a_verbose, char *format, ...);
 
 
 static const char *f_file_ive_layout =
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
     char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     enum enum_plot_type_t l_plot_type;
     enum enum_plot_timeframe_t l_plot_timeframe;
+    int l_verbose = 0;
 
     /*
      * Parse arguments
@@ -70,6 +72,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    l_verbose = args.verbose ? 1 : 0;
     l_start_year = atoi(args.startyear);
     l_end_year = atoi(args.endyear);
 
@@ -82,10 +85,10 @@ int main(int argc, char *argv[])
      * Preparation of data.
      */
     uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
-    printf(">>> Preparing data...\n");
+    print_if_verbose(&l_verbose, ">>> Preparing data...\n");
     if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) != SUCCEEDED)
         l_status = EXIT_FAILURE;
-    printf(">>> Preparation %s.\n", string_return_status(l_status));
+    print_if_verbose(&l_verbose, ">>> Preparation %s.\n", string_return_status(l_status));
 
     printf(">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
@@ -409,4 +412,15 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
     *a_lines_total += l_count;
     fclose(l_file);
     return SUCCEEDED;
+}
+
+void print_if_verbose(int *a_verbose, char *a_msg, ...)
+{
+    va_list l_args;
+    if (!a_verbose)
+        return;
+
+    va_start(l_args, a_msg);
+    vprintf(a_msg, l_args);
+    va_end(l_args);
 }

@@ -17,3 +17,4 @@ Options:
     --weekly                    Plot totals per week.
     -h --help                   Show this screen.
     --version                   Show version.
+    --verbose                   Display info on stdout.
