@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
     }
 
     l_verbose = args.verbose ? 1 : 0;
-    l_start_year = atoi(args.startyear);
-    l_end_year = atoi(args.endyear);
+    l_start_year = args.startyear ? atoi(args.startyear) : 0;
+    l_end_year = args.endyear ? atoi(args.endyear) : 0;
 
-    // TODO: get l_plot_type from parameters
-    // TODO: get l_plot_timeframe from parameters
+    // TODO: get_plot_type_from_args func,
+// to return plottype based on selection. See docopt.txt
     l_plot_type = income_vs_expenses;
     l_plot_timeframe = yearly;
 
