@@ -27,14 +27,14 @@ static uint32_t prepare_data_file(
 );
 static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total);
-static uint32_t merge_data_files(uint32_t a_nargs, ...);
+static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t load_data(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_plot_cmd(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static uint32_t plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
     const char *a_file_chart_cmd);
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static uint32_t append_content_to_file(const char *a_src, const char *a_dst);
+static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
 void print_if_verbose(uint32_t *a_verbose, char *format, ...);
 
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     print_if_verbose(&l_verbose, ">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(2, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
+        && (merge_data_files(&l_verbose, 2, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
      */
     print_if_verbose(&l_verbose, ">>> Plotting...\n");
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
+        && (plot_data(&l_verbose, l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
     /*
@@ -177,7 +177,7 @@ static uint32_t prepare_data_file(
  * merge_data_files:
  * Load layout, data and gnuplot specific file-data into one temporary file we can plot from.
  */
-static uint32_t merge_data_files(uint32_t a_nargs, ...)
+static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
 {
     register uint32_t l_i;
     va_list l_ap;
@@ -187,15 +187,15 @@ static uint32_t merge_data_files(uint32_t a_nargs, ...)
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
         l_current = va_arg(l_ap, char *);
-        printf(">>> [%s] ", l_current);
-        if(append_content_to_file(l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        print_if_verbose(a_verbose, ">>> [%s] ", l_current);
+        if(append_content_to_file(a_verbose, l_current, FILE_MERGED_TMP) != SUCCEEDED)
         {
-            printf(" [FAIL]");
+            print_if_verbose(a_verbose, " [FAIL]");
             l_status = FAILED;
         }
         else
-            printf(" [OK]");
-        printf("\n");
+            print_if_verbose(a_verbose, " [OK]");
+        print_if_verbose(a_verbose, "\n");
     }
     va_end(l_ap);
     return l_status;
@@ -287,7 +287,7 @@ static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LI
  * append_content_to_file:
  * Reads a file and appends it's non-comment and non-empty lines output to the tmp merge file.
  */
-static uint32_t append_content_to_file(const char *a_src, const char *a_dst)
+static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst)
 {
     FILE *l_src;
     FILE *l_dst;
@@ -324,7 +324,7 @@ static uint32_t append_content_to_file(const char *a_src, const char *a_dst)
     }
     fclose(l_dst);
     fclose(l_src);
-    fprintf(stdout, "%d lines copied from %s to %s.", l_count, a_src, a_dst);
+    print_if_verbose(a_verbose, "%d lines copied from %s to %s.", l_count, a_src, a_dst);
     return SUCCEEDED;
 }
 
@@ -332,11 +332,11 @@ static uint32_t append_content_to_file(const char *a_src, const char *a_dst)
  * plot_data:
  * Plot the data and display information about what's going on.
  */
-static uint32_t plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
     const char *a_file_chart_cmd)
 {
-    printf("%s:\n", a_file_layout);
-    printf(">>> Generated using gnuplot chart info from %s.\n", a_file_chart_cmd);
+    print_if_verbose(a_verbose, "%s:\n", a_file_layout);
+    print_if_verbose(a_verbose, ">>> Generated using gnuplot chart info from %s.\n", a_file_chart_cmd);
     if (write_to_gnuplot(a_gnu_command) != SUCCEEDED)
     {
         fprintf(stderr, ">>> Error exporting data to png!\n");
@@ -344,8 +344,8 @@ static uint32_t plot_data(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], co
     }
     else
     {
-        printf(">>> Data exported to png.\n");
-        printf(">>> The filename was specified in %s.\n", f_file_ive_layout);
+        print_if_verbose(a_verbose, ">>> Data exported to png.\n");
+        print_if_verbose(a_verbose, ">>> The filename was specified in %s.\n", f_file_ive_layout);
     }
     return SUCCEEDED;
 }
@@ -361,7 +361,7 @@ static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
     char *l_current;
     uint32_t l_status = SUCCEEDED;
 
-    printf(">>> Cleaning up temporary file(s)...\n");
+    print_if_verbose(a_verbose, ">>> Cleaning up temporary file(s)...\n");
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
@@ -373,7 +373,7 @@ static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
         }
     }
     va_end(l_ap);
-    printf(">>> Cleaning done.\n");
+    print_if_verbose(a_verbose, ">>> Cleaning done.\n");
     return l_status;
 }
 
