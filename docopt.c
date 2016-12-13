@@ -34,10 +34,9 @@ const char help_message[] =
 "Ledgerplot.\n"
 "\n"
 "Usage:\n"
-"    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
-"    ledgerplot --verbose\n"
 "\n"
 "Options:\n"
 "    --file=<file_name>          Ledger dat filename to use.\n"
@@ -56,10 +55,9 @@ const char help_message[] =
 
 const char usage_pattern[] =
 "Usage:\n"
-"    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
-"    ledgerplot --version"
-"    ledgerplot --verbose";
+"    ledgerplot --version";
 
 typedef struct {
     const char *name;
@@ -345,7 +343,7 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--file", 1, 0, NULL},
         {NULL, "--startyear", 1, 0, NULL}
     };
-    Elements elements = {0, 0, 11, commands, arguments, options};
+    Elements elements = {0, 0, 12, commands, arguments, options};
 
     ts = tokens_new(argc, argv);
     if (parse_args(&ts, &elements))
