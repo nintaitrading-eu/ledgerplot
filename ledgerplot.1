@@ -16,14 +16,32 @@ The plots are exported to png files, in the same directory where the ledgerplot 
 is started.
 .SH OPTIONS
 .TP
-.B \-v
+.B \--help
+Prints basic usage info to standard output, then exits.
+.B \--version
 Prints version information to standard output, then exits.
+.B \--verbose
+Prints information to standard output, while the program is running. By default, the program does not display anything.
 .B \-\-file=<filename>
 Used to specify the ledger dat file to query.
 .B \-\-startyear=<year_start>
 Start year for the ledger query.
 .B \-\-endyear=<year_end>
 End year for the ledger query.
+.B \-\-income_vs_expenses
+One of the possible charts we can make: income vs expenses.
+.B \-\-income_per_category
+Not implemented yet! One of the possible charts we can make: income per category.
+.B \-\-expenses_per_category
+Not implemented yet! One of the possible charts we can make: expenses per category.
+.B \-\-yearly
+Yearly totals are used.
+.B \-\-quarterly
+Not implemented yet! Quarterly totals, for each year, are used.
+.B \-\-monthly
+Not implemented yet! Monthly totals are used.
+.B \-\-weekly
+Not implemented yet! Weekly totals are used.
 .SH USAGE
 .SH SEE ALSO
 .BR ledger (1)

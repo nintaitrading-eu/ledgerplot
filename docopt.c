@@ -12,15 +12,16 @@
 
 typedef struct {
     /* options without arguments */
-    int expenses_per_category;
     int help;
+    int expenses_per_category;
     int income_per_category;
     int income_vs_expenses;
+    int yearly;
+    int quarterly;
     int monthly;
+    int weekly;
     int version;
     int verbose;
-    int weekly;
-    int yearly;
     /* options with arguments */
     char *endyear;
     char *file;
@@ -34,7 +35,7 @@ const char help_message[] =
 "Ledgerplot.\n"
 "\n"
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
 "\n"
@@ -46,6 +47,7 @@ const char help_message[] =
 "    --income_per_category       Plot income per category.\n"
 "    --expenses_per_category     Plot expenses per category.\n"
 "    --yearly                    Plot totals per year.\n"
+"    --quarterly                 Plot totals per year, for each quarter.\n"
 "    --monthly                   Plot totals per month.\n"
 "    --weekly                    Plot totals per week.\n"
 "    -h --help                   Show this screen.\n"
@@ -55,7 +57,7 @@ const char help_message[] =
 
 const char usage_pattern[] =
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version";
 
@@ -280,25 +282,27 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
             args->income_per_category = option->value;
         } else if (!strcmp(option->olong, "--income_vs_expenses")) {
             args->income_vs_expenses = option->value;
+        } else if (!strcmp(option->olong, "--yearly")) {
+            args->yearly = option->value;
         } else if (!strcmp(option->olong, "--monthly")) {
             args->monthly = option->value;
+        } else if (!strcmp(option->olong, "--quarterly")) {
+            args->quarterly = option->value;
+        } else if (!strcmp(option->olong, "--weekly")) {
+            args->weekly = option->value;
         } else if (!strcmp(option->olong, "--version")) {
             args->version = option->value;
         } else if (!strcmp(option->olong, "--verbose")) {
             args->verbose = option->value;
-        } else if (!strcmp(option->olong, "--weekly")) {
-            args->weekly = option->value;
-        } else if (!strcmp(option->olong, "--yearly")) {
-            args->yearly = option->value;
-        } else if (!strcmp(option->olong, "--endyear")) {
-            if (option->argument)
-                args->endyear = option->argument;
         } else if (!strcmp(option->olong, "--file")) {
             if (option->argument)
                 args->file = option->argument;
         } else if (!strcmp(option->olong, "--startyear")) {
             if (option->argument)
                 args->startyear = option->argument;
+        } else if (!strcmp(option->olong, "--endyear")) {
+            if (option->argument)
+                args->endyear = option->argument;
         }
     }
     /* commands */
@@ -319,7 +323,7 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;
@@ -330,20 +334,21 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {""}
     };
     Option options[] = {
-        {NULL, "--expenses_per_category", 0, 0, NULL},
         {"-h", "--help", 0, 0, NULL},
-        {NULL, "--income_per_category", 0, 0, NULL},
-        {NULL, "--income_vs_expenses", 0, 0, NULL},
-        {NULL, "--monthly", 0, 0, NULL},
         {NULL, "--version", 0, 0, NULL},
         {NULL, "--verbose", 0, 0, NULL},
-        {NULL, "--weekly", 0, 0, NULL},
+        {NULL, "--income_vs_expenses", 0, 0, NULL},
+        {NULL, "--expenses_per_category", 0, 0, NULL},
+        {NULL, "--income_per_category", 0, 0, NULL},
         {NULL, "--yearly", 0, 0, NULL},
-        {NULL, "--endyear", 1, 0, NULL},
+        {NULL, "--quarterly", 0, 0, NULL},
+        {NULL, "--monthly", 0, 0, NULL},
+        {NULL, "--weekly", 0, 0, NULL},
         {NULL, "--file", 1, 0, NULL},
-        {NULL, "--startyear", 1, 0, NULL}
+        {NULL, "--startyear", 1, 0, NULL},
+        {NULL, "--endyear", 1, 0, NULL}
     };
-    Elements elements = {0, 0, 12, commands, arguments, options};
+    Elements elements = {0, 0, 13, commands, arguments, options};
 
     ts = tokens_new(argc, argv);
     if (parse_args(&ts, &elements))
