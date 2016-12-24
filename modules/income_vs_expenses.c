@@ -6,6 +6,7 @@
 #include <string.h>
 #include "../ledgerplot.h"
 #include "../c_generic/functions.h"
+#include "../c_generic/enum.h"
 #include "../enum.h"
 #include "income_vs_expenses.h"
 

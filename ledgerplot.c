@@ -9,6 +9,7 @@
 #include "ledgerplot.h"
 #include "docopt.c"
 #include "c_generic/functions.h"
+#include "c_generic/enum.h"
 #include "enum.h"
 #include "modules/income_vs_expenses.h"
 
@@ -35,8 +36,6 @@ static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRA
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
-void print_if_verbose(uint32_t *a_verbose, char *format, ...);
-
 
 static const char *f_file_ive_layout =
     "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
@@ -412,15 +411,4 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
     *a_lines_total += l_count;
     fclose(l_file);
     return SUCCEEDED;
-}
-
-void print_if_verbose(uint32_t *a_verbose, char *a_msg, ...)
-{
-    va_list l_args;
-    if (*a_verbose != 1)
-        return;
-
-    va_start(l_args, a_msg);
-    vprintf(a_msg, l_args);
-    va_end(l_args);
 }
