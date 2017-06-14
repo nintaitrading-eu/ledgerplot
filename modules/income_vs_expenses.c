@@ -22,6 +22,7 @@ static char *f_cmd_yearly =
 // TODO: -b "startdate" -e "enddate"
 //static char *f_cmd_income_vs_expenses_range =
 //    "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+// TODO: make the period an extra parameter. Including the -b -e stuff? Then you could add it to the command and let ledgerplot deal with it...
 
 
 /*
@@ -59,7 +60,7 @@ int ive_prepare_temp_file(
         switch(a_enum_plot_timeframe)
         {
             case daily:
-                //sprintf(l_result, f_cmd_daiy, a_input_file, a_current_year);
+                //sprintf(l_result, f_cmd_daily, a_input_file, a_current_year);
                 break;
             case weekly:
                 //sprintf(l_result, f_cmd_weekly, a_input_file, a_current_year);

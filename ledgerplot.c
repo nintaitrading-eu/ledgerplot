@@ -14,9 +14,14 @@
 #include "modules/income_vs_expenses.h"
 
 #define CMD_GNUPLOT "gnuplot -persist"
+#ifndef NDEBUG
+#define FILE_DATA_TMP "/var/tmp/lp_data.tmp"
+#define FILE_MERGED_TMP "/var/tmp/lp_merged.tmp"
+#else
 #define FILE_DATA_TMP "lp_data.tmp"
 #define FILE_MERGED_TMP "lp_merged.tmp"
-#define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
+#endif
+//#define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
 
 
 static uint32_t prepare_data_file(
@@ -24,21 +29,29 @@ static uint32_t prepare_data_file(
     enum enum_plot_type_t a_plot_type,
     enum enum_plot_timeframe_t a_plot_timeframe,
     uint32_t a_start_year,
-    uint32_t a_end_year
-);
-static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+    uint32_t a_end_year);
+static uint32_t get_lines_from_file(
+    const char *a_file,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total);
 static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t load_data(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_plot_cmd(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+static uint32_t plot_data(
+    uint32_t *a_verbose,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     const char *a_file_chart_cmd);
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
 
+#ifndef NDEBUG
 static const char *f_file_ive_layout =
     "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
+#else
+static const char *f_file_ive_layout =
+    "gnuplot/gp_income_vs_expenses.gnu";
+#endif
 static char *f_cmd_gnuplot_barchart =
     "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
@@ -91,9 +104,10 @@ int main(int argc, char *argv[])
 
     print_if_verbose(&l_verbose, ">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(&l_verbose, 2, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
+        && (merge_data_files(&l_verbose, 1, f_file_ive_layout) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));
+
 
     print_if_verbose(&l_verbose, ">>> Loading data...\n");
     if ((l_status != EXIT_FAILURE)
@@ -117,7 +131,7 @@ int main(int argc, char *argv[])
      */
     print_if_verbose(&l_verbose, ">>> Plotting...\n");
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(&l_verbose, l_gnu_command, f_file_ive_layout, FILE_BARCHART) != SUCCEEDED))
+        && (plot_data(&l_verbose, l_gnu_command, f_file_ive_layout) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
     /*
@@ -139,8 +153,7 @@ static uint32_t prepare_data_file(
     enum enum_plot_type_t a_plot_type,
     enum enum_plot_timeframe_t a_plot_timeframe,
     uint32_t a_start_year,
-    uint32_t a_end_year
-)
+    uint32_t a_end_year)
 {
     FILE *l_output_file; // Temp dat file, where the final script is written to.
     uint32_t l_status;
@@ -187,7 +200,7 @@ static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
     {
         l_current = va_arg(l_ap, char *);
         print_if_verbose(a_verbose, ">>> [%s] ", l_current);
-        if(append_content_to_file(a_verbose, l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        if (append_content_to_file(a_verbose, l_current, FILE_MERGED_TMP) != SUCCEEDED)
         {
             print_if_verbose(a_verbose, " [FAIL]");
             l_status = FAILED;
@@ -206,8 +219,7 @@ static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
  */
 static uint32_t load_data(
     uint32_t *a_lines_total,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
-)
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 {
     memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
     if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, a_lines_total) != SUCCEEDED)
@@ -331,10 +343,9 @@ static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, c
  * plot_data:
  * Plot the data and display information about what's going on.
  */
-static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE], const char *a_file_layout,
+static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     const char *a_file_chart_cmd)
 {
-    print_if_verbose(a_verbose, "%s:\n", a_file_layout);
     print_if_verbose(a_verbose, ">>> Generated using gnuplot chart info from %s.\n", a_file_chart_cmd);
     if (write_to_gnuplot(a_gnu_command) != SUCCEEDED)
     {
@@ -389,6 +400,7 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
     char l_line_temp[MS_INPUT_LINE];
     uint32_t l_count = 0;
 
+    fprintf(stdout, "DEBUG: %s", a_file);
     l_file = fopen(a_file, "r");
     if (l_file == NULL)
     {

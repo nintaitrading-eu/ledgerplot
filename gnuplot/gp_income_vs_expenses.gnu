@@ -7,11 +7,15 @@
 #set terminal pngcairo transparent enhanced font "inconsolata,10" fontscale 1.0 size 500, 350
 set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
 set output 'income_vs_expenses.png'
-COLORS = "light-salmon seagreen stealblue"
+COLORS = "red green blue"
 STARTCOL = 2
 ENDCOL = 4
+GAPSIZE = 3
+NCOL = ENDCOL-STARTCOL+1
+BOXWIDTH = 2./(GAPSIZE+NCOL)
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
 set style fill solid 0.75 border lt -1
+# TODO: The output is screwed up: legend has no color + data is shifted. Find the reason why.
 
 ### titles and labels
 set title "Income vs expenses" textcolor rgb "gold"
@@ -27,6 +31,7 @@ set grid layerdefault linetype 0 linewidth 1.000 linecolor "grey", linetype 0 li
 set xzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 set yzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 set zzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
+# Note: I can not use GAPSIZE below, for some reason... hardcoded value is used instead
 set style histogram clustered gap 3 title offset character 1, 0.25, 0
 set datafile missing '-'
 set style data histograms
