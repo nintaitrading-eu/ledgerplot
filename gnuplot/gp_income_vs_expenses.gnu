@@ -11,6 +11,7 @@ COLORS = "light-salmon seagreen stealblue"
 STARTCOL = 2
 ENDCOL = 4
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
+set style fill solid 0.75 border lt -1
 
 ### titles and labels
 set title "Income vs expenses" textcolor rgb "gold"
@@ -26,6 +27,16 @@ set grid layerdefault linetype 0 linewidth 1.000 linecolor "grey", linetype 0 li
 set xzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 set yzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 set zzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
+set style histogram clustered gap 3 title offset character 1, 0.25, 0
+set datafile missing '-'
+set style data histograms
+set xtics border in scale 0,0 nomirror rotate by -45  offset character 0, 0, 0 autojustify
+set xtics  norangelimit font ",8"
+set xtics ()
+set ytics border in scale 0,0 mirror norotate  offset character 0, 0, 0 autojustify
+set ztics border in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojustify
+set cbtics border in scale 0,0 mirror norotate  offset character 0, 0, 0 autojustify
+set rtics axis in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojustify
 
 ### legend
 set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"
