@@ -1,3 +1,4 @@
 ledgerplot
 *.o
 *.png
+tmp/
