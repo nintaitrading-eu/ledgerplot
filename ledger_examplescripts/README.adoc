@@ -1,0 +1,4 @@
+= Script source
+
+Found at the following location:
+https://www.sundialdreams.com/report-scripts-for-ledger-cli-with-gnuplot/
