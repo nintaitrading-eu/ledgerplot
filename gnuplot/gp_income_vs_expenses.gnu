@@ -7,7 +7,7 @@
 #set terminal pngcairo transparent enhanced font "inconsolata,10" fontscale 1.0 size 500, 350
 set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
 set output 'income_vs_expenses.png'
-COLORS = "red green blue"
+COLORS = "light-salmon seagreen stealblue"
 STARTCOL = 2
 ENDCOL = 4
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
