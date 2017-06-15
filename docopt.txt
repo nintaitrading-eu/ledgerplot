@@ -1,7 +1,7 @@
 Ledgerplot.
 
 Usage:
-    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]
+    ledgerplot --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--income_per_category|--expenses_per_category] [--yearly|--monthly|--weekly]
     ledgerplot --help
     ledgerplot --version
 
@@ -10,6 +10,7 @@ Options:
     --startyear=<year_start>    Plot from this year.
     --endyear=<year_end>        Plot until this year (inclusive).
     --income_vs_expenses        Plot income vs expenses.
+    --cashflow                  Plot cashflow.
     --income_per_category       Plot income per category.
     --expenses_per_category     Plot expenses per category.
     --yearly                    Plot totals per year.

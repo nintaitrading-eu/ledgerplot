@@ -35,7 +35,7 @@ const char help_message[] =
 "Ledgerplot.\n"
 "\n"
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
 "\n"
@@ -44,6 +44,7 @@ const char help_message[] =
 "    --startyear=<year_start>    Plot from this year.\n"
 "    --endyear=<year_end>        Plot until this year (inclusive).\n"
 "    --income_vs_expenses        Plot income vs expenses.\n"
+"    --cashflow                  Plot cashflow.\n"
 "    --income_per_category       Plot income per category.\n"
 "    --expenses_per_category     Plot expenses per category.\n"
 "    --yearly                    Plot totals per year.\n"
@@ -57,7 +58,7 @@ const char help_message[] =
 
 const char usage_pattern[] =
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version";
 
@@ -282,6 +283,8 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
             args->income_per_category = option->value;
         } else if (!strcmp(option->olong, "--income_vs_expenses")) {
             args->income_vs_expenses = option->value;
+        } else if (!strcmp(option->olong, "--cashflow")) {
+            args->cashflow= option->value;
         } else if (!strcmp(option->olong, "--yearly")) {
             args->yearly = option->value;
         } else if (!strcmp(option->olong, "--monthly")) {
@@ -338,6 +341,7 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--version", 0, 0, NULL},
         {NULL, "--verbose", 0, 0, NULL},
         {NULL, "--income_vs_expenses", 0, 0, NULL},
+        {NULL, "--cashflow", 0, 0, NULL},
         {NULL, "--expenses_per_category", 0, 0, NULL},
         {NULL, "--income_per_category", 0, 0, NULL},
         {NULL, "--yearly", 0, 0, NULL},
