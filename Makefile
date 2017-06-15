@@ -31,7 +31,7 @@ ledgerplot: ${OBJ}
 
 clean:
 	@echo cleaning...
-	@rm -fv ledgerplot ${OBJ} ledgerplot-${VERSION}.tar.gz
+	@rm -fv ledgerplot ${OBJ} *.png ledgerplot-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball

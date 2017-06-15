@@ -10,12 +10,7 @@ set output 'income_vs_expenses.png'
 COLORS = "red green blue"
 STARTCOL = 2
 ENDCOL = 4
-GAPSIZE = 3
-NCOL = ENDCOL-STARTCOL+1
-BOXWIDTH = 2./(GAPSIZE+NCOL)
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
-set style fill solid 0.75 border lt -1
-# TODO: The output is screwed up: legend has no color + data is shifted. Find the reason why.
 
 ### titles and labels
 set title "Income vs expenses" textcolor rgb "gold"
@@ -31,6 +26,21 @@ set grid layerdefault linetype 0 linewidth 1.000 linecolor "grey", linetype 0 li
 set xzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 set yzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
 set zzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
+
+### legend
+set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"
+
+
+### main code
+GAPSIZE = 3
+NCOL = ENDCOL-STARTCOL+1
+BOXWIDTH = 2./(GAPSIZE+NCOL)
+
+### barchart layout
+set style fill solid 0.75 border lt -1
+#set boxwidth BOXWIDTH absolute
+
+### Set tics and histograms
 # Note: I can not use GAPSIZE below, for some reason... hardcoded value is used instead
 set style histogram clustered gap 3 title offset character 1, 0.25, 0
 set datafile missing '-'
@@ -42,6 +52,3 @@ set ytics border in scale 0,0 mirror norotate  offset character 0, 0, 0 autojust
 set ztics border in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojustify
 set cbtics border in scale 0,0 mirror norotate  offset character 0, 0, 0 autojustify
 set rtics axis in scale 0,0 nomirror norotate  offset character 0, 0, 0 autojustify
-
-### legend
-set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"
