@@ -48,9 +48,13 @@ static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, c
 #ifndef NDEBUG
 static const char *f_file_ive_layout =
     "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
+static const char *f_file_cashflow_layout =
+    "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
 #else
 static const char *f_file_ive_layout =
     "gnuplot/gp_income_vs_expenses.gnu";
+static const char *f_file_cashflow_layout =
+    "gnuplot/gp_cashflow.gnu";
 #endif
 static char *f_cmd_gnuplot_barchart =
     "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
@@ -92,6 +96,8 @@ int main(int argc, char *argv[])
 // to return plottype based on selection. See docopt.txt
     l_plot_type = income_vs_expenses;
     l_plot_timeframe = yearly;
+
+    // TODO: refactor needed! You give a plot type, but the preparatioon/merging etc. is per plot type.
 
     /*
      * Preparation of data.
@@ -174,6 +180,8 @@ static uint32_t prepare_data_file(
                 l_status = FAILED;
             };
             break;
+	case cashflow:
+	    break;
         /* expenses per category */
         /* dividend ... */
         /* ... */
