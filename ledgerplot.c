@@ -44,16 +44,17 @@ static uint32_t plot_data(
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
+static const char get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type_t)
 
 #ifndef NDEBUG
-static const char *f_file_ive_layout =
+static const char *f_gnuplot_ive =
     "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
-//static const char *f_file_cashflow_layout =
+//static const char *f_gnuplot_cashflow =
 //    "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
 #else
-static const char *f_file_ive_layout =
+static const char *f_gnuplot_ive =
     "gnuplot/gp_income_vs_expenses.gnu";
-//static const char *f_file_cashflow_layout =
+//static const char *f_gnuplot_cashflow =
 //    "gnuplot/gp_cashflow.gnu";
 #endif
 static char *f_cmd_gnuplot_barchart =
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
 
     print_if_verbose(&l_verbose, ">>> Merging data...\n");
     if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(&l_verbose, 1, f_file_ive_layout) != SUCCEEDED))
+        && (merge_data_files(&l_verbose, 1, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));
 
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
      */
     print_if_verbose(&l_verbose, ">>> Plotting...\n");
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(&l_verbose, l_gnu_command, f_file_ive_layout) != SUCCEEDED))
+        && (plot_data(&l_verbose, l_gnu_command, f_gnuplot_ive) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
     /*
@@ -186,11 +187,33 @@ static uint32_t prepare_data_file(
         /* dividend ... */
         /* ... */
         default:
-            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[income_vs_expenses]);
+            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[a_plot_type_t]);
             l_status = FAILED;
     }
     fclose(l_output_file);
     return l_status;
+}
+
+/*
+ * get_gnuplot_instructions_for_plot_type:
+ * Returns the gnuplot filename to use, for the gnuplot instructions that belong
+ * to the given plot type.
+ */
+static const char get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type_t)
+{
+    switch(a_plot_type)
+    {
+        case income_vs_expenses:
+            return f_gnuplot_ive;
+            break;
+	case cashflow:
+	    break;
+        /* expenses per category */
+        /* dividend ... */
+        /* ... */
+        default:
+            fprintf(stderr, "Error in get_gnuplot_instructions_for_plot_type: Unknown plot type %s.\n", string_plot_type_t[a_plot_type_t]);
+    }
 }
 
 /*
@@ -363,7 +386,7 @@ static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRA
     else
     {
         print_if_verbose(a_verbose, ">>> Data exported to png.\n");
-        print_if_verbose(a_verbose, ">>> The filename was specified in %s.\n", f_file_ive_layout);
+        print_if_verbose(a_verbose, ">>> The filename was specified in %s.\n", f_gnuplot_ive);
     }
     return SUCCEEDED;
 }
