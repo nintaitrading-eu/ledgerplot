@@ -223,7 +223,7 @@ static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
 
 /*
  * load_data:
- * Load data from merged file with layout data and gnuplot commands.
+ * Load data from merged file with layout, data and gnuplot instructions.
  */
 static uint32_t load_data(
     uint32_t *a_lines_total,
