@@ -44,7 +44,7 @@ static uint32_t plot_data(
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
-static const char get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type_t)
+static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type);
 
 #ifndef NDEBUG
 static const char *f_gnuplot_ive =
@@ -57,7 +57,7 @@ static const char *f_gnuplot_ive =
 //static const char *f_gnuplot_cashflow =
 //    "gnuplot/gp_cashflow.gnu";
 #endif
-static char *f_cmd_gnuplot_barchart =
+static char *f_gnuplot_barchart =
     "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
 /*
@@ -187,7 +187,7 @@ static uint32_t prepare_data_file(
         /* dividend ... */
         /* ... */
         default:
-            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[a_plot_type_t]);
+            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
             l_status = FAILED;
     }
     fclose(l_output_file);
@@ -199,21 +199,22 @@ static uint32_t prepare_data_file(
  * Returns the gnuplot filename to use, for the gnuplot instructions that belong
  * to the given plot type.
  */
-static const char get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type_t)
+static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type)
 {
     switch(a_plot_type)
     {
         case income_vs_expenses:
             return f_gnuplot_ive;
             break;
-	case cashflow:
-	    break;
+	    case cashflow:
+	        break;
         /* expenses per category */
         /* dividend ... */
         /* ... */
         default:
-            fprintf(stderr, "Error in get_gnuplot_instructions_for_plot_type: Unknown plot type %s.\n", string_plot_type_t[a_plot_type_t]);
+            fprintf(stderr, "Error in get_gnuplot_instructions_for_plot_type: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
     }
+    return NULL;
 }
 
 /*
@@ -276,7 +277,7 @@ static uint32_t append_plot_cmd(
      */
     sprintf(
         a_gnu_command[*a_lines_total - 1],
-        f_cmd_gnuplot_barchart,
+        f_gnuplot_barchart,
         FILE_DATA_TMP,
         FILE_DATA_TMP
     );
