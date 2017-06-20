@@ -93,12 +93,36 @@ int main(int argc, char *argv[])
     l_start_year = args.startyear ? atoi(args.startyear) : 0;
     l_end_year = args.endyear ? atoi(args.endyear) : 0;
 
-    // TODO: get_plot_type_from_args func,
-// to return plottype based on selection. See docopt.txt
+    // plot_type (default: income_vs_expenses)
     l_plot_type = income_vs_expenses;
-    l_plot_timeframe = yearly;
+    if (args.cashflow)
+    {
+        l_plot_type = cashflow;
+    }
+    else if (args.income_per_category)
+    {
+        l_plot_type = income_per_category;
+    }
+    else if (args.expenses_per_category)
+    {
+        l_plot_type = expenses_per_category;
+    }
 
-    // TODO: refactor needed! You give a plot type, but the preparatioon/merging etc. is per plot type.
+    // plot_timeframe (default: yearly)
+    l_plot_timeframe = yearly;
+    if (args.quarterly)
+    {
+        l_plot_timeframe = quarterly;
+    }
+    else if (args.monthly)
+    {
+        l_plot_timeframe = monthly;
+    }
+    else if (args.weekly)
+    {
+        l_plot_timeframe = weekly;
+    };
+
 
     /*
      * Preparation of data.
