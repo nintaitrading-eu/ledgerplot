@@ -67,13 +67,13 @@ int ive_prepare_temp_file(
         switch(a_enum_plot_timeframe)
         {
             case weekly:
-                sprintf(l_result, f_cmd_weekly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
+                //sprintf(l_result, f_cmd_weekly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
                 break;
             case monthly:
-                sprintf(l_result, f_cmd_monthly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
+                //sprintf(l_result, f_cmd_monthly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
                 break;
             case quarterly:
-                //sprintf(l_result, f_cmquarterly, a_input_file, a_current_year);
+                //sprintf(l_result, f_cmd_quarterly, a_input_file, a_current_year);
                 break;
             default:
                 snprintf(l_cmd, MAX_CMD_LENGTH - 1, f_cmd_yearly, a_input_file, l_current_year);
