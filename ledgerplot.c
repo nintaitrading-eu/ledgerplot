@@ -15,14 +15,14 @@
 
 #define CMD_GNUPLOT "gnuplot -persist"
 #ifndef NDEBUG
-#define FILE_DATA_TMP "/var/tmp/lp_data.tmp"
+#define FILE_DATA0_TMP "/var/tmp/lp_data0.tmp"
+#define FILE_DATA1_TMP "/var/tmp/lp_data1.tmp"
 #define FILE_MERGED_TMP "/var/tmp/lp_merged.tmp"
 #else
-#define FILE_DATA_TMP "lp_data.tmp"
+#define FILE_DATA0_TMP "lp_data0.tmp"
+#define FILE_DATA1_TMP "lp_data1.tmp"
 #define FILE_MERGED_TMP "lp_merged.tmp"
 #endif
-//#define FILE_BARCHART "/usr/local/share/ledgerplot/gnuplot/gp_barchart.gnu"
-
 
 static uint32_t prepare_data_file(
     const char *a_file,
@@ -35,8 +35,13 @@ static uint32_t get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total);
 static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
-static uint32_t load_data(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static uint32_t append_plot_cmd(uint32_t *a_lines_total, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static uint32_t load_data(
+    uint32_t *a_lines_total,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+static uint32_t append_plot_cmd(
+    uint32_t *a_lines_total,
+    enum enum_plot_type_t a_plot_type,
+    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t plot_data(
     uint32_t *a_verbose,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
@@ -47,19 +52,15 @@ static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, c
 static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type);
 
 #ifndef NDEBUG
-static const char *f_gnuplot_ive =
-    "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
-//static const char *f_gnuplot_cashflow =
-//    "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
+static const char *f_gnuplot_ive = "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
+static const char *f_gnuplot_cashflow = "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
 #else
-static const char *f_gnuplot_ive =
-    "gnuplot/gp_income_vs_expenses.gnu";
-//static const char *f_gnuplot_cashflow =
-//    "gnuplot/gp_cashflow.gnu";
+static const char *f_gnuplot_ive = "gnuplot/gp_income_vs_expenses.gnu";
+static const char *f_gnuplot_cashflow = "gnuplot/gp_cashflow.gnu";
 #endif
-static char *f_gnuplot_barchart =
-    "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
+static char *f_gnuplot_ive_cmd = "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
+static char *f_gnuplot_cashflow_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"red\", '' using 1:2:2 with labels font \"Courier,8\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"green\", '' using 1:2:2 with labels font \"Courier,8\" offset 0,0.5 textcolor linestyle 0 notitle";
 /*
  * Main
  */
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
     uint32_t l_start_year;
     uint32_t l_end_year;
     uint32_t l_lines_total = 0;
-    char l_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char l_gnu_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     enum enum_plot_type_t l_plot_type;
     enum enum_plot_timeframe_t l_plot_timeframe;
     uint32_t l_verbose = 0;
@@ -94,6 +95,7 @@ int main(int argc, char *argv[])
     l_end_year = args.endyear ? atoi(args.endyear) : 0;
 
     // plot_type (default: income_vs_expenses)
+    // TODO: to much choosing between plot type. Perhaps put it in a struct and determine everything in 1 function?
     l_plot_type = income_vs_expenses;
     if (args.cashflow)
     {
@@ -123,7 +125,6 @@ int main(int argc, char *argv[])
         l_plot_timeframe = weekly;
     };
 
-
     /*
      * Preparation of data.
      */
@@ -133,28 +134,27 @@ int main(int argc, char *argv[])
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Preparation %s.\n", string_return_status(l_status));
 
-    print_if_verbose(&l_verbose, ">>> Merging data...\n");
+    print_if_verbose(&l_verbose, ">>> Merging data with gnuplot instruction file...\n");
     if ((l_status != EXIT_FAILURE)
         && (merge_data_files(&l_verbose, 1, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));
 
-
-    print_if_verbose(&l_verbose, ">>> Loading data...\n");
+    print_if_verbose(&l_verbose, ">>> Loading merged gnuplot instructions into memory...\n");
     if ((l_status != EXIT_FAILURE)
-        && (load_data(&l_lines_total, l_gnu_command) != SUCCEEDED))
+        && (load_data(&l_lines_total, l_gnu_instructions) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Loading %s.\n", string_return_status(l_status));
 
-    print_if_verbose(&l_verbose, ">>> Appending plot cmd...\n");
+    print_if_verbose(&l_verbose, ">>> Appending plot cmd to in-memory gnuplot instructions...\n");
     if ((l_status != EXIT_FAILURE)
-        && (append_plot_cmd(&l_lines_total, l_gnu_command) != SUCCEEDED))
+        && (append_plot_cmd(&l_lines_total, l_plot_type, l_gnu_instructions) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Appending %s.\n", string_return_status(l_status));
 
     /*for (uint32_t i=0; i<l_lines_total+2; i++)
     {
-        printf("-- %s\n", l_gnu_command[i]);
+        printf("-- %s\n", l_gnu_instructions[i]);
     }*/
 
     /*
@@ -162,14 +162,17 @@ int main(int argc, char *argv[])
      */
     print_if_verbose(&l_verbose, ">>> Plotting...\n");
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(&l_verbose, l_gnu_command, f_gnuplot_ive) != SUCCEEDED))
+        && (plot_data(&l_verbose, l_gnu_instructions, f_gnuplot_ive) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
+
     /*
      * Cleanup tmp files.
      */
     sleep(3); /* Give gnuplot time to read from the temporary file. */
-    if (remove_tmp_files(&l_verbose, 2, FILE_DATA_TMP, FILE_MERGED_TMP) != SUCCEEDED)
+    // TODO: some plots use 2 data files. See cashflow. This makes working with 1 FILE_MERGED_TMP
+    // file a bit difficult? Find a better way? How to plot cashflow?
+    if (remove_tmp_files(&l_verbose, 2, FILE_DATA0_TMP, FILE_DATA1_TMP, FILE_MERGED_TMP) != SUCCEEDED)
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Done.\n");
     return l_status;
@@ -186,13 +189,21 @@ static uint32_t prepare_data_file(
     uint32_t a_start_year,
     uint32_t a_end_year)
 {
-    FILE *l_output_file; // Temp dat file, where the final script is written to.
+    FILE *l_data0_tmp; // Temp dat file, where the data is written to.
+    FILE *l_data1_tmp; // Temp dat file, where the data is written to.
     uint32_t l_status;
 
-    l_output_file = fopen(FILE_DATA_TMP, "w");
-    if (l_output_file == NULL)
+    l_data0_tmp = fopen(FILE_DATA0_TMP, "w");
+    l_data1_tmp = fopen(FILE_DATA1_TMP, "w");
+    if (l_data0_tmp == NULL)
     {
-        fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA_TMP);
+        fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA0_TMP);
+        return FAILED;
+    }
+    if (l_data1_tmp == NULL)
+    {
+        fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA1_TMP);
+        fclose(l_data0_tmp);
         return FAILED;
     }
     l_status = SUCCEEDED;
@@ -201,20 +212,23 @@ static uint32_t prepare_data_file(
         case income_vs_expenses:
             if (ive_prepare_temp_file(a_file, l_output_file, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
             {
-                fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-file %s.\n", FILE_DATA_TMP);
+                fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-file %s.\n", FILE_DATA0_TMP);
                 l_status = FAILED;
             };
             break;
-	case cashflow:
-	    break;
-        /* expenses per category */
-        /* dividend ... */
-        /* ... */
+        case cashflow:
+            // TODO: call module to prepare both data files.
+            break;
+        case income_per_category:
+            break;
+        case expenses_per_category:
+            break;
         default:
             fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
             l_status = FAILED;
     }
-    fclose(l_output_file);
+    fclose(l_data0_tmp);
+    fclose(l_data1_tmp);
     return l_status;
 }
 
@@ -230,11 +244,12 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
         case income_vs_expenses:
             return f_gnuplot_ive;
             break;
-	    case cashflow:
-	        break;
-        /* expenses per category */
-        /* dividend ... */
-        /* ... */
+        case cashflow:
+            break;
+        case income_per_category:
+            break;
+        case expenses_per_category:
+            break;
         default:
             fprintf(stderr, "Error in get_gnuplot_instructions_for_plot_type: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
     }
@@ -292,19 +307,36 @@ static uint32_t load_data(
  */
 static uint32_t append_plot_cmd(
     uint32_t *a_lines_total,
+    enum enum_plot_type_t a_plot_type,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
-    // TODO: different command, according to the plot-type?
     /*
      * Load barchart plot command
      */
-    sprintf(
-        a_gnu_command[*a_lines_total - 1],
-        f_gnuplot_barchart,
-        FILE_DATA_TMP,
-        FILE_DATA_TMP
-    );
+    switch(a_plot_type)
+    {
+        case income_vs_expenses:
+            sprintf(
+                a_gnu_command[*a_lines_total - 1],
+                f_gnuplot_ive_cmd,
+                FILE_DATA0_TMP,
+                FILE_DATA0_TMP);
+            break;
+        case cashflow:
+            sprintf(
+                a_gnu_command[*a_lines_total - 1],
+                f_gnuplot_ive_cmd,
+                FILE_DATA0_TMP,
+                FILE_DATA1_TMP);
+            break;
+        case income_per_category:
+            break;
+        case expenses_per_category:
+            break;
+        default:
+            fprintf(stderr, "Error in append_plot_cmd: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
+    }
     return SUCCEEDED;
 }
 
