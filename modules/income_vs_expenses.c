@@ -13,6 +13,10 @@
 
 #define MAX_CMD_LENGTH 512
 
+// New way:
+//static char *f_ledger_ive_cmd =
+//    "ledger -f %s --strict bal --real -X EUR -s -p %s -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+// Old way:
 static char *f_cmd_yearly =
     "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 //static char *f_cmd_monthly =
@@ -50,6 +54,9 @@ int ive_prepare_temp_file(
     char l_current_datetime[20];
     uint32_t l_current_year;
 
+    // TODO: see if we can skip this part and add start- and end-year together with the weekly/quarterly/... stuff
+    // in a period string, that we can give directly to ledger.
+    // That will make the code easier,  because then we only need to have a switch that
     uint32_t l_records = (a_end_year - a_start_year) + 1;
     l_current_year = a_start_year;
     for (uint32_t i = 0; i < l_records; i++)
@@ -59,14 +66,14 @@ int ive_prepare_temp_file(
             l_current_year++;
         switch(a_enum_plot_timeframe)
         {
-            case daily:
-                //sprintf(l_result, f_cmd_daily, a_input_file, a_current_year);
-                break;
             case weekly:
-                //sprintf(l_result, f_cmd_weekly, a_input_file, a_current_year);
+                sprintf(l_result, f_cmd_weekly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
                 break;
             case monthly:
-                //sprintf(l_result, f_cmd_monthly, a_input_file, a_current_year);
+                sprintf(l_result, f_cmd_monthly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
+                break;
+            case quarterly:
+                //sprintf(l_result, f_cmquarterly, a_input_file, a_current_year);
                 break;
             default:
                 snprintf(l_cmd, MAX_CMD_LENGTH - 1, f_cmd_yearly, a_input_file, l_current_year);
