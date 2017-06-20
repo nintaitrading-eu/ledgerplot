@@ -54,9 +54,13 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
 #ifndef NDEBUG
 static const char *f_gnuplot_ive = "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
 static const char *f_gnuplot_cashflow = "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
+static const char *f_gnuplot_ipc = "/usr/local/share/ledgerplot/gnuplot/gp_income_per_category.gnu";
+static const char *f_gnuplot_epc = "/usr/local/share/ledgerplot/gnuplot/gp_expenses_per_category.gnu";
 #else
 static const char *f_gnuplot_ive = "gnuplot/gp_income_vs_expenses.gnu";
 static const char *f_gnuplot_cashflow = "gnuplot/gp_cashflow.gnu";
+static const char *f_gnuplot_ipc = "gnuplot/gp_income_per_category.gnu";
+static const char *f_gnuplot_epc = "gnuplot/gp_expenses_per_category.gnu";
 #endif
 static char *f_gnuplot_ive_cmd = "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"gold\"";
 
@@ -245,10 +249,13 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
             return f_gnuplot_ive;
             break;
         case cashflow:
+            return f_gnuplot_cashflow;
             break;
         case income_per_category:
+            return f_gnuplot_ipc;
             break;
         case expenses_per_category:
+            return f_gnuplot_epc;
             break;
         default:
             fprintf(stderr, "Error in get_gnuplot_instructions_for_plot_type: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
@@ -326,7 +333,7 @@ static uint32_t append_plot_cmd(
         case cashflow:
             sprintf(
                 a_gnu_command[*a_lines_total - 1],
-                f_gnuplot_ive_cmd,
+                f_gnuplot_cashflow_cmd,
                 FILE_DATA0_TMP,
                 FILE_DATA1_TMP);
             break;
@@ -488,7 +495,6 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
     char l_line_temp[MS_INPUT_LINE];
     uint32_t l_count = 0;
 
-    fprintf(stdout, "DEBUG: %s", a_file);
     l_file = fopen(a_file, "r");
     if (l_file == NULL)
     {
