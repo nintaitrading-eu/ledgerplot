@@ -22,7 +22,7 @@ set mytics 2
 set grid xtics ytics mytics
 
 # layout
-set style fill transparent solid 0.6 noborder
+set style fill transparent solid 0.75 noborder
 
 ## legend
 set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "#839496"
