@@ -37,7 +37,7 @@ NCOL = ENDCOL-STARTCOL+1
 BOXWIDTH = 2./(GAPSIZE+NCOL)
 
 ### barchart layout
-set style fill solid 0.75 border lt -1
+set style fill transparent solid 0.75 border lt -1
 #set boxwidth BOXWIDTH absolute
 
 ### Set tics and histograms
