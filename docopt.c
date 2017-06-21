@@ -16,6 +16,7 @@ typedef struct {
     int expenses_per_category;
     int income_per_category;
     int cashflow;
+    int wealthgrowth;
     int income_vs_expenses;
     int yearly;
     int quarterly;
@@ -36,7 +37,7 @@ const char help_message[] =
 "Ledgerplot.\n"
 "\n"
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--wealthgrowth|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
 "\n"
@@ -46,6 +47,7 @@ const char help_message[] =
 "    --endyear=<year_end>        Plot until this year (inclusive).\n"
 "    --income_vs_expenses        Plot income vs expenses.\n"
 "    --cashflow                  Plot cashflow.\n"
+"    --wealthgrowth              Plot wealthgrowth.\n"
 "    --income_per_category       Plot income per category.\n"
 "    --expenses_per_category     Plot expenses per category.\n"
 "    --yearly                    Plot totals per year.\n"
@@ -59,7 +61,7 @@ const char help_message[] =
 
 const char usage_pattern[] =
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--wealthgrowth|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version";
 
@@ -284,6 +286,8 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
             args->income_per_category = option->value;
         } else if (!strcmp(option->olong, "--cashflow")) {
             args->cashflow= option->value;
+        } else if (!strcmp(option->olong, "--wealthgrowth")) {
+            args->cashflow= option->value;
         } else if (!strcmp(option->olong, "--income_vs_expenses")) {
             args->income_vs_expenses = option->value;
         } else if (!strcmp(option->olong, "--yearly")) {
@@ -327,7 +331,7 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;
@@ -343,6 +347,7 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--verbose", 0, 0, NULL},
         {NULL, "--income_vs_expenses", 0, 0, NULL},
         {NULL, "--cashflow", 0, 0, NULL},
+        {NULL, "--wealthgrowth", 0, 0, NULL},
         {NULL, "--expenses_per_category", 0, 0, NULL},
         {NULL, "--income_per_category", 0, 0, NULL},
         {NULL, "--yearly", 0, 0, NULL},
@@ -353,7 +358,7 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--startyear", 1, 0, NULL},
         {NULL, "--endyear", 1, 0, NULL}
     };
-    Elements elements = {0, 0, 14, commands, arguments, options};
+    Elements elements = {0, 0, 15, commands, arguments, options};
 
     ts = tokens_new(argc, argv);
     if (parse_args(&ts, &elements))

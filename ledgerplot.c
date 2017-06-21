@@ -54,17 +54,20 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
 #ifndef NDEBUG
 static const char *f_gnuplot_ive = "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
 static const char *f_gnuplot_cashflow = "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
+static const char *f_gnuplot_wealthgrowth = "/usr/local/share/ledgerplot/gnuplot/gp_wealthgrowth.gnu";
 static const char *f_gnuplot_ipc = "/usr/local/share/ledgerplot/gnuplot/gp_income_per_category.gnu";
 static const char *f_gnuplot_epc = "/usr/local/share/ledgerplot/gnuplot/gp_expenses_per_category.gnu";
 #else
 static const char *f_gnuplot_ive = "gnuplot/gp_income_vs_expenses.gnu";
 static const char *f_gnuplot_cashflow = "gnuplot/gp_cashflow.gnu";
+static const char *f_gnuplot_wealthgrowth = "gnuplot/gp_wealthgrowth.gnu";
 static const char *f_gnuplot_ipc = "gnuplot/gp_income_per_category.gnu";
 static const char *f_gnuplot_epc = "gnuplot/gp_expenses_per_category.gnu";
 #endif
 static char *f_gnuplot_ive_cmd = "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"#839496\"";
-
 static char *f_gnuplot_cashflow_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
+static char *f_gnuplot_wealthgrowth = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
+
 /*
  * Main
  */
@@ -104,6 +107,10 @@ int main(int argc, char *argv[])
     if (args.cashflow)
     {
         l_plot_type = cashflow;
+    }
+    else if (args.wealthgrowth)
+    {
+        l_plot_type = wealthgrowth;
     }
     else if (args.income_per_category)
     {
@@ -165,6 +172,7 @@ int main(int argc, char *argv[])
      * Plot data
      */
     print_if_verbose(&l_verbose, ">>> Plotting...\n");
+    // TODO: plot_data should not use the file, but the plot_type.
     if ((l_status != EXIT_FAILURE)
         && (plot_data(&l_verbose, l_gnu_instructions, f_gnuplot_ive) != SUCCEEDED))
         l_status = EXIT_FAILURE;
@@ -223,6 +231,9 @@ static uint32_t prepare_data_file(
         case cashflow:
             // TODO: call module to prepare both data files.
             break;
+        case wealthgrowth:
+            // TODO: call module to prepare both data files.
+            break;
         case income_per_category:
             break;
         case expenses_per_category:
@@ -250,6 +261,9 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
             break;
         case cashflow:
             return f_gnuplot_cashflow;
+            break;
+        case wealthgrowth:
+            return f_gnuplot_wealthgrowth;
             break;
         case income_per_category:
             return f_gnuplot_ipc;
@@ -334,6 +348,13 @@ static uint32_t append_plot_cmd(
             sprintf(
                 a_gnu_command[*a_lines_total - 1],
                 f_gnuplot_cashflow_cmd,
+                FILE_DATA0_TMP,
+                FILE_DATA1_TMP);
+            break;
+        case wealthgrowth:
+            sprintf(
+                a_gnu_command[*a_lines_total - 1],
+                f_gnuplot_wealthgrowth_cmd,
                 FILE_DATA0_TMP,
                 FILE_DATA1_TMP);
             break;
