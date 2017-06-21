@@ -5,30 +5,30 @@
 
 ### plot setup
 #set terminal pngcairo transparent enhanced font "inconsolata,10" fontscale 1.0 size 500, 350
-set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
+set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#fdf6e3"
 set output 'income_vs_expenses.png'
-COLORS = "red green blue"
+COLORS = "#dc322f #859900 #268bd2"
 STARTCOL = 2
 ENDCOL = 4
-set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
+set border 3 front linetype -1 linewidth 1.000 linecolor rgb "#839496"
 
 ### titles and labels
-set title "Income vs expenses" textcolor rgb "gold"
+set title "Income vs expenses" textcolor rgb "#839496"
 set xlabel "Year"
-set xlabel  offset character 0, -2, 0 font "" textcolor rgb "gold"  norotate
+set xlabel  offset character 0, -2, 0 font "" textcolor rgb "#839496"  norotate
 set ylabel "Value (EUR)"
-set ylabel textcolor rgb "gold"
+set ylabel textcolor rgb "#839496"
 
 ### axis / grid
 set grid nopolar
 set grid xtics nomxtics ytics nomytics noztics nomztics nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
-set grid layerdefault linetype 0 linewidth 1.000 linecolor "grey", linetype 0 linewidth 1.000 linecolor "grey"
-set xzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
-set yzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
-set zzeroaxis linetype 0 linewidth 1.000 linecolor "gold"
+set grid layerdefault linetype 0 linewidth 1.000 linecolor rgb "#93a1a1", linetype 0 linewidth 1.000 linecolor rgb "#93a1a1"
+set xzeroaxis linetype 0 linewidth 1.000 linecolor "#839496"
+set yzeroaxis linetype 0 linewidth 1.000 linecolor "#839496"
+set zzeroaxis linetype 0 linewidth 1.000 linecolor "#839496"
 
 ### legend
-set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"
+set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "#839496"
 
 
 ### main code

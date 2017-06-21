@@ -5,11 +5,11 @@
 ### plot setup
 set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
 set output 'cashflow.png'
-colors = "light-salmon seagreen steelblue"
-set border 3 front linetype -1 linewidth 1.000 linecolor rgb "gold"
+COLORS = "#dc322f #859900"
+set border 3 front linetype -1 linewidth 1.000 linecolor rgb "#839496"
 
 ### titles and labels
-set title "Cashflow" textcolor rgb "gold"
+set title "Cashflow" textcolor rgb "#839496"
 set ylabel "Accumulative Income and Expenses"
 
 ### axis/grid
@@ -25,7 +25,7 @@ set grid xtics ytics mytics
 set style fill transparent solid 0.6 noborder
 
 ## legend
-set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "gold"
+set key bmargin center horizontal Left reverse noenhanced autotitles columnhead nobox textcolor rgb "#839496"
 
 # TODO: add plot command in C? But no data is generated here, so you can just leave it here...
 # TODO: what needs to be changed for the plot command to work in the same way as income_vs_expenses?
