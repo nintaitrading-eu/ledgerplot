@@ -6,6 +6,7 @@ enum enum_plot_type_t
 {
     income_vs_expenses,
     cashflow,
+    wealthgrowth,
     income_per_category,
     expenses_per_category
 };
@@ -13,6 +14,7 @@ enum enum_plot_type_t
 static const char* string_plot_type_t[] = {
     "income_vs_expenses",
     "cashflow",
+    "wealthgrowth",
     "income_per_category",
     "expenses_per_category"
 };
