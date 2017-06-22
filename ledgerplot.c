@@ -234,7 +234,11 @@ static uint32_t prepare_data_file(
             // TODO: call module to prepare both data files.
             break;
         case wealthgrowth:
-            // TODO: call module to prepare both data files.
+            if (wealthgrowth_prepare_temp_file(a_file, l_data0_tmp, l_data1_tmp, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
+            {
+                fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-files %s and %s.\n", FILE_DATA0_TMP, FILE_DATA1_TMP);
+                l_status = FAILED;
+            };
             break;
         case income_per_category:
             break;
