@@ -1,21 +1,22 @@
 ####################################################################################
-# Gnuplot 4.6 script for plotting the cashflow.
+# Gnuplot 4.6 script for plotting the wealthgrowth.
 ####################################################################################
 
 ### plot setup
 set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10' background "#002b36"
-set output 'cashflow.png'
+set output 'wealthgrowth.png'
 COLORS = "#dc322f #859900"
 set border 3 front linetype -1 linewidth 1.000 linecolor rgb "#839496"
 
 ### titles and labels
-set title "Cashflow" textcolor rgb "#839496"
-set ylabel "Accumulative Income and Expenses"
+set title "Wealthgrowth" textcolor rgb "#839496"
+set ylabel "Amount"
 
 ### axis/grid
 set xdata time
 set timefmt "%Y-%m-%d"
-set xrange ["$(date --date='last year'+%Y)-12-20":"$(date +%Y)-12-10"]
+#set xrange ["$(date --date='last year'+%Y)-12-31":"$(date +%Y)-12-31"]
+set xrange ["$(date +%Y)-01-01":"$(date +%Y)-12-31"]
 set xtics nomirror "$(date +%Y)-01-01",2592000 format "%b"
 unset mxtics
 set mytics 2
