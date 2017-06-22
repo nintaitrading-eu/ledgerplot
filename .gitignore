@@ -2,3 +2,4 @@ ledgerplot
 *.o
 *.png
 tmp/
+*.tmp
