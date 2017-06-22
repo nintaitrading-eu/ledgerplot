@@ -12,6 +12,8 @@
 #include "c_generic/enum.h"
 #include "enum.h"
 #include "modules/income_vs_expenses.h"
+#include "modules/cashflow.h"
+#include "modules/wealthgrowth.h"
 
 #define CMD_GNUPLOT "gnuplot -persist"
 #ifndef NDEBUG
