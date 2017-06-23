@@ -36,7 +36,7 @@ static uint32_t get_lines_from_file(
     const char *a_file,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total);
-static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
+//static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t load_data(
     uint32_t *a_lines_total,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
@@ -147,11 +147,11 @@ int main(int argc, char *argv[])
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Preparation %s.\n", string_return_status(l_status));
 
-    print_if_verbose(&l_verbose, ">>> Merging data with gnuplot instruction file...\n");
+    /*print_if_verbose(&l_verbose, ">>> Merging data with gnuplot instruction file...\n");
     if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(&l_verbose, 1, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
+        && (merge_data_files(&l_verbose, 1, FILE_DATA0_TMP, FILE_DATA1_TMP, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
         l_status = EXIT_FAILURE;
-    print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));
+    print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));*/
 
     print_if_verbose(&l_verbose, ">>> Loading merged gnuplot instructions into memory...\n");
     if ((l_status != EXIT_FAILURE)
@@ -174,9 +174,8 @@ int main(int argc, char *argv[])
      * Plot data
      */
     print_if_verbose(&l_verbose, ">>> Plotting...\n");
-    // TODO: plot_data should not use the file, but the plot_type.
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(&l_verbose, l_gnu_instructions, f_gnuplot_ive) != SUCCEEDED))
+        && (plot_data(&l_verbose, l_gnu_instructions, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
 
@@ -184,9 +183,7 @@ int main(int argc, char *argv[])
      * Cleanup tmp files.
      */
     sleep(3); /* Give gnuplot time to read from the temporary file. */
-    // TODO: some plots use 2 data files. See cashflow. This makes working with 1 FILE_MERGED_TMP
-    // file a bit difficult? Find a better way? How to plot cashflow?
-    if (remove_tmp_files(&l_verbose, 2, FILE_DATA0_TMP, FILE_DATA1_TMP, FILE_MERGED_TMP) != SUCCEEDED)
+    if (remove_tmp_files(&l_verbose, 2, FILE_DATA0_TMP, FILE_DATA1_TMP) != SUCCEEDED)
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Done.\n");
     return l_status;
@@ -283,22 +280,18 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
     return NULL;
 }
 
-/*
- * merge_data_files:
- * Load layout, data and gnuplot specific file-data into one temporary file we can plot from.
- */
-static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
+/*static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
 {
     register uint32_t l_i;
     va_list l_ap;
-    char *l_current;
+    char *l_current_file;
     uint32_t l_status = SUCCEEDED;
     va_start(l_ap, a_nargs);
     for (l_i = 0; l_i < a_nargs; l_i++)
     {
         l_current = va_arg(l_ap, char *);
-        print_if_verbose(a_verbose, ">>> [%s] ", l_current);
-        if (append_content_to_file(a_verbose, l_current, FILE_MERGED_TMP) != SUCCEEDED)
+        print_if_verbose(a_verbose, ">>> [%s] ", l_current_file);
+        if (append_content_to_file(a_verbose, l_current_file, FILE_MERGED_TMP) != SUCCEEDED)
         {
             print_if_verbose(a_verbose, " [FAIL]");
             l_status = FAILED;
@@ -309,7 +302,7 @@ static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
     }
     va_end(l_ap);
     return l_status;
-}
+}*/
 
 /*
  * load_data:
@@ -477,7 +470,6 @@ static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRA
     else
     {
         print_if_verbose(a_verbose, ">>> Data exported to png.\n");
-        print_if_verbose(a_verbose, ">>> The filename was specified in %s.\n", f_gnuplot_ive);
     }
     return SUCCEEDED;
 }
