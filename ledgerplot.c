@@ -19,11 +19,11 @@
 #ifndef NDEBUG
 #define FILE_DATA0_TMP "/var/tmp/lp_data0.tmp"
 #define FILE_DATA1_TMP "/var/tmp/lp_data1.tmp"
-#define FILE_MERGED_TMP "/var/tmp/lp_merged.tmp"
+//#define FILE_MERGED_TMP "/var/tmp/lp_merged.tmp"
 #else
 #define FILE_DATA0_TMP "lp_data0.tmp"
 #define FILE_DATA1_TMP "lp_data1.tmp"
-#define FILE_MERGED_TMP "lp_merged.tmp"
+//#define FILE_MERGED_TMP "lp_merged.tmp"
 #endif
 
 static uint32_t prepare_data_file(
@@ -37,9 +37,6 @@ static uint32_t get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total);
 //static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
-static uint32_t load_data(
-    uint32_t *a_lines_total,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_plot_cmd(
     uint32_t *a_lines_total,
     enum enum_plot_type_t a_plot_type,
@@ -155,7 +152,7 @@ int main(int argc, char *argv[])
 
     print_if_verbose(&l_verbose, ">>> Loading merged gnuplot instructions into memory...\n");
     if ((l_status != EXIT_FAILURE)
-        && (load_data(&l_lines_total, l_gnu_instructions) != SUCCEEDED))
+        && (get_lines_from_file(get_gnuplot_instructions_for_plot_type(l_plot_type), l_gnu_instructions, &l_lines_total) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Loading %s.\n", string_return_status(l_status));
 
@@ -303,23 +300,6 @@ static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t 
     va_end(l_ap);
     return l_status;
 }*/
-
-/*
- * load_data:
- * Load data from merged file with layout, data and gnuplot instructions.
- */
-static uint32_t load_data(
-    uint32_t *a_lines_total,
-    char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
-{
-    memset(a_gnu_command, '\0', MS_OUTPUT_ARRAY*MS_INPUT_LINE*sizeof(char));
-    if (get_lines_from_file(FILE_MERGED_TMP, a_gnu_command, a_lines_total) != SUCCEEDED)
-    {
-        fprintf(stderr, "Error in load_data: Could not read %s.\n", FILE_MERGED_TMP);
-        return FAILED;
-    }
-    return SUCCEEDED;
-}
 
 /*
  * append_plot_cmd:
