@@ -13,7 +13,7 @@
 #define MAX_CMD_LENGTH 512
 
 static char *f_cmd_yearly =
-    "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
+    "ledger -f %s --strict bal --real -X EUR -H -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 //static char *f_cmd_monthly =
 //    "ledger -f %s --strict bal --real -X EUR -s -p \"%s %d\" -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
 // Note: substitute s with the month names january, february, etc. Define an enum or something for that.
