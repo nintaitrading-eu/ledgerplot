@@ -47,7 +47,7 @@ static uint32_t plot_data(
     const char *a_file_chart_cmd);
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
+//static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
 static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type);
 enum enum_plot_type_t get_plot_type_from_args(DocoptArgs args);
 enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args);
@@ -427,7 +427,7 @@ static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LI
  * append_content_to_file:
  * Reads a file and appends it's non-comment and non-empty lines output to the tmp merge file.
  */
-static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst)
+/*static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst)
 {
     FILE *l_src;
     FILE *l_dst;
@@ -466,7 +466,7 @@ static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, c
     fclose(l_src);
     print_if_verbose(a_verbose, "%d lines copied from %s to %s.", l_count, a_src, a_dst);
     return SUCCEEDED;
-}
+}*/
 
 /*
  * plot_data:
