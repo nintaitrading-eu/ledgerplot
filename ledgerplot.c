@@ -49,6 +49,8 @@ static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
 static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type);
+enum enum_plot_type_t get_plot_type_from_args(DocoptArgs args);
+enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args);
 
 #ifndef NDEBUG
 static const char *f_gnuplot_ive = "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
@@ -101,39 +103,10 @@ int main(int argc, char *argv[])
     l_end_year = args.endyear ? atoi(args.endyear) : 0;
 
     // plot_type (default: income_vs_expenses)
-    // TODO: to much choosing between plot type. Perhaps put it in a struct and determine everything in 1 function?
-    l_plot_type = income_vs_expenses;
-    if (args.cashflow)
-    {
-        l_plot_type = cashflow;
-    }
-    else if (args.wealthgrowth)
-    {
-        l_plot_type = wealthgrowth;
-    }
-    else if (args.income_per_category)
-    {
-        l_plot_type = income_per_category;
-    }
-    else if (args.expenses_per_category)
-    {
-        l_plot_type = expenses_per_category;
-    }
-
+    l_plot_type = get_plot_type_from_args(args);
+    
     // plot_timeframe (default: yearly)
-    l_plot_timeframe = yearly;
-    if (args.quarterly)
-    {
-        l_plot_timeframe = quarterly;
-    }
-    else if (args.monthly)
-    {
-        l_plot_timeframe = monthly;
-    }
-    else if (args.weekly)
-    {
-        l_plot_timeframe = weekly;
-    };
+    l_plot_timeframe = get_plot_timeframe_from_args(args);
 
     /*
      * Preparation of data.
@@ -184,6 +157,54 @@ int main(int argc, char *argv[])
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Done.\n");
     return l_status;
+}
+
+/*
+ * get_plot_type_from_args:
+ * Return plot_type, based on given option.
+ */
+enum enum_plot_type_t get_plot_type_from_args(DocoptArgs args)
+{
+    if (args.cashflow)
+    {
+        return cashflow;
+    }
+    else if (args.wealthgrowth)
+    {
+        return wealthgrowth;
+    }
+    else if (args.income_per_category)
+    {
+        return income_per_category;
+    }
+    else if (args.expenses_per_category)
+    {
+        return expenses_per_category;
+    }
+    else
+        return income_vs_expenses;
+};
+
+/*
+ * get_plot_timeframe_from_args:
+ * Return plot_timeframe, based on given option.
+ */
+enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args)
+{
+    if (args.quarterly)
+    {
+        return quarterly;
+    }
+    else if (args.monthly)
+    {
+        return monthly;
+    }
+    else if (args.weekly)
+    {
+        return weekly;
+    }
+    else
+        return yearly;
 }
 
 /*
