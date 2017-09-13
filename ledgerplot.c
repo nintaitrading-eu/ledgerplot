@@ -30,8 +30,7 @@ static uint32_t prepare_data_file(
     const char *a_file,
     enum enum_plot_type_t a_plot_type,
     enum enum_plot_timeframe_t a_plot_timeframe,
-    uint32_t a_start_year,
-    uint32_t a_end_year);
+    char *a_period);
 static uint32_t get_lines_from_file(
     const char *a_file,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
@@ -74,8 +73,7 @@ static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves
  */
 int main(int argc, char *argv[])
 {
-    uint32_t l_start_year;
-    uint32_t l_end_year;
+    char *l_period;
     uint32_t l_lines_total = 0;
     char l_gnu_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     enum enum_plot_type_t l_plot_type;
@@ -99,8 +97,7 @@ int main(int argc, char *argv[])
     }
 
     l_verbose = args.verbose ? 1 : 0;
-    l_start_year = args.startyear ? atoi(args.startyear) : 0;
-    l_end_year = args.endyear ? atoi(args.endyear) : 0;
+    strncpy(args.period, l_period, MS_MAX_PARM);
 
     // TODO: work with a struct.
     // You can fill it up like this:
@@ -126,7 +123,7 @@ int main(int argc, char *argv[])
      */
     uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
     print_if_verbose(&l_verbose, ">>> Preparing data...\n");
-    if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_start_year, l_end_year) != SUCCEEDED)
+    if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_period) != SUCCEEDED)
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Preparation %s.\n", string_return_status(l_status));
 
@@ -228,8 +225,7 @@ static uint32_t prepare_data_file(
     const char *a_file,
     enum enum_plot_type_t a_plot_type,
     enum enum_plot_timeframe_t a_plot_timeframe,
-    uint32_t a_start_year,
-    uint32_t a_end_year)
+    char *a_period)
 {
     FILE *l_data0_tmp; // Temp dat file, where the data is written to.
     FILE *l_data1_tmp; // Temp dat file, where the data is written to.
@@ -252,7 +248,7 @@ static uint32_t prepare_data_file(
     switch(a_plot_type)
     {
         case income_vs_expenses:
-            if (ive_prepare_temp_file(a_file, l_data0_tmp, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
+            if (ive_prepare_temp_file(a_file, l_data0_tmp, a_period, a_plot_timeframe) != SUCCEEDED)
             {
                 fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-file %s.\n", FILE_DATA0_TMP);
                 l_status = FAILED;
@@ -262,7 +258,7 @@ static uint32_t prepare_data_file(
             // TODO: call module to prepare both data files.
             break;
         case wealthgrowth:
-            if (wealthgrowth_prepare_temp_file(a_file, l_data0_tmp, l_data1_tmp, a_start_year, a_end_year, a_plot_timeframe) != SUCCEEDED)
+            if (wealthgrowth_prepare_temp_file(a_file, l_data0_tmp, l_data1_tmp, a_period, a_plot_timeframe) != SUCCEEDED)
             {
                 fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-files %s and %s.\n", FILE_DATA0_TMP, FILE_DATA1_TMP);
                 l_status = FAILED;

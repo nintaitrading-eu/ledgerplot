@@ -13,21 +13,12 @@
 
 #define MAX_CMD_LENGTH 512
 
-// New way:
-//static char *f_ledger_ive_cmd =
-//    "ledger -f %s --strict bal --real -X EUR -s -p %s -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
-// Old way:
-static char *f_cmd_yearly =
-    "ledger -f %s --strict bal --real -X EUR -H -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
-//static char *f_cmd_monthly =
-//    "ledger -f %s --strict bal --real -X EUR -s -p \"%s %d\" -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
-// Note: substitute s with the month names january, february, etc. Define an enum or something for that.
-// e.g. -p "may 2015"
-// TODO: -b "startdate" -e "enddate"
-//static char *f_cmd_income_vs_expenses_range =
-//    "ledger -f %s --strict bal --real -X EUR -s -p %d -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";
-// TODO: make the period an extra parameter. Including the -b -e stuff? Then you could add it to the command and let ledgerplot deal with it...
-
+/*static char *f_cmd =
+    "ledger -f %s --strict bal --real -X EUR -H -s %s -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";*/
+// TODO: period must be of the form "-M", for a monthly overview
+static char *f_cmd_income = "ledger -f %s --strict -j reg --real -X EUR -H ^income %s --collapse --plot-amount-format="%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
+// TODO: period must be of the form "-M" for a monthly overview
+static char *f_cmd_expenses = "ledger -f %s --strict -j reg --real -X EUR -H ^expenses %s --collapse";
 
 /*
  * prepare_temp_file:
@@ -37,11 +28,11 @@ static char *f_cmd_yearly =
 int ive_prepare_temp_file(
     const char *a_input_file,
     FILE *a_output_file,
-    uint32_t a_start_year,
-    uint32_t a_end_year,
+    char *a_period,
     enum enum_plot_timeframe_t a_enum_plot_timeframe
 )
 {
+    // TODO: Work with 2 output files: 1 for income, 1 for expenses.
     FILE *l_fp;
     char l_cmd[MAX_CMD_LENGTH];
     char l_line_temp[MS_INPUT_LINE];
@@ -52,72 +43,65 @@ int ive_prepare_temp_file(
     double l_d3;
     char *l_tmp;
     char l_current_datetime[20];
-    uint32_t l_current_year;
 
-    // TODO: see if we can skip this part and add start- and end-year together with the weekly/quarterly/... stuff
-    // in a period string, that we can give directly to ledger.
-    // That will make the code easier,  because then we only need to have a switch that
-    uint32_t l_records = (a_end_year - a_start_year) + 1;
-    l_current_year = a_start_year;
-    for (uint32_t i = 0; i < l_records; i++)
+    memset(l_cmd_income, '\0', sizeof(char) * MAX_CMD_LENGTH);
+    memset(l_cmd_expenses, '\0', sizeof(char) * MAX_CMD_LENGTH);
+    switch(a_enum_plot_timeframe)
     {
-        memset(l_cmd, '\0', sizeof(char) * MAX_CMD_LENGTH);
-        if (i > 0)
-            l_current_year++;
-        switch(a_enum_plot_timeframe)
-        {
-            case weekly:
-                //sprintf(l_result, f_cmd_weekly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
-                break;
-            case monthly:
-                //sprintf(l_result, f_cmd_monthly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
-                break;
-            case quarterly:
-                //sprintf(l_result, f_cmd_quarterly, a_input_file, a_current_year);
-                break;
-            default:
-                snprintf(l_cmd, MAX_CMD_LENGTH - 1, f_cmd_yearly, a_input_file, l_current_year);
-        }
-
-        l_fp = popen(l_cmd, "r");
-        if (l_fp == NULL)
-        {
-            fprintf(stderr, "Could not execute ledger command.\n");
-            return FAILED;
-        }
-
-        *l_line_output = '\0';
-        while (fgets(l_line_input, MS_INPUT_LINE, l_fp) != NULL)
-        {
-            *l_line_temp = '\0'; /* Make sure temp string is empty. */
-            trim_whitespace(l_line_temp, l_line_input, MS_INPUT_LINE);
-            if (strlen(l_line_output) <= 0)
-                sprintf(l_line_output, "%s", l_line_temp);
-            else
-                sprintf(l_line_output, "%s %s", l_line_output, l_line_temp);
-        }
-        l_d1 = strtod(l_line_output, &l_tmp);
-        l_d2 = -1.0 * strtod(l_tmp, &l_tmp); /* Income is the second number, it's
-                                              * always negative in accounting.
-                                              * Reverse for correct display in graph.
-                                              */
-        l_d3 = strtod(l_tmp, NULL);
-        //printf("test: l_d1 = %.2f, l_d2 = %.2f, l_d3 = %.2f\n", l_d1, l_d2, l_d3);
-
-        if (pclose(l_fp) == -1)
-            fprintf(stderr, "Error reported by pclose().\n");
-
-        /* Initialize tmp file */
-        if (i == 0)
-        {
-            // TODO: move timestamp function in its own module.
-            // TODO: make format an enum?
-            timestamp(l_current_datetime, "%02d%02d%02d_%02d%02d%02d", sizeof(l_current_datetime));
-            fprintf(a_output_file, "# Generated by ledgerplot %s on %s.\n", LEDGERPLOT_VERSION, l_current_datetime);
-            fprintf(a_output_file, "year expenses income difference\n");
-        }
-        /* Write data to tmp file */
-        fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3);
+        case weekly:
+            //sprintf(l_result, f_cmd_weekly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
+            break;
+        case monthly:
+            //sprintf(l_result, f_cmd_monthly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
+            break;
+        case quarterly:
+            //sprintf(l_result, f_cmd_quarterly, a_input_file, a_current_year);
+            break;
+        default:
+            // TODO: l_period must be something like '-b "2015-01-01" -e "2017-01-01"'
+            // TODO: change the command. Use something like in the ledger_examplescripts
+            snprintf(l_cmd_income, MAX_CMD_LENGTH - 1, f_cmd_income, a_input_file, l_period);
+            snprintf(l_cmd_expenses, MAX_CMD_LENGTH - 1, f_cmd_expenses, a_input_file, l_period);
     }
+
+    l_fp = popen(l_cmd_income, "r");
+    if (l_fp == NULL)
+    {
+        fprintf(stderr, "Could not execute ledger command.\n");
+        return FAILED;
+    }
+
+    *l_line_output = '\0';
+    while (fgets(l_line_input, MS_INPUT_LINE, l_fp) != NULL)
+    {
+        *l_line_temp = '\0'; /* Make sure temp string is empty. */
+        trim_whitespace(l_line_temp, l_line_input, MS_INPUT_LINE);
+        if (strlen(l_line_output) <= 0)
+            sprintf(l_line_output, "%s", l_line_temp);
+        else
+            sprintf(l_line_output, "%s %s", l_line_output, l_line_temp);
+    }
+    l_d1 = strtod(l_line_output, &l_tmp);
+    l_d2 = -1.0 * strtod(l_tmp, &l_tmp); /* Income is the second number, it's
+                                            * always negative in accounting.
+                                            * Reverse for correct display in graph.
+                                            */
+    l_d3 = strtod(l_tmp, NULL);
+    //printf("test: l_d1 = %.2f, l_d2 = %.2f, l_d3 = %.2f\n", l_d1, l_d2, l_d3);
+
+    if (pclose(l_fp) == -1)
+        fprintf(stderr, "Error reported by pclose().\n");
+
+    /* Initialize tmp file */
+    if (i == 0)
+    {
+        // TODO: move timestamp function in its own module.
+        // TODO: make format an enum?
+        timestamp(l_current_datetime, "%02d%02d%02d_%02d%02d%02d", sizeof(l_current_datetime));
+        fprintf(a_output_file, "# Generated by ledgerplot %s on %s.\n", LEDGERPLOT_VERSION, l_current_datetime);
+        fprintf(a_output_file, "year expenses income difference\n");
+    }
+    /* Write data to tmp file */
+    fprintf(a_output_file, "%d %.2lf %.2lf %.2lf\n", l_current_year, l_d1, l_d2, l_d3);
     return 0;
 }
