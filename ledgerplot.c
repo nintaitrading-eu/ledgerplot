@@ -102,6 +102,19 @@ int main(int argc, char *argv[])
     l_start_year = args.startyear ? atoi(args.startyear) : 0;
     l_end_year = args.endyear ? atoi(args.endyear) : 0;
 
+    // TODO: work with a struct.
+    // You can fill it up like this:
+    // typedef struct plot_object {
+    //     plot_type;
+    //     plot_timeframe;
+    //     start_year;
+    //     end_year;
+    //     gnuplot_data;
+    //     gnuplot_instruction;
+    // };
+    // and then call a function which will initialize it, based on
+    // the plot_type.
+    //
     // plot_type (default: income_vs_expenses)
     l_plot_type = get_plot_type_from_args(args);
     
