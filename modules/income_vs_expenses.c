@@ -13,12 +13,18 @@
 
 #define MAX_CMD_LENGTH 512
 
+#ifndef NDEBUG
+static const char *f_gnuplot_ive = "/usr/local/share/ledgerplot/gnuplot/gp_income_vs_expenses.gnu";
+#else
+static const char *f_gnuplot_ive = "gnuplot/gp_income_vs_expenses.gnu";
+#endif
 /*static char *f_cmd =
     "ledger -f %s --strict bal --real -X EUR -H -s %s -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";*/
 // TODO: period must be of the form "-M", for a monthly overview
 static char *f_cmd_income = "ledger -f %s --strict -j reg --real -X EUR -H ^income %s --collapse --plot-amount-format="%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 // TODO: period must be of the form "-M" for a monthly overview
 static char *f_cmd_expenses = "ledger -f %s --strict -j reg --real -X EUR -H ^expenses %s --collapse";
+static char *f_gnuplot_ive_cmd = "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"#839496\"";
 
 /*
  * prepare_temp_file:
