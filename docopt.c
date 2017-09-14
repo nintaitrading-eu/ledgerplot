@@ -26,8 +26,7 @@ typedef struct {
     int verbose;
     /* options with arguments */
     char *file;
-    char *startyear;
-    char *endyear;
+    char *period;
     /* special */
     const char *usage_pattern;
     const char *help_message;
@@ -37,14 +36,13 @@ const char help_message[] =
 "Ledgerplot.\n"
 "\n"
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--wealthgrowth|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --period=<period string> [--income_vs_expenses|--cashflow|--wealthgrowth|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version\n"
 "\n"
 "Options:\n"
 "    --file=<file_name>          Ledger dat filename to use.\n"
-"    --startyear=<year_start>    Plot from this year.\n"
-"    --endyear=<year_end>        Plot until this year (inclusive).\n"
+"    --period=<period string>    Plot for this period.\n"
 "    --income_vs_expenses        Plot income vs expenses.\n"
 "    --cashflow                  Plot cashflow.\n"
 "    --wealthgrowth              Plot wealthgrowth.\n"
@@ -61,7 +59,7 @@ const char help_message[] =
 
 const char usage_pattern[] =
 "Usage:\n"
-"    ledgerplot [--verbose] --file=<file_name> --startyear=<year_start> --endyear=<year_end> [--income_vs_expenses|--cashflow|--wealthgrowth|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
+"    ledgerplot [--verbose] --file=<file_name> --period=<period string> [--income_vs_expenses|--cashflow|--wealthgrowth|--income_per_category|--expenses_per_category] [--yearly|--quarterly|--monthly|--weekly]\n"
 "    ledgerplot --help\n"
 "    ledgerplot --version";
 
@@ -305,12 +303,9 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
         } else if (!strcmp(option->olong, "--file")) {
             if (option->argument)
                 args->file = option->argument;
-        } else if (!strcmp(option->olong, "--startyear")) {
+        } else if (!strcmp(option->olong, "--period")) {
             if (option->argument)
-                args->startyear = option->argument;
-        } else if (!strcmp(option->olong, "--endyear")) {
-            if (option->argument)
-                args->endyear = option->argument;
+                args->period = option->argument;
         }
     }
     /* commands */
@@ -331,7 +326,7 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;
@@ -355,10 +350,9 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--monthly", 0, 0, NULL},
         {NULL, "--weekly", 0, 0, NULL},
         {NULL, "--file", 1, 0, NULL},
-        {NULL, "--startyear", 1, 0, NULL},
-        {NULL, "--endyear", 1, 0, NULL}
+        {NULL, "--period", 1, 0, NULL}
     };
-    Elements elements = {0, 0, 15, commands, arguments, options};
+    Elements elements = {0, 0, 14, commands, arguments, options};
 
     ts = tokens_new(argc, argv);
     if (parse_args(&ts, &elements))

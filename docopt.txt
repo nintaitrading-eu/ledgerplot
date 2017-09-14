@@ -7,8 +7,7 @@ Usage:
 
 Options:
     --file=<file_name>          Ledger dat filename to use.
-    --startyear=<year_start>    Plot from this year.
-    --endyear=<year_end>        Plot until this year (inclusive).
+    --period=<period string>    Plot for this period.
     --income_vs_expenses        Plot income vs expenses.
     --cashflow                  Plot cashflow.
     --wealthgrowth              Plot wealthgrowth.
