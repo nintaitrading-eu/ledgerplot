@@ -26,11 +26,21 @@
 //#define FILE_MERGED_TMP "lp_merged.tmp"
 #endif
 
-static uint32_t prepare_data_file(
+struct plot_object_t
+{
+    enum enum_plot_type_t plot_type;
+    enum enum_plot_timeframe_t plot_timeframe;
+    char *period;
+    char gnuplot_data[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char *gnuplot_command;
+} plot_object_t;
+
+typedef struct plot_object_t plot_object;
+
+static uint32_t prepare_and_plot_data(
     const char *a_file,
-    enum enum_plot_type_t a_plot_type,
-    enum enum_plot_timeframe_t a_plot_timeframe,
-    char *a_period);
+    uint32_t *a_verbose, 
+    plot_object *a_plot_object);
 static uint32_t get_lines_from_file(
     const char *a_file,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
@@ -65,15 +75,6 @@ static const char *f_gnuplot_epc = "gnuplot/gp_expenses_per_category.gnu";
 static char *f_gnuplot_cashflow_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
 static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Assets\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Liabilities\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
 
-typedef struct plot_object_t
-{
-    enum enum_plot_type_t plot_type;
-    enum enum_plot_timeframe_t plot_timeframe;
-    char *period;
-    char gnuplot_data[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
-    char *gnuplot_command;
-} plot_object_t;
-
 /*
  * Main
  */
@@ -82,8 +83,8 @@ int main(int argc, char *argv[])
     uint32_t l_lines_total = 0;
     char l_gnu_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_verbose = 0;
-    plot_object_t l_plot_object;
     uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
+    plot_object l_plot_object;
 
     /*
      * Parse arguments
@@ -185,7 +186,7 @@ enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args)
 static uint32_t prepare_and_plot_data(
     const char *a_file,
     uint32_t *a_verbose, 
-    enum enum_plot_object_t a_plot_object)
+    plot_object *a_plot_object)
 {
     FILE *l_data0_tmp; // Temp dat file, where the data is written to.
     FILE *l_data1_tmp; // Temp dat file, where the data is written to.
@@ -206,7 +207,7 @@ static uint32_t prepare_and_plot_data(
         return FAILED;
     }
     l_status = SUCCEEDED;
-    switch(a_plot_type)
+    switch(a_plot_object->plot_type)
     {
         case income_vs_expenses:
             // TODO: use a_plot_object
