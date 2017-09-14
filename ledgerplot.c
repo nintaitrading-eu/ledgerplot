@@ -65,17 +65,25 @@ static const char *f_gnuplot_epc = "gnuplot/gp_expenses_per_category.gnu";
 static char *f_gnuplot_cashflow_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
 static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Assets\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Liabilities\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
 
+typedef struct plot_object_t
+{
+    enum enum_plot_type_t plot_type;
+    enum enum_plot_timeframe_t plot_timeframe;
+    char *period;
+    char gnuplot_data[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char *gnuplot_command;
+} plot_object_t;
+
 /*
  * Main
  */
 int main(int argc, char *argv[])
 {
-    char *l_period;
     uint32_t l_lines_total = 0;
     char l_gnu_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
-    enum enum_plot_type_t l_plot_type;
-    enum enum_plot_timeframe_t l_plot_timeframe;
     uint32_t l_verbose = 0;
+    plot_object_t l_plot_object;
+    uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
 
     /*
      * Parse arguments
@@ -94,65 +102,21 @@ int main(int argc, char *argv[])
     }
 
     l_verbose = args.verbose ? 1 : 0;
-    strncpy(args.period, l_period, MS_MAX_PARM);
-
-    // TODO: work with a struct.
-    // You can fill it up like this:
-    // typedef struct plot_object {
-    //     plot_type;
-    //     plot_timeframe;
-    //     start_year;
-    //     end_year;
-    //     gnuplot_data;
-    //     gnuplot_instruction;
-    // };
-    // and then call a function which will initialize it, based on
-    // the plot_type.
-    //
-    // plot_type (default: income_vs_expenses)
-    l_plot_type = get_plot_type_from_args(args);
-    
-    // plot_timeframe (default: yearly)
-    l_plot_timeframe = get_plot_timeframe_from_args(args);
 
     /*
-     * Preparation of data.
+     * Prepare the plot_object.
      */
-    uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
-    print_if_verbose(&l_verbose, ">>> Preparing data...\n");
-    if (prepare_data_file(args.file, l_plot_type, l_plot_timeframe, l_period) != SUCCEEDED)
-        l_status = EXIT_FAILURE;
-    print_if_verbose(&l_verbose, ">>> Preparation %s.\n", string_return_status(l_status));
 
-    /*print_if_verbose(&l_verbose, ">>> Merging data with gnuplot instruction file...\n");
-    if ((l_status != EXIT_FAILURE)
-        && (merge_data_files(&l_verbose, 1, FILE_DATA0_TMP, FILE_DATA1_TMP, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
-        l_status = EXIT_FAILURE;
-    print_if_verbose(&l_verbose, ">>> Merging %s.\n", string_return_status(l_status));*/
-
-    print_if_verbose(&l_verbose, ">>> Loading merged gnuplot instructions into memory...\n");
-    if ((l_status != EXIT_FAILURE)
-        && (get_lines_from_file(get_gnuplot_instructions_for_plot_type(l_plot_type), l_gnu_instructions, &l_lines_total) != SUCCEEDED))
-        l_status = EXIT_FAILURE;
-    print_if_verbose(&l_verbose, ">>> Loading %s.\n", string_return_status(l_status));
-
-    print_if_verbose(&l_verbose, ">>> Appending plot cmd to in-memory gnuplot instructions...\n");
-    if ((l_status != EXIT_FAILURE)
-        && (append_plot_cmd(&l_lines_total, l_plot_type, l_gnu_instructions) != SUCCEEDED))
-        l_status = EXIT_FAILURE;
-    print_if_verbose(&l_verbose, ">>> Appending %s.\n", string_return_status(l_status));
-
-    /*for (uint32_t i=0; i<l_lines_total+2; i++)
-    {
-        printf("-- %s\n", l_gnu_instructions[i]);
-    }*/
+    strncpy(args.period, l_plot_object.period, MS_MAX_PARM);
+    l_plot_object.plot_type = get_plot_type_from_args(args); /* default: income_vs_expenses */
+    l_plot_object.plot_timeframe = get_plot_timeframe_from_args(args); /* default: yearly */
 
     /*
-     * Plot data
+     * Prepare and plot data
      */
-    print_if_verbose(&l_verbose, ">>> Plotting...\n");
+    print_if_verbose(&l_verbose, ">>> Plotting %s...\n", string_plot_type_t[l_plot_object.plot_type]);
     if ((l_status != EXIT_FAILURE)
-        && (plot_data(&l_verbose, l_gnu_instructions, get_gnuplot_instructions_for_plot_type(l_plot_type)) != SUCCEEDED))
+        && (prepare_and_plot_data(args.file, &l_verbose, &l_plot_object) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
 
@@ -215,14 +179,13 @@ enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args)
 }
 
 /*
- * prepare_data_file:
- * Prepare temporary data file
+ * prepare_and_plot_data:
+ * Prepare and plot data, for given plot_type and timeframe.
  */
-static uint32_t prepare_data_file(
+static uint32_t prepare_and_plot_data(
     const char *a_file,
-    enum enum_plot_type_t a_plot_type,
-    enum enum_plot_timeframe_t a_plot_timeframe,
-    char *a_period)
+    uint32_t *a_verbose, 
+    enum enum_plot_object_t a_plot_object)
 {
     FILE *l_data0_tmp; // Temp dat file, where the data is written to.
     FILE *l_data1_tmp; // Temp dat file, where the data is written to.
@@ -233,18 +196,20 @@ static uint32_t prepare_data_file(
     if (l_data0_tmp == NULL)
     {
         fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA0_TMP);
+        fclose(l_data0_tmp);
         return FAILED;
     }
     if (l_data1_tmp == NULL)
     {
         fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA1_TMP);
-        fclose(l_data0_tmp);
+        fclose(l_data1_tmp);
         return FAILED;
     }
     l_status = SUCCEEDED;
     switch(a_plot_type)
     {
         case income_vs_expenses:
+            // TODO: use a_plot_object
             if (ive_prepare_temp_file(a_file, l_data0_tmp, a_period, a_plot_timeframe) != SUCCEEDED)
             {
                 fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-file %s.\n", FILE_DATA0_TMP);
