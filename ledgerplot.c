@@ -11,6 +11,7 @@
 #include "c_generic/functions.h"
 #include "c_generic/enum.h"
 #include "enum.h"
+#include "struct.h"
 #include "modules/income_vs_expenses.h"
 #include "modules/cashflow.h"
 #include "modules/wealthgrowth.h"
@@ -25,17 +26,6 @@
 #define FILE_DATA1_TMP "lp_data1.tmp"
 //#define FILE_MERGED_TMP "lp_merged.tmp"
 #endif
-
-struct plot_object_t
-{
-    enum enum_plot_type_t plot_type;
-    enum enum_plot_timeframe_t plot_timeframe;
-    char *period;
-    char gnuplot_data[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
-    char *gnuplot_command;
-} plot_object_t;
-
-typedef struct plot_object_t plot_object;
 
 static uint32_t prepare_data(
     const char *a_file,
@@ -79,7 +69,6 @@ static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves
  */
 int main(int argc, char *argv[])
 {
-    uint32_t l_lines_total = 0;
     char l_gnuplot_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_verbose = 0;
     uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.

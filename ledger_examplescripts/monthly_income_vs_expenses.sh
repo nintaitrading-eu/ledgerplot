@@ -1,14 +1,13 @@
 #!/bin/sh
 
-if [-z "$LEDGER_TERM" ]; then
-  LEDGER_TERM="qt size 1280,720 persist"
-fi
+FILE=/home/rockwolf/doc/ledger/ledger.dat
 
-ledger -j reg ^Income -M --collapse --plot-amount-format="%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n" > ledgeroutput1.tmp
-ledger -j reg ^Expenses -M --collapse > ledgeroutput2.tmp
+ledger -f $FILE -j reg ^Income -M --collapse --plot-amount-format="%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n" > ledgeroutput1.tmp
+ledger -f $FILE -j reg ^Expenses -M --collapse > ledgeroutput2.tmp
 
 (cat <<EOF) | gnuplot
-  set terminal $LEDGER_TERM
+  set terminal pngcairo size 800,600 enhanced font 'Liberation Mono,10'
+  set output 'monthly_income_vs_expenses.png'
   set style data histogram
   set style histogram clustered gap 1
   set style fill transparent solid 0.4 noborder

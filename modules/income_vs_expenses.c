@@ -34,8 +34,7 @@ int ive_prepare_data(
     const char *a_input_file,
     FILE *a_output_file0,
     FILE *a_output_file1,
-    char *a_period,
-    enum enum_plot_timeframe_t a_enum_plot_timeframe
+    plot_object *a_plot_object
 )
 {
     // TODO: Work with 2 output files: 1 for income, 1 for expenses.
