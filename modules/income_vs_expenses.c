@@ -8,6 +8,7 @@
 #include "../c_generic/functions.h"
 #include "../c_generic/enum.h"
 #include "../enum.h"
+#include "../struct.h"
 #include "income_vs_expenses.h"
 
 
@@ -21,7 +22,7 @@ static const char *f_gnuplot_ive = "gnuplot/gp_income_vs_expenses.gnu";
 /*static char *f_cmd =
     "ledger -f %s --strict bal --real -X EUR -H -s %s -d \"T&l<=1\" expenses income | grep -Eo '[-0-9][0-9\\.]{1,100}'";*/
 // TODO: period must be of the form "-M", for a monthly overview
-static char *f_cmd_income = "ledger -f %s --strict -j reg --real -X EUR -H ^income %s --collapse --plot-amount-format="%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
+static char *f_cmd_income = "ledger -f %s --strict -j reg --real -X EUR -H ^income %s --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 // TODO: period must be of the form "-M" for a monthly overview
 static char *f_cmd_expenses = "ledger -f %s --strict -j reg --real -X EUR -H ^expenses %s --collapse";
 static char *f_gnuplot_ive_cmd = "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"#839496\"";
@@ -39,7 +40,8 @@ int ive_prepare_data(
 {
     // TODO: Work with 2 output files: 1 for income, 1 for expenses.
     FILE *l_fp;
-    char l_cmd[MAX_CMD_LENGTH];
+    char l_cmd_income[MAX_CMD_LENGTH];
+    char l_cmd_expenses[MAX_CMD_LENGTH];
     char l_line_temp[MS_INPUT_LINE];
     char l_line_input[MS_INPUT_LINE];
     char l_line_output[MS_INPUT_LINE]; /* The output line may be just as long. */
@@ -51,7 +53,7 @@ int ive_prepare_data(
 
     memset(l_cmd_income, '\0', sizeof(char) * MAX_CMD_LENGTH);
     memset(l_cmd_expenses, '\0', sizeof(char) * MAX_CMD_LENGTH);
-    switch(a_enum_plot_timeframe)
+    switch(a_plot_object->plot_timeframe)
     {
         case weekly:
             //sprintf(l_result, f_cmd_weekly, a_input_file, /* TODO: make  a_current_year a string with the period */a_current_year);
@@ -65,8 +67,8 @@ int ive_prepare_data(
         default:
             // TODO: l_period must be something like '-b "2015-01-01" -e "2017-01-01"'
             // TODO: change the command. Use something like in the ledger_examplescripts
-            snprintf(l_cmd_income, MAX_CMD_LENGTH - 1, f_cmd_income, a_input_file, l_period);
-            snprintf(l_cmd_expenses, MAX_CMD_LENGTH - 1, f_cmd_expenses, a_input_file, l_period);
+            snprintf(l_cmd_income, MAX_CMD_LENGTH - 1, f_cmd_income, a_input_file, a_plot_object->period);
+            snprintf(l_cmd_expenses, MAX_CMD_LENGTH - 1, f_cmd_expenses, a_input_file, a_plot_object->period);
     }
 
     l_fp = popen(l_cmd_income, "r");
@@ -98,6 +100,7 @@ int ive_prepare_data(
         fprintf(stderr, "Error reported by pclose().\n");
 
     /* Initialize tmp file */
+    // TODO: fix all this logic.
     if (i == 0)
     {
         // TODO: move timestamp function in its own module.

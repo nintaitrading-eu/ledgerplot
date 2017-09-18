@@ -31,38 +31,38 @@ static uint32_t prepare_data(
     const char *a_file,
     uint32_t *a_verbose, 
     plot_object *a_plot_object);
-static uint32_t get_lines_from_file(
+/*static uint32_t get_lines_from_file(
     const char *a_file,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-    uint32_t *a_lines_total);
+    uint32_t *a_lines_total);*/
 //static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 void append_plot_cmd(
     uint32_t *a_lines_total,
     plot_object *a_plot_object,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
-static uint32_t plot_data(
+/*static uint32_t plot_data(
     uint32_t *a_verbose,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
-    const char *a_file_chart_cmd);
+    const char *a_file_chart_cmd);*/
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
-static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
+//static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 //static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
 enum enum_plot_type_t get_plot_type_from_args(DocoptArgs args);
 enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args);
 
 #ifndef NDEBUG
-static const char *f_gnuplot_cashflow = "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
+/*static const char *f_gnuplot_cashflow = "/usr/local/share/ledgerplot/gnuplot/gp_cashflow.gnu";
 static const char *f_gnuplot_wealthgrowth = "/usr/local/share/ledgerplot/gnuplot/gp_wealthgrowth.gnu";
 static const char *f_gnuplot_ipc = "/usr/local/share/ledgerplot/gnuplot/gp_income_per_category.gnu";
-static const char *f_gnuplot_epc = "/usr/local/share/ledgerplot/gnuplot/gp_expenses_per_category.gnu";
+static const char *f_gnuplot_epc = "/usr/local/share/ledgerplot/gnuplot/gp_expenses_per_category.gnu";*/
 #else
-static const char *f_gnuplot_cashflow = "gnuplot/gp_cashflow.gnu";
+/*static const char *f_gnuplot_cashflow = "gnuplot/gp_cashflow.gnu";
 static const char *f_gnuplot_wealthgrowth = "gnuplot/gp_wealthgrowth.gnu";
 static const char *f_gnuplot_ipc = "gnuplot/gp_income_per_category.gnu";
-static const char *f_gnuplot_epc = "gnuplot/gp_expenses_per_category.gnu";
+static const char *f_gnuplot_epc = "gnuplot/gp_expenses_per_category.gnu";*/
 #endif
-static char *f_gnuplot_cashflow_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
-static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Assets\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Liabilities\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
+/*static char *f_gnuplot_cashflow_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Income\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Expenses\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";
+static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves x1 title \"Assets\" linecolor rgb \"#dc322f\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle, '%s' using 1:2 with filledcurves y1=0 title \"Liabilities\" linecolor rgb \"#859900\", '' using 1:2:2 with labels font \"Liberation Mono,10\" offset 0,0.5 textcolor linestyle 0 notitle";*/
 
 /*
  * Main
@@ -286,15 +286,15 @@ void append_plot_cmd(
  * write_to_gnuplot:
  * Writes the generated script lines to a gnuplot pipe.
  */
-static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
+/*static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE])
 {
     FILE *l_gp; // Gnuplot pipe
-
+*/
      /*
      * Opens an interface that one can use to send commands as if they were typing into the gnuplot command line.
      * The "-persistent" keeps the plot open even after your C program terminates.
      */
-    l_gp = popen(CMD_GNUPLOT, "w");
+/*    l_gp = popen(CMD_GNUPLOT, "w");
     if (l_gp == NULL)
     {
         fprintf(stderr, "Error opening pipe to GNU plot. Check if you have it!\n");
@@ -305,12 +305,12 @@ static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LI
     for (uint32_t i = 0; i < MS_OUTPUT_ARRAY; i++)
     {
         if (strncmp(a_gnu_command[i], "", MS_INPUT_LINE) != 0)
-        {
+        {*/
             //printf("%d: %s\n", i, a_gnu_command[i]); /* Used for testing/debugging. */
-            fprintf(l_gp, "%s\n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
-            fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
-        }
-    }
+            //fprintf(l_gp, "%s\n", a_gnu_command[i]); /* Send commands to gnuplot one by one. */
+            //fflush(l_gp); /* Note: Update in realtime, don't wait until processing is finished. */
+        /*}
+    }*/
 
     /*
      * Note: you could also make an actual pipe:
@@ -320,9 +320,9 @@ static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LI
      * echo "plot sin(x)" > /tmp/gnuplot
      */
 
-    fclose(l_gp);
+    /*fclose(l_gp);
     return SUCCEEDED;
-}
+}*/
 
 /*
  * append_content_to_file:
@@ -373,7 +373,7 @@ static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LI
  * plot_data:
  * Plot the data and display information about what's going on.
  */
-static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+/*static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     const char *a_file_chart_cmd)
 {
     print_if_verbose(a_verbose, ">>> Generated using gnuplot chart info from %s.\n", a_file_chart_cmd);
@@ -387,7 +387,7 @@ static uint32_t plot_data(uint32_t *a_verbose, char a_gnu_command[MS_OUTPUT_ARRA
         print_if_verbose(a_verbose, ">>> Data exported to png.\n");
     }
     return SUCCEEDED;
-}
+}*/
 
 /*
  * remove_tmp_files:
@@ -421,7 +421,7 @@ static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
  * Loads the lines of a file into an array that will be used to send to gnuplot. It returns an integer for the number
  * of lines read.
  */
-static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
+/*static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total)
 {
     FILE *l_file;
@@ -434,9 +434,9 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
     {
         fprintf(stderr, "Error: could not open output file %s.\n", a_file);
         return FAILED;
-    }
+    }*/
     /* Note: l_count < MS_OUTPUT_ARRAY -> leave 1 row for the plot command, that is added in a final step. */
-    while ((fgets(l_line, MS_INPUT_LINE, l_file) != NULL) && (l_count < MS_OUTPUT_ARRAY))
+    /*while ((fgets(l_line, MS_INPUT_LINE, l_file) != NULL) && (l_count < MS_OUTPUT_ARRAY))
     {
         if (
             (strlen(l_line) > 0)
@@ -451,4 +451,4 @@ static uint32_t get_lines_from_file(const char *a_file, char a_gnu_command[MS_OU
     *a_lines_total += l_count;
     fclose(l_file);
     return SUCCEEDED;
-}
+}*/
