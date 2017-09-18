@@ -37,7 +37,7 @@ struct plot_object_t
 
 typedef struct plot_object_t plot_object;
 
-static uint32_t prepare_and_plot_data(
+static uint32_t prepare_data(
     const char *a_file,
     uint32_t *a_verbose, 
     plot_object *a_plot_object);
@@ -80,7 +80,7 @@ static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves
 int main(int argc, char *argv[])
 {
     uint32_t l_lines_total = 0;
-    char l_gnu_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
+    char l_gnuplot_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_verbose = 0;
     uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
     plot_object l_plot_object;
@@ -112,13 +112,24 @@ int main(int argc, char *argv[])
     l_plot_object.plot_timeframe = get_plot_timeframe_from_args(args); /* default: yearly */
 
     /*
-     * Prepare and plot data
+     * Prepare data
      */
     print_if_verbose(&l_verbose, ">>> Plotting %s...\n", string_plot_type_t[l_plot_object.plot_type]);
     if ((l_status != EXIT_FAILURE)
-        && (prepare_and_plot_data(args.file, &l_verbose, &l_plot_object) != SUCCEEDED))
+        && (prepare_data(args.file, &l_verbose, &l_plot_object) != SUCCEEDED))
         l_status = EXIT_FAILURE;
     print_if_verbose(&l_verbose, ">>> Plotting %s.\n", string_return_status(l_status));
+
+    /*
+     * Assemble gnuplot instructions
+     */
+    // TODO: combine data from the temp files + plot command and use it to plot.
+    // l_gnuplot_instructions
+
+    /* Plot data
+     *
+     */
+    // TBD
 
     /*
      * Cleanup tmp files.
@@ -179,10 +190,10 @@ enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args)
 }
 
 /*
- * prepare_and_plot_data:
- * Prepare and plot data, for given plot_type and timeframe.
+ * prepare_data:
+ * Prepare data, for given plot_type and timeframe.
  */
-static uint32_t prepare_and_plot_data(
+static uint32_t prepare_data(
     const char *a_file,
     uint32_t *a_verbose, 
     plot_object *a_plot_object)
@@ -195,13 +206,13 @@ static uint32_t prepare_and_plot_data(
     l_data1_tmp = fopen(FILE_DATA1_TMP, "w");
     if (l_data0_tmp == NULL)
     {
-        fprintf(stderr, "Error in prepare_and_plot_data: could not open output file %s.\n", FILE_DATA0_TMP);
+        fprintf(stderr, "Error in prepare_data: could not open output file %s.\n", FILE_DATA0_TMP);
         fclose(l_data0_tmp);
         return FAILED;
     }
     if (l_data1_tmp == NULL)
     {
-        fprintf(stderr, "Error in prepare_and_plot_data: could not open output file %s.\n", FILE_DATA1_TMP);
+        fprintf(stderr, "Error in prepare_data: could not open output file %s.\n", FILE_DATA1_TMP);
         fclose(l_data1_tmp);
         return FAILED;
     }
@@ -210,9 +221,9 @@ static uint32_t prepare_and_plot_data(
     {
         case income_vs_expenses:
             // TODO: use a_plot_object
-            if (ive_prepare_and_plot_data(a_file, l_data0_tmp, l_data1_tmp, &a_plot_object) != SUCCEEDED)
+            if (ive_prepare_data(a_file, l_data0_tmp, l_data1_tmp, &a_plot_object) != SUCCEEDED)
             {
-                fprintf(stderr, "Error in prepare_and_plot_data: ive_prepare_and_plot_data failed.\n");
+                fprintf(stderr, "Error in prepare_data: ive_prepare__data failed.\n");
                 l_status = FAILED;
             };
             break;

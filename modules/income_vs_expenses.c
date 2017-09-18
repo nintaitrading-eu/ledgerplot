@@ -27,11 +27,10 @@ static char *f_cmd_expenses = "ledger -f %s --strict -j reg --real -X EUR -H ^ex
 static char *f_gnuplot_ive_cmd = "plot for [COL=STARTCOL:ENDCOL] '%s' u COL:xtic(1) w histogram title columnheader(COL) lc rgb word(COLORS, COL-STARTCOL+1), for [COL=STARTCOL:ENDCOL] '%s' u (column(0)+BOXWIDTH*(COL-STARTCOL+GAPSIZE/2+1)-1.0):COL:COL notitle w labels textcolor rgb \"#839496\"";
 
 /*
- * prepare_and_plot_data:
- * This function prepares the data to be plotted,
- * and plots the data.
+ * ive_prepare_data:
+ * This function prepares the data to be plotted.
  */
-int ive_prepare_and_plot_data(
+int ive_prepare_data(
     const char *a_input_file,
     FILE *a_output_file0,
     FILE *a_output_file1,
