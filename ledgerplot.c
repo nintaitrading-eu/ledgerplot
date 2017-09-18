@@ -57,7 +57,6 @@ static uint32_t plot_data(
 static uint32_t remove_tmp_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
 static uint32_t write_to_gnuplot(char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 //static uint32_t append_content_to_file(uint32_t *a_verbose, const char *a_src, const char *a_dst);
-static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type);
 enum enum_plot_type_t get_plot_type_from_args(DocoptArgs args);
 enum enum_plot_timeframe_t get_plot_timeframe_from_args(DocoptArgs args);
 
@@ -196,13 +195,13 @@ static uint32_t prepare_and_plot_data(
     l_data1_tmp = fopen(FILE_DATA1_TMP, "w");
     if (l_data0_tmp == NULL)
     {
-        fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA0_TMP);
+        fprintf(stderr, "Error in prepare_and_plot_data: could not open output file %s.\n", FILE_DATA0_TMP);
         fclose(l_data0_tmp);
         return FAILED;
     }
     if (l_data1_tmp == NULL)
     {
-        fprintf(stderr, "Error in prepare_data_file: could not open output file %s.\n", FILE_DATA1_TMP);
+        fprintf(stderr, "Error in prepare_and_plot_data: could not open output file %s.\n", FILE_DATA1_TMP);
         fclose(l_data1_tmp);
         return FAILED;
     }
@@ -236,34 +235,6 @@ static uint32_t prepare_and_plot_data(
     fclose(l_data0_tmp);
     fclose(l_data1_tmp);
     return l_status;
-}
-
-/*
- * get_gnuplot_instructions_for_plot_type:
- * Returns the gnuplot filename to use, for the gnuplot instructions that belong
- * to the given plot type.
- */
-static const char *get_gnuplot_instructions_for_plot_type(enum enum_plot_type_t a_plot_type)
-{
-    switch(a_plot_type)
-    {
-        // TODO: move all to their modules, so this function will become obsolete.
-        case cashflow:
-            return f_gnuplot_cashflow;
-            break;
-        case wealthgrowth:
-            return f_gnuplot_wealthgrowth;
-            break;
-        case income_per_category:
-            return f_gnuplot_ipc;
-            break;
-        case expenses_per_category:
-            return f_gnuplot_epc;
-            break;
-        default:
-            fprintf(stderr, "Error in get_gnuplot_instructions_for_plot_type: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
-    }
-    return NULL;
 }
 
 /*static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...)
