@@ -211,28 +211,26 @@ static uint32_t prepare_and_plot_data(
     {
         case income_vs_expenses:
             // TODO: use a_plot_object
-            if (ive_prepare_temp_file(a_file, l_data0_tmp, a_period, a_plot_timeframe) != SUCCEEDED)
+            if (ive_prepare_and_plot_data(a_file, l_data0_tmp, l_data1_tmp, &a_plot_object) != SUCCEEDED)
             {
-                fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-file %s.\n", FILE_DATA0_TMP);
+                fprintf(stderr, "Error in prepare_and_plot_data: ive_prepare_and_plot_data failed.\n");
                 l_status = FAILED;
             };
             break;
         case cashflow:
-            // TODO: call module to prepare both data files.
+            // TODO:
             break;
         case wealthgrowth:
-            if (wealthgrowth_prepare_temp_file(a_file, l_data0_tmp, l_data1_tmp, a_period, a_plot_timeframe) != SUCCEEDED)
-            {
-                fprintf(stderr, "Error in prepare_data_file: Could not prepare temporary data-files %s and %s.\n", FILE_DATA0_TMP, FILE_DATA1_TMP);
-                l_status = FAILED;
-            };
+            // TODO:
             break;
         case income_per_category:
+            // TODO:
             break;
         case expenses_per_category:
+            // TODO:
             break;
         default:
-            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
+            fprintf(stderr, "Error in prepare_data_file: Unknown plot type %s.\n", string_plot_type_t[a_plot_object->plot_type]);
             l_status = FAILED;
     }
     fclose(l_data0_tmp);
