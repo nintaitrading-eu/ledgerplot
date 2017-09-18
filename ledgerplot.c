@@ -36,9 +36,9 @@ static uint32_t get_lines_from_file(
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE],
     uint32_t *a_lines_total);
 //static uint32_t merge_data_files(uint32_t *a_verbose, uint32_t a_nargs, ...);
-static uint32_t append_plot_cmd(
+void append_plot_cmd(
     uint32_t *a_lines_total,
-    enum enum_plot_type_t a_plot_type,
+    plot_object *a_plot_object,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]);
 static uint32_t plot_data(
     uint32_t *a_verbose,
@@ -69,7 +69,6 @@ static char *f_gnuplot_wealthgrowth_cmd = "plot '%s' using 1:2 with filledcurves
  */
 int main(int argc, char *argv[])
 {
-    char l_gnuplot_instructions[MS_OUTPUT_ARRAY][MS_INPUT_LINE];
     uint32_t l_verbose = 0;
     uint32_t l_status = EXIT_SUCCESS; // Note: To make sure the cleanup runs.
     plot_object l_plot_object;
@@ -114,6 +113,8 @@ int main(int argc, char *argv[])
      */
     // TODO: combine data from the temp files + plot command and use it to plot.
     // l_gnuplot_instructions
+    // TODO: the a_gnu_command doesn't work anymore. We're using 2 files now.
+    // TODO: l_lines_total is needed.
 
     /* Plot data
      *
@@ -210,7 +211,7 @@ static uint32_t prepare_data(
     {
         case income_vs_expenses:
             // TODO: use a_plot_object
-            if (ive_prepare_data(a_file, l_data0_tmp, l_data1_tmp, &a_plot_object) != SUCCEEDED)
+            if (ive_prepare_data(a_file, l_data0_tmp, l_data1_tmp, a_plot_object) != SUCCEEDED)
             {
                 fprintf(stderr, "Error in prepare_data: ive_prepare__data failed.\n");
                 l_status = FAILED;
@@ -265,47 +266,20 @@ static uint32_t prepare_data(
  * append_plot_cmd:
  * Append a line to the command array, with the actual plot command.
  */
-static uint32_t append_plot_cmd(
+void append_plot_cmd(
     uint32_t *a_lines_total,
-    enum enum_plot_type_t a_plot_type,
+    plot_object *a_plot_object,
     char a_gnu_command[MS_OUTPUT_ARRAY][MS_INPUT_LINE]
 )
 {
     /*
      * Load barchart plot command
      */
-    switch(a_plot_type)
-    {
-        // TODO: plot command must also move to the modules, so this function might become obsolete. Just use the sprintf statements in each module.
-        case income_vs_expenses:
-            sprintf(
-                a_gnu_command[*a_lines_total - 1],
-                f_gnuplot_ive_cmd,
-                FILE_DATA0_TMP,
-                FILE_DATA0_TMP);
-            break;
-        case cashflow:
-            sprintf(
-                a_gnu_command[*a_lines_total - 1],
-                f_gnuplot_cashflow_cmd,
-                FILE_DATA0_TMP,
-                FILE_DATA1_TMP);
-            break;
-        case wealthgrowth:
-            sprintf(
-                a_gnu_command[*a_lines_total - 1],
-                f_gnuplot_wealthgrowth_cmd,
-                FILE_DATA0_TMP,
-                FILE_DATA1_TMP);
-            break;
-        case income_per_category:
-            break;
-        case expenses_per_category:
-            break;
-        default:
-            fprintf(stderr, "Error in append_plot_cmd: Unknown plot type %s.\n", string_plot_type_t[a_plot_type]);
-    }
-    return SUCCEEDED;
+    sprintf(
+        a_gnu_command[*a_lines_total - 1],
+        a_plot_object->gnuplot_command,
+        FILE_DATA0_TMP,
+        FILE_DATA1_TMP);
 }
 
 /*
